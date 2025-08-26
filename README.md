@@ -1,6 +1,9 @@
 # CSE-4214-03-Lab-Project (Project Topic: E-Commerce platform)
 Intro to Software Engineering Lab Project
 
+### Contributors/Team Members:
+**Lucas Cox; coxlucas2022@gmail.com; ROLE**
+
 ## Requirements
 
 ### The platform must perform the following functionalities:
