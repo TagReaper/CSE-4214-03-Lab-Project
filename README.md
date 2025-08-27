@@ -6,6 +6,8 @@ Intro to Software Engineering Lab Project
 
 **Moustapha Niang; mn979@msstate.edu; ROLE**
 
+**Gunner Beck; gjb144@msstate.edu; ROLE**
+
 ## Requirements
 
 ### The platform must perform the following functionalities:
