@@ -3,6 +3,7 @@ Intro to Software Engineering Lab Project
 
 ### Contributors/Team Members:
 **Lucas Cox; coxlucas2022@gmail.com; ROLE**
+
 **Moustapha Niang; mn979@msstate.edu; ROLE**
 
 ## Requirements
