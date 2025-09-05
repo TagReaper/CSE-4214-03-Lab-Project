@@ -14,30 +14,30 @@ Intro to Software Engineering Lab Project
 
 ### The platform must perform the following functionalities:
 
-– Users with different roles (Buyer, Seller, Admin) should be able to login into their accounts to be able to perform different actions and logout.
+- Users with different roles (Buyer, Seller, Admin) should be able to login into their accounts to be able to perform different actions and logout.
 
-– A Buyer should be able to search, compare, buy, and return different types of products from different sellers.
+- A Buyer should be able to search, compare, buy, and return different types of products from different sellers.
 
-– A seller should be able to add, sell, and receive payments for their available prod- ucts.
+- A seller should be able to add, sell, and receive payments for their available prod- ucts.
 
-– An admin should be able to approve/block new user accounts and products, and oversee different user actions.
+- An admin should be able to approve/block new user accounts and products, and oversee different user actions.
 
 ### Project Type
 
-– Website, Web application
+- Website, Web application
 
 ### Tools and Frameworks
 
-– Front-End: React.js and Next.js
+- Front-End: React.js and Next.js
 - Back-End: Firebase
 - Server Hosting: Vercel
 
 ### Number of versions
 
-– The project will have two versions. Version 1 will implement the above function- alities. After reviewing the deliverables of version 1 the customer (TA) will give 1 to 2 new requirements for version 2.
+- The project will have two versions. Version 1 will implement the above function- alities. After reviewing the deliverables of version 1 the customer (TA) will give 1 to 2 new requirements for version 2.
 
 ### Development Timeline
-– The project will be completed in 4 sprints of 2 to 4 weeks. The development will follow an agile paradigm. The workload for each sprint will be described in the lab guideline posted on canvas for that sprint.
+- The project will be completed in 4 sprints of 2 to 4 weeks. The development will follow an agile paradigm. The workload for each sprint will be described in the lab guideline posted on canvas for that sprint.
 
 ### Evaluation
 – The project willl be evaluaged based upon unique grading criteria for each week. Every sprint will ask students to evaluate their performance in addition to their group members.
