@@ -2,11 +2,11 @@
 Intro to Software Engineering Lab Project
 
 ### Contributors/Team Members:
-**Lucas Cox; coxlucas2022@gmail.com; ROLE**
+**Lucas Cox; coxlucas2022@gmail.com; Frontend-Dev**
 
-**Moustapha Niang; mn979@msstate.edu; ROLE**
+**Moustapha Niang; mn979@msstate.edu; Backend-Dev**
 
-**Gunner Beck; gjb144@msstate.edu; ROLE**
+**Gunner Beck; gjb144@msstate.edu; Flex-Dev**
 
 **Brenden Grant; bjg357@msstate.edu; ROLE**
 
@@ -28,7 +28,9 @@ Intro to Software Engineering Lab Project
 
 ### Tools and Frameworks
 
-– Any language and framework can be used to achieve the objective.
+– Front-End: React.js and Next.js
+- Back-End: Firebase
+- Server Hosting: Vercel
 
 ### Number of versions
 
