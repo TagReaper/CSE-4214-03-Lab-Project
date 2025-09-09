@@ -8,7 +8,7 @@ Intro to Software Engineering Lab Project
 
 **Gunner Beck; gjb144@msstate.edu; Flex-Dev**
 
-**Brenden Grant; bjg357@msstate.edu; ROLE**
+**Brenden Grant; bjg357@msstate.edu; Flex-Dev**
 
 ## Requirements
 
