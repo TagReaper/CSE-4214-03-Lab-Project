@@ -1,0 +1,92 @@
+Overview: Corrections for Creation Errors
+ 1. Overview
+
+ The goal of mistake feedback
+
+ The value of messages that are easy to understand and actionable
+
+ Objective: Enhance user experience and direct remedial action
+
+ 2. Creation Error Types
+
+ A duplicate email
+
+ Cause: The database already contains email.
+
+ Method of Detection: Backend comparison with current user data
+
+ Example of Feedback:
+
+ "This email address has already been set up.  Please try a different email address or log in.
+
+ Resolution Advice: Offer a login or password recovery link.
+
+ Errors in the Network Connection or API
+
+ Causes include network timeouts, server outages, and API errors.
+
+ Method of Detection: Failed HTTP Request/Server Status Verification
+
+ Example of Feedback:
+
+ "We're experiencing issues with the server connection.  Please try again later or check your internet connection.
+
+ Resolution Advice: Provide retry choices and, if necessary, display the system status page.
+
+  A weak password
+
+ Cause: The password is not secure enough.
+
+ Method of Detection: Backend recheck and frontend validation (length, complexity)
+
+ Example of Feedback:
+
+ "Your password must include at least 8 characters, one uppercase letter, and one symbol."
+
+ Resolution Advice: Show a strength meter or offer advice.
+
+ The email is invalid.
+
+ Cause: Incorrect email format (missing domain, @, etc.)
+
+ Detection Method: Backend verification and frontend regex validation
+
+ Example of Feedback:
+
+ "Please enter a valid email address (e.g., name@example.com )."
+
+ Resolution Advice: To make corrections, highlight the email input field.
+
+ 3. Techniques for Delivering Feedback
+
+ Frontend Real-Time Validation:
+
+ error messages that appear inline while the user types (such as "weak password" or "invalid email").
+
+ Backend Post-Submission Feedback:
+
+ server response messages for API failures or duplicate emails.
+
+ Visual Signals:
+
+ Red borders, warning icons, tooltips.
+
+ Considerations for Accessibility:
+
+ Clear language for all users and assistance for screen readers.
+
+            Top Techniques
+
+ Keep communications precise and unambiguous; stay away from technical jargon.
+
+ Give the user practical advice on what to do next.
+
+ Make sure that every error state has a uniform design.
+
+ Record errors for debugging and developer monitoring.
+
+ Conclusion
+
+ Review the significance of mistake feedback on conversion rates and user trust.
+
+ To handle new edge cases, place a strong emphasis on ongoing testing.
