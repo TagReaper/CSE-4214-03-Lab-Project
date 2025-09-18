@@ -27,25 +27,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div style={{backgroundColor: "black", alignItems: 'center', gap: '5px', outlineColor: '#c5c5c5', outlineStyle: 'solid', outlineWidth: '3px'}}>
-          <span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-            <Image className="dark:invert" src="/Icons/home.svg" alt="Home logo" width={30} height={30} />
-            <Link href = {"/"}> Home </Link>
-          </span>
-          <span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-            <Image className="dark:invert" src="/Icons/buyer.svg" alt="Home logo" width={30} height={30} />
-            <Link href = {"/login"}> Login </Link>
-          </span>
-          <span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-            <Image className="dark:invert" src="/Icons/seller.svg" alt="Home logo" width={30} height={30} />
-            <Link href = {"/signup"}> Sign-Up </Link>
-          </span>
+      <head>
+        <style>
+        </style>
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} style={{margin: '0px', padding: '0px'}}>
+        <div>
+          <ul style={{backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
+            <li style={{float: "left"}}><span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
+              <Image className="dark:invert" src="/Icons/home.svg" alt="Home logo" width={30} height={30} />
+              <Link href = {"/"}> Home </Link>
+            </span></li>
+            <li style={{float: "right"}}><span style={{direction: 'rtl', display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
+              <Image className="dark:invert" src="/Icons/buyer.svg" alt="Home logo" width={30} height={30} />
+              <Link href = {"/login"}> Login </Link>
+            </span></li>
+            <li style={{float: "right"}}><span style={{direction: 'rtl', display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
+              <Image className="dark:invert" src="/Icons/seller.svg" alt="Home logo" width={30} height={30} />
+              <Link href = {"/signup"}> Sign-Up </Link>
+            </span></li>
+          </ul>
         </div>
         <div>
-          {" "}
+          {""}
         </div>
         {children}
       </body>
