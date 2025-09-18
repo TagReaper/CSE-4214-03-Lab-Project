@@ -31,9 +31,9 @@ export default function RootLayout({
         <style>
         </style>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} style={{margin: '0px', padding: '0px'}}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div>
-          <ul style={{backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
+          <ul style={{color: 'white', backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
             <li style={{float: "left"}}><span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
               <Image className="dark:invert" src="/Icons/home.svg" alt="Home logo" width={30} height={30} />
               <Link href = {"/"}> Home </Link>
