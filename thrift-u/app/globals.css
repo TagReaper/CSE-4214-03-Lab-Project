@@ -59,9 +59,9 @@ body {
 }
 
 h1 {
-  margin-bottom: min(50px, 5dvh);
+  margin-bottom: min(50px, 6dvh);
   font-size: 2.5rem;
-  font-weight: bold;
+  font-weight: bolder;
   text-align: center;
 }
 
@@ -71,7 +71,7 @@ h1 {
   margin: 5px 0;
   margin-bottom: 20px;
   border: 5px solid white;
-  border-radius: 10px;
+  border-radius: 20px;
   background-color: white;
   overflow: hidden;
 }
@@ -80,14 +80,17 @@ h1 {
   background-color: beige;
 }
 
-.button {
-  width: min(5em, 15dvw);
-  border-radius: 10px;
+.loginbutton {
+  color: var(--background);
+  width: min(15em, 30dvw);
+  height: 34px;
+  border-radius: 20px;
   background-color: #c84b31;
-  margin: 5px;
+  margin: 10px;
   overflow: hidden;
 }
 
-.button:hover{
+.loginbutton:hover{
   background-color: hwb(10 19% 50%);
 }
+

@@ -1,26 +1,24 @@
 import Image from "next/image";
-
+import Link from 'next/link';
 
 export default function Login() {
     return <div className="login-box">
         <h1>
             Login
         </h1>
-        <form action={"/"}>
-            <div className="grid">
-                <label className="font-bold"> Email: </label>
-                <input className="input-box" type="email" required></input>
+        <form style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}} action={"/"}>
+            <div>
+                <input className="input-box" type="email" placeholder="Email" required></input>
             </div>
-            <div className="grid">
-                <label className="font-bold"> Password: </label>
-                <input className="input-box" type="password" required></input>
+            <div>
+                <input className="input-box" type="password" placeholder="Password" required></input>
             </div>
-            <div className="grid grid-cols-2">
-                <input className="button" type="submit" value={"Login"}></input>
-                <form action={"/signup"}>
-                    <input style={{float: "right"}} className="button" type="submit" value={"Sign-Up"}></input>
-                </form>
+            <div>
+                <input className="loginbutton" type="submit" value={"Sign in"}></input>
             </div>
         </form>
+        <div style={{marginTop: "15px"}}>
+            Don&#39;t have an account, <Link className="underline" href = {"/signup"}> register </Link>
+        </div>
     </div>
 }
