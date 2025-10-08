@@ -27,9 +27,16 @@ const SignUp = () => {
                             lastName: lastName,
                             accessLevel: 1,
                             dateCreated: serverTime.toLocaleString(),
+                            deletedAt,
                         })
                         console.log('User written with ID: ', docRef.id)
-                        console.log('seller')
+                        const docRef2 = await addDoc(collection(db, 'Seller'), {
+                            UserID: docRef.id,
+                            banned: false,
+                            validated: false,
+                            Flags: 0,
+                        })
+                        console.log('Seller written with ID: ', docRef2.id)
                     } else {
                         setSeller(false)
                     }
@@ -40,10 +47,21 @@ const SignUp = () => {
                             password: password,
                             firstName: firstName,
                             lastName: lastName,
-                            accessLevel: 2
+                            accessLevel: 2,
+                            dateCreated: serverTime.toLocaleString(),
+                            deletedAt,
                         })
                         console.log('User written with ID: ', docRef.id)
-                        console.log('buyer')
+                        const docRef2 = await addDoc(collection(db, 'Buyer'), {
+                            UserID: docRef.id,
+                            banned: false,
+                            address,
+                            city,
+                            state,
+                            zip,
+                            numOrders,
+                        })
+                        console.log('Seller written with ID: ', docRef2.id)
                     } else {
                         setSeller(false)
                     }
