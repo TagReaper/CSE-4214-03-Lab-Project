@@ -3,6 +3,7 @@
 import {useState} from 'react';
 import db from '../firebase/clientApp'
 import {collection, addDoc, getDocs} from '@firebase/firestore';
+import {useRouter}  from 'next/navigation'
 
 const SignUp = () => {
     const [email, setEmail] = useState('')
@@ -13,6 +14,7 @@ const SignUp = () => {
     const [sellerReq, setSeller] = useState('')
     const [users, setUsers] = useState([])
     const serverTime = new Date()
+    const router = useRouter()
 
     const handleSubmit = async (event) => {
         event.preventDefault()
@@ -47,6 +49,7 @@ const SignUp = () => {
                                 Flags: 0,
                             })
                             console.log('Seller written with ID: ', docRef2.id)
+                            router.push('/')
                         } else {
                             setSeller(false)
                         }
@@ -72,6 +75,7 @@ const SignUp = () => {
                                 numOrders: 0,
                             })
                             console.log('Buyer written with ID: ', docRef2.id)
+                            router.push('/')
                         } else {
                             setSeller(false)
                         }
