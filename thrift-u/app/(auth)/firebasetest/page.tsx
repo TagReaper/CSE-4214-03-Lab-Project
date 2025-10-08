@@ -1,5 +1,5 @@
-"use client"
-import AddItem from '../../../components/addItem';
+import AddItem from '../../../components/addItem'
+import ListItems from '../../../components/listItems'
 
 export default function FirebaseTest() {
     return (
@@ -8,6 +8,7 @@ export default function FirebaseTest() {
                 NextJS Firebase Firestore
             </h1>
             <AddItem />
+            <ListItems />
         </div>
     );
 }
