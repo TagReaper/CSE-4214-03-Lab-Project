@@ -59,11 +59,18 @@ body {
 }
 
 h1 {
-  margin-bottom: min(50px, 6dvh);
+  margin-bottom: min(20px, 6dvh);
   font-size: 2.5rem;
   font-weight: bolder;
   text-align: center;
 }
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: bolder;
+  text-align: center;
+}
+
 
 .input-box {
   width: min(15em, 30dvw);
