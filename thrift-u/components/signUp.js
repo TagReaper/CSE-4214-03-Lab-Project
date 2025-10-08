@@ -49,10 +49,7 @@ const SignUp = () => {
                             lastName: lastName,
                             accessLevel: 2,
                             dateCreated: serverTime.toLocaleString(),
-<<<<<<< HEAD
                             deletedAt,
-=======
->>>>>>> de068ff38f83156bdf78b0b82e393bb282e184a4
                         })
                         console.log('User written with ID: ', docRef.id)
                         const docRef2 = await addDoc(collection(db, 'Buyer'), {
