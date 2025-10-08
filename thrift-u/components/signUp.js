@@ -50,6 +50,7 @@ const SignUp = () => {
                                     Flags: 0,
                                 })
                                 console.log('Seller written with ID: ', docRef2.id)
+                                console.log('Notify admins of new seller account.')
                                 router.push('/login')
                             } else {
                                 setSeller(false)
