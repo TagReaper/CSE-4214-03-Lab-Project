@@ -40,7 +40,8 @@ const SignUp = () => {
                             password: password,
                             firstName: firstName,
                             lastName: lastName,
-                            accessLevel: 2
+                            accessLevel: 2,
+                            dateCreated: serverTime.toLocaleString(),
                         })
                         console.log('User written with ID: ', docRef.id)
                         console.log('buyer')
