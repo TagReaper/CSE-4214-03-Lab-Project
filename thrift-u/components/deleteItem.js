@@ -15,7 +15,7 @@ const DeleteItem = ({id}) => {
                 alert('Error reloading page, reload manually to update information')
             }
         } catch (error){
-            console.log('Error deleting item')
+            console.log('Error deleting item: ', error)
             alert('Error deleting')
         }
     }
