@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 import db from '../firebase/clientApp'
-import {collection, addDoc} from '@firebase/firestore';
+import {collection, addDoc, getDocs} from '@firebase/firestore';
 
 const SignUp = () => {
     const [email, setEmail] = useState('')
@@ -11,60 +11,74 @@ const SignUp = () => {
     const [firstName, setFirst] = useState('')
     const [lastName, setLast] = useState('')
     const [sellerReq, setSeller] = useState('')
+    const [users, setUsers] = useState([])
     const serverTime = new Date()
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-
         try{
             if(password == passwordValid){
-                if(sellerReq){
-                    if (confirm("Are you sure you want to request a seller account?")){
-                        const docRef = await addDoc(collection(db, 'User'), {
-                            email: email,
-                            password: password,
-                            firstName: firstName,
-                            lastName: lastName,
-                            accessLevel: 1,
-                            dateCreated: serverTime.toLocaleString(),
-                            deletedAt,
-                        })
-                        console.log('User written with ID: ', docRef.id)
-                        const docRef2 = await addDoc(collection(db, 'Seller'), {
-                            UserID: docRef.id,
-                            banned: false,
-                            validated: false,
-                            Flags: 0,
-                        })
-                        console.log('Seller written with ID: ', docRef2.id)
-                    } else {
-                        setSeller(false)
+                const querySnapshot = await getDocs(collection(db, 'User'))
+                var valid = true
+                setUsers(querySnapshot.docs.map((doc) => ({...doc.data()})))
+                for (let index = 0; index < users.length; index++) {
+                    if (users[index].email == email){
+                        valid = false
+                        break;
                     }
-                } else {
-                    if (confirm("Are you sure you don't want to create a seller account?")){
-                        const docRef = await addDoc(collection(db, 'User'), {
-                            email: email,
-                            password: password,
-                            firstName: firstName,
-                            lastName: lastName,
-                            accessLevel: 2,
-                            dateCreated: serverTime.toLocaleString(),
-                            deletedAt,
-                        })
-                        console.log('User written with ID: ', docRef.id)
-                        const docRef2 = await addDoc(collection(db, 'Buyer'), {
-                            UserID: docRef.id,
-                            banned: false,
-                            address,
-                            city,
-                            state,
-                            zip,
-                            numOrders,
-                        })
-                        console.log('Seller written with ID: ', docRef2.id)
+                }
+                if (valid) {
+                    if(sellerReq){
+                        if (confirm("Are you sure you want to request a seller account?")){
+                            const docRef = await addDoc(collection(db, 'User'), {
+                                email: email,
+                                password: password,
+                                firstName: firstName,
+                                lastName: lastName,
+                                accessLevel: 1,
+                                dateCreated: serverTime.toLocaleString(),
+                                deletedAt: "",
+                            })
+                            console.log('User written with ID: ', docRef.id)
+                            const docRef2 = await addDoc(collection(db, 'Seller'), {
+                                UserID: docRef.id,
+                                banned: false,
+                                validated: false,
+                                Flags: 0,
+                            })
+                            console.log('Seller written with ID: ', docRef2.id)
+                        } else {
+                            setSeller(false)
+                        }
                     } else {
-                        setSeller(false)
+                        if (confirm("Are you sure you don't want to create a seller account?")){
+                            const docRef = await addDoc(collection(db, 'User'), {
+                                email: email,
+                                password: password,
+                                firstName: firstName,
+                                lastName: lastName,
+                                accessLevel: 2,
+                                dateCreated: serverTime.toLocaleString(),
+                                deletedAt: "",
+                            })
+                            console.log('User written with ID: ', docRef.id)
+                            const docRef2 = await addDoc(collection(db, 'Buyer'), {
+                                UserID: docRef.id,
+                                banned: false,
+                                address: "",
+                                city: "",
+                                state: "",
+                                zip: "",
+                                numOrders: 0,
+                            })
+                            console.log('Buyer written with ID: ', docRef2.id)
+                        } else {
+                            setSeller(false)
+                        }
                     }
+                } else{
+                    alert('Email is already registred to an account!')
+                    setEmail('')
                 }
             } else {
                 alert('Passwords do not match!')
