@@ -1,0 +1,114 @@
+'use client'
+
+import {useState} from 'react';
+import db from '../firebase/clientApp'
+import {collection, addDoc} from '@firebase/firestore';
+
+const SignUp = () => {
+    const [email, setEmail] = useState('')
+    const [password, setPass] = useState('')
+    const [passwordValid, setPassValid] = useState('')
+    const [firstName, setFirst] = useState('')
+    const [lastName, setLast] = useState('')
+    const [sellerReq, setSeller] = useState('')
+    const serverTime = new Date()
+
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+
+        try{
+            if(password == passwordValid){
+                if(sellerReq){
+                    if (confirm("Are you sure you want to request a seller account?")){
+                        const docRef = await addDoc(collection(db, 'User'), {
+                            email: email,
+                            password: password,
+                            firstName: firstName,
+                            lastName: lastName,
+                            accessLevel: 1,
+                            dateCreated: serverTime.toLocaleString(),
+                        })
+                        console.log('User written with ID: ', docRef.id)
+                        console.log('seller')
+                    } else {
+                        setSeller(false)
+                    }
+                } else {
+                    if (confirm("Are you sure you don't want to create a seller account?")){
+                        const docRef = await addDoc(collection(db, 'User'), {
+                            email: email,
+                            password: password,
+                            firstName: firstName,
+                            lastName: lastName,
+                            accessLevel: 2
+                        })
+                        console.log('User written with ID: ', docRef.id)
+                        console.log('buyer')
+                    } else {
+                        setSeller(false)
+                    }
+                }
+            } else {
+                alert('Passwords do not match!')
+                setPass('')
+                setPassValid('')
+            }
+        }catch (error){
+            console.log("Error creating account: ", error)
+            alert('Error creating account!')
+            setEmail('')
+            setPass('')
+            setPassValid('')
+            setFirst('')
+            setLast('')
+            setSeller(false)
+        }
+    }
+
+    return (
+        <form className='m-5 flex flex-col' onSubmit={handleSubmit}>
+            <input className='m-1 text-black border-1 rounded border-black' required
+                type = 'text'
+                value = {firstName}
+                onChange={(e) => setFirst(e.target.value)}
+                placeholder = "First name"
+            />
+            <input className='m-1 text-black border-1 rounded border-black' required
+                type = 'text'
+                value = {lastName}
+                onChange={(e) => setLast(e.target.value)}
+                placeholder = "Last name"
+            />
+            <input className='m-1 text-black border-1 rounded border-black' required
+                type = 'email'
+                value = {email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder = "Email"
+            />
+            <input className='m-1 text-black border-1 rounded border-black' required
+                type = 'password'
+                value = {password}
+                onChange={(e) => setPass(e.target.value)}
+                placeholder = "Password"
+            />
+            <input className='m-1 text-black border-1 rounded border-black' required
+                type = 'password'
+                value = {passwordValid}
+                onChange={(e) => setPassValid(e.target.value)}
+                placeholder = "Confirm password"
+            />
+            <span className="m-1 text-black border-1 rounded border-black">
+                Request Seller Account?&nbsp;
+                <input
+                    type="checkbox"
+                    checked={sellerReq}
+                    onChange={(e) => setSeller(e.target.checked)}
+                />
+            </span>
+            &nbsp;&nbsp;
+            <button className='m-1 text-black border-2 rounded border-black' type='submit'>Confirm</button>
+        </form>
+    )
+}
+
+export default SignUp
