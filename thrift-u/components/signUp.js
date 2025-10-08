@@ -20,69 +20,75 @@ const SignUp = () => {
         event.preventDefault()
         try{
             if(password == passwordValid){
-                const querySnapshot = await getDocs(collection(db, 'User'))
-                var valid = true
-                setUsers(querySnapshot.docs.map((doc) => ({...doc.data()})))
-                for (let index = 0; index < users.length; index++) {
-                    if (users[index].email == email){
-                        valid = false
-                        break;
-                    }
-                }
-                if (valid) {
-                    if(sellerReq){
-                        if (confirm("Are you sure you want to request a seller account?")){
-                            const docRef = await addDoc(collection(db, 'User'), {
-                                email: email,
-                                password: password,
-                                firstName: firstName,
-                                lastName: lastName,
-                                accessLevel: 1,
-                                dateCreated: serverTime.toLocaleString(),
-                                deletedAt: "",
-                            })
-                            console.log('User written with ID: ', docRef.id)
-                            const docRef2 = await addDoc(collection(db, 'Seller'), {
-                                UserID: docRef.id,
-                                banned: false,
-                                validated: false,
-                                Flags: 0,
-                            })
-                            console.log('Seller written with ID: ', docRef2.id)
-                            router.push('/')
-                        } else {
-                            setSeller(false)
-                        }
-                    } else {
-                        if (confirm("Are you sure you don't want to create a seller account?")){
-                            const docRef = await addDoc(collection(db, 'User'), {
-                                email: email,
-                                password: password,
-                                firstName: firstName,
-                                lastName: lastName,
-                                accessLevel: 2,
-                                dateCreated: serverTime.toLocaleString(),
-                                deletedAt: "",
-                            })
-                            console.log('User written with ID: ', docRef.id)
-                            const docRef2 = await addDoc(collection(db, 'Buyer'), {
-                                UserID: docRef.id,
-                                banned: false,
-                                address: "",
-                                city: "",
-                                state: "",
-                                zip: "",
-                                numOrders: 0,
-                            })
-                            console.log('Buyer written with ID: ', docRef2.id)
-                            router.push('/')
-                        } else {
-                            setSeller(false)
+                if(password.length >= 10){
+                    const querySnapshot = await getDocs(collection(db, 'User'))
+                    var valid = true
+                    setUsers(querySnapshot.docs.map((doc) => ({...doc.data()})))
+                    for (let index = 0; index < users.length; index++) {
+                        if (users[index].email == email){
+                            valid = false
+                            break;
                         }
                     }
-                } else{
-                    alert('Email is already registred to an account!')
-                    setEmail('')
+                    if (valid) {
+                        if(sellerReq){
+                            if (confirm("Are you sure you want to request a seller account?")){
+                                const docRef = await addDoc(collection(db, 'User'), {
+                                    email: email,
+                                    password: password,
+                                    firstName: firstName,
+                                    lastName: lastName,
+                                    accessLevel: 1,
+                                    dateCreated: serverTime.toLocaleString(),
+                                    deletedAt: "",
+                                })
+                                console.log('User written with ID: ', docRef.id)
+                                const docRef2 = await addDoc(collection(db, 'Seller'), {
+                                    UserID: docRef.id,
+                                    banned: false,
+                                    validated: false,
+                                    Flags: 0,
+                                })
+                                console.log('Seller written with ID: ', docRef2.id)
+                                router.push('/login')
+                            } else {
+                                setSeller(false)
+                            }
+                        } else {
+                            if (confirm("Are you sure you don't want to create a seller account?")){
+                                const docRef = await addDoc(collection(db, 'User'), {
+                                    email: email,
+                                    password: password,
+                                    firstName: firstName,
+                                    lastName: lastName,
+                                    accessLevel: 2,
+                                    dateCreated: serverTime.toLocaleString(),
+                                    deletedAt: "",
+                                })
+                                console.log('User written with ID: ', docRef.id)
+                                const docRef2 = await addDoc(collection(db, 'Buyer'), {
+                                    UserID: docRef.id,
+                                    banned: false,
+                                    address: "",
+                                    city: "",
+                                    state: "",
+                                    zip: "",
+                                    numOrders: 0,
+                                })
+                                console.log('Buyer written with ID: ', docRef2.id)
+                                router.push('/login')
+                            } else {
+                                setSeller(false)
+                            }
+                        }
+                    } else{
+                        alert('Email is already registred to an account!')
+                        setEmail('')
+                    }
+                }else{
+                    alert('Password must be 10 (or more) characters long')
+                    setPass('')
+                    setPassValid('')
                 }
             } else {
                 alert('Passwords do not match!')
@@ -125,7 +131,7 @@ const SignUp = () => {
                 type = 'password'
                 value = {password}
                 onChange={(e) => setPass(e.target.value)}
-                placeholder = "Password"
+                placeholder = "Password (10+ characters)"
             />
             <input className='m-1 text-black border-1 rounded border-black' required
                 type = 'password'
