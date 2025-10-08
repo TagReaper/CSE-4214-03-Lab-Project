@@ -3,6 +3,7 @@
 import { useState, useEffect} from "react"
 import db from '../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
+import DeleteItem from './deleteItem'
 
 const ListItems = () => {
     const [items, setItems] = useState([])
@@ -18,11 +19,12 @@ const ListItems = () => {
 
     return (
         <div>
-            <h2>List of Items</h2>
+            <h2><u>List of Items</u></h2>
             <ul className='list-disc'>
                 {items.map((item) => (
-                    <li key={item.id}>
-                        {item.name}
+                    <li className='border rounded grid m-1' key={item.id}>
+                        <p className="center font-bold"> {item.name}</p>
+                        <DeleteItem id={item.id}/>
                     </li>
                 ))}
             </ul>

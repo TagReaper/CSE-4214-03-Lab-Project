@@ -59,7 +59,7 @@ body {
 }
 
 h1 {
-  margin-bottom: min(50px, 6dvh);
+  margin-bottom: min(30px, 6dvh);
   font-size: 2.5rem;
   font-weight: bolder;
   text-align: center;
