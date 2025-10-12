@@ -1,10 +1,6 @@
-import { initializeApp } from "firebase/app"
-import {getFirestore} from "@firebase/firestore";
-import "firebase/auth"
-import "firebase/firestore"
-import { getAnalytics } from "firebase/analytics";
-import { initialize } from "next/dist/server/lib/render-server";
-import { firebaseConfig } from "firebase-functions/v1";
+import { initializeApp } from "firebase/app";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 
 const clientCredentials = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,6 +13,15 @@ const clientCredentials = {
 };
 
 const app = initializeApp(clientCredentials);
-const db = getFirestore(app)
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-export default db
+if (process.env.FIRESTORE_EMULATOR_HOST) {
+    connectFirestoreEmulator(db, "127.0.0.1", 8081);
+}
+
+if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+}
+
+export { app, db, auth };

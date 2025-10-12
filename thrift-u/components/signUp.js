@@ -1,113 +1,98 @@
 'use client'
 
 import {useState} from 'react';
-import db from '../firebase/clientApp'
-import {collection, addDoc, getDocs} from '@firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {db, auth} from '../firebase/clientApp'
+import { collection, addDoc, getDocs, doc, setDoc } from '@firebase/firestore';
 import {useRouter}  from 'next/navigation'
 
 const SignUp = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPass] = useState('')
-    const [passwordValid, setPassValid] = useState('')
-    const [firstName, setFirst] = useState('')
-    const [lastName, setLast] = useState('')
-    const [sellerReq, setSeller] = useState('')
-    const [users, setUsers] = useState([])
-    const serverTime = new Date()
+    const [email, setEmail] = useState('');
+    const [password, setPass] = useState('');
+    const [passwordValid, setPassValid] = useState('');
+    const [firstName, setFirst] = useState('');
+    const [lastName, setLast] = useState('');
+    const [sellerReq, setSeller] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const serverTime = new Date();
+    
     const router = useRouter()
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-        try{
-            if(password == passwordValid){
-                if(password.length >= 10){
-                    const querySnapshot = await getDocs(collection(db, 'User'))
-                    var valid = true
-                    setUsers(querySnapshot.docs.map((doc) => ({...doc.data()})))
-                    for (let index = 0; index < users.length; index++) {
-                        if (users[index].email == email){
-                            valid = false
-                            break;
-                        }
-                    }
-                    if (valid) {
-                        if(sellerReq){
-                            if (confirm("Are you sure you want to request a seller account?")){
-                                const docRef = await addDoc(collection(db, 'User'), {
-                                    email: email,
-                                    password: password,
-                                    firstName: firstName,
-                                    lastName: lastName,
-                                    accessLevel: 1,
-                                    dateCreated: serverTime.toLocaleString(),
-                                    deletedAt: "",
-                                })
-                                console.log('User written with ID: ', docRef.id)
-                                const docRef2 = await addDoc(collection(db, 'Seller'), {
-                                    UserID: docRef.id,
-                                    banned: false,
-                                    validated: false,
-                                    Flags: 0,
-                                })
-                                console.log('Seller written with ID: ', docRef2.id)
-                                console.log('Notify admins of new seller account.')
-                                router.push('/login')
-                            } else {
-                                setSeller(false)
-                            }
-                        } else {
-                            if (confirm("Are you sure you don't want to create a seller account?")){
-                                const docRef = await addDoc(collection(db, 'User'), {
-                                    email: email,
-                                    password: password,
-                                    firstName: firstName,
-                                    lastName: lastName,
-                                    accessLevel: 2,
-                                    dateCreated: serverTime.toLocaleString(),
-                                    deletedAt: "",
-                                })
-                                console.log('User written with ID: ', docRef.id)
-                                const docRef2 = await addDoc(collection(db, 'Buyer'), {
-                                    UserID: docRef.id,
-                                    banned: false,
-                                    address: "",
-                                    city: "",
-                                    state: "",
-                                    zip: "",
-                                    numOrders: 0,
-                                })
-                                console.log('Buyer written with ID: ', docRef2.id)
-                                router.push('/login')
-                            } else {
-                                setSeller(false)
-                            }
-                        }
-                    } else{
-                        alert('Email is already registred to an account!')
-                        setEmail('')
-                    }
-                }else{
-                    alert('Password must be 10 (or more) characters long')
-                    setPass('')
-                    setPassValid('')
+        if (password !== passwordValid) {
+            alert('Passwords do not match!');
+            return;
+        }
+        if (password.length < 10) {
+            alert('Password must be at least 10 characters long');
+            return;
+        }
+        try {
+            setLoading(true);
+
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            console.log('account created', user.uid);
+            await setDoc(doc(db, 'User', user.uid), {
+                email,
+                firstName,
+                lastName,
+                accessLevel: sellerReq ? 2 : 1,
+                dateCreated: serverTime.toLocaleString(),
+                deletedAt: "",
+            });
+
+            if (sellerReq) {
+                const confirmed = confirm("Are you sure you want to request a seller account?");
+                if (confirmed) {
+                await addDoc(collection(db, 'Seller'), {
+                    UserID: user.uid,
+                    banned: false,
+                    validated: false,
+                    Flags: 0,
+                });
+                console.log('Seller record created');
+                } else {
+                setSeller(false);
                 }
             } else {
-                alert('Passwords do not match!')
-                setPass('')
-                setPassValid('')
+                await addDoc(collection(db, 'Buyer'), {
+                UserID: user.uid,
+                banned: false,
+                address: "",
+                city: "",
+                state: "",
+                zip: "",
+                numOrders: 0,
+                });
+                console.log('Buyer record created');
             }
-        }catch (error){
-            console.log("Error creating account: ", error)
-            alert('Error creating account!')
-            setEmail('')
-            setPass('')
-            setPassValid('')
-            setFirst('')
-            setLast('')
-            setSeller(false)
+
+            alert('Account created successfully');
+            router.push('/login');
+
+        } catch (error) {
+        console.error('error creating account:', error);
+        switch (error.code) {
+        case 'auth/email-already-in-use':
+            alert('This email is already registered.');
+            break;
+        case 'auth/invalid-email':
+            alert('Invalid email address.');
+            break;
+        case 'auth/weak-password':
+            alert('Password is too weak.');
+            break;
+        default:
+            alert('Error creating account. Please try again.');
+            }
+        }
+        finally {
+            setLoading(false);
         }
     }
-
     return (
         <form className='m-5 flex flex-col' onSubmit={handleSubmit}>
             <input className='m-1 text-black border-1 rounded border-black' required
