@@ -1,11 +1,12 @@
 import { initializeApp } from "firebase/app"
-import { getFirestore } from "@firebase/firestore";
+import {getFirestore} from "@firebase/firestore";
 import "firebase/auth"
 import "firebase/firestore"
+import { getAnalytics } from "firebase/analytics";
 import { initialize } from "next/dist/server/lib/render-server";
 import { firebaseConfig } from "firebase-functions/v1";
 
-export const clientCredentials = {
+const clientCredentials = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
