@@ -15,7 +15,6 @@ const SignUp = () => {
     const [sellerReq, setSeller] = useState(false);
     const [loading, setLoading] = useState(false);
     const serverTime = new Date();
-    
     const router = useRouter()
 
     const handleSubmit = async (event) => {
@@ -30,10 +29,8 @@ const SignUp = () => {
         }
         try {
             setLoading(true);
-
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
             console.log('account created', user.uid);
             await setDoc(doc(db, 'User', user.uid), {
                 email,
