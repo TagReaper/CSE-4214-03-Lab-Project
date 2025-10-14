@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword, validatePassword  } from "firebase/auth";
 import { db, auth } from '../firebase/clientApp'
-import { collection, addDoc, getDocs, doc, setDoc } from '@firebase/firestore';
+import { collection, addDoc, doc, setDoc } from '@firebase/firestore';
 import { useRouter }  from 'next/navigation'
 
 const UIPasswordValidation = (password) => {

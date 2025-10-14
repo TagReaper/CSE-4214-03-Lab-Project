@@ -1,6 +1,4 @@
-import Image from "next/image";
 import SignUp from '../../../components/signUp'
-
 
 export default function SignUpPage() {
     return <div className="center">
