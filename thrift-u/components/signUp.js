@@ -59,10 +59,10 @@ const SignUp = () => {
             const user = userCredential.user;
             console.log('account created', user.uid);
             await setDoc(doc(db, 'User', user.uid), {
-                email,
-                firstName,
-                lastName,
-                accessLevel: sellerReq ? 2 : 1,
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                accessLevel: sellerReq ? 1 : 2,
                 dateCreated: serverTime.toLocaleString(),
                 deletedAt: "",
             });
