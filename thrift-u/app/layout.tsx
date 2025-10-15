@@ -40,10 +40,6 @@ export default function RootLayout({
               <Image className="dark:invert" src="/Icons/buyer.svg" alt="Home logo" width={30} height={30} />
               <Link href = {"/login"}> Login </Link>
             </span></li>
-            <li style={{float: "right"}}><span style={{direction: 'rtl', display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-              <Image className="dark:invert" src="/Icons/seller.svg" alt="Home logo" width={30} height={30} />
-              <Link href = {"/signup"}> Sign-Up </Link>
-            </span></li>
           </ul>
         </div>
         <div>
