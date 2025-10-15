@@ -61,6 +61,8 @@ const ListUsers = () => {
                         <span className="center font-bold"> {item.id}</span>
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
+                        <span className="center"> View Orders </span>
+                        <span className="center"> BAN </span>
                     </li>
                 ))}
             </ul>
@@ -71,6 +73,7 @@ const ListUsers = () => {
                         <span className="center font-bold"> {item.id}</span>
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
+                        <span className="center"> BAN </span>
                     </li>
                 ))}
             </ul>
@@ -81,6 +84,7 @@ const ListUsers = () => {
                         <span className="center font-bold"> {item.id}</span>
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
+                        <span className="center"> Accept/Deny </span>
                     </li>
                 ))}
             </ul>
