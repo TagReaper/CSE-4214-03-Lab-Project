@@ -4,6 +4,7 @@
 import { useState, useEffect} from "react"
 import db from '../firebase/clientApp'
 import {collection, doc, getDoc, getDocs } from '@firebase/firestore'
+import BanUser from '../components/banUser'
 
 
 
@@ -34,17 +35,19 @@ const ListUsers = () => {
                 if(sellers[index].validated == true){
                     sellerListTemp[index] = docRef.data()
                     sellerListTemp[index].id = sellers[index].UserID
+                    sellerListTemp[index].SellerID = sellers[index].id
                 } else {
                     sellerPendListTemp[index] = docRef.data()
                     sellerPendListTemp[index].id = sellers[index].UserID
+                    sellerPendListTemp[index].SellerID = sellers[index].id
                 }
             }
             for (let index = 0; index < buyers.length; index++) {
                 const docRef = await getDoc(doc(db, "User", buyers[index].UserID))
                 buyerListTemp[index] = docRef.data()
                 buyerListTemp[index].id = buyers[index].UserID
+                buyerListTemp[index].BuyerID = buyers[index].id
             }
-            console.log(buyerListTemp)
             setBList(buyerListTemp)
             setSList(sellerListTemp)
             setSPList(sellerPendListTemp)
@@ -62,7 +65,7 @@ const ListUsers = () => {
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
                         <span></span>
-                        <span className="center">Buttons</span>
+                        <span className="center"><BanUser id={item.BuyerID} access={2}/></span>
                     </li>
                 ))}
             </ul>
@@ -74,7 +77,7 @@ const ListUsers = () => {
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
                         <span></span>
-                        <span className="center"> BAN </span>
+                        <span className="center"><BanUser id={item.SellerID} access={1}/></span>
                     </li>
                 ))}
             </ul>
