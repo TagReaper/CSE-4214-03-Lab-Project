@@ -57,12 +57,12 @@ const ListUsers = () => {
             <h2><u>List of Buyers</u></h2>
             <ul className='list'>
                 {buyerList.map((item) => (
-                    <li className='border rounded grid m-1 grid-cols-3' key={item.id}>
+                    <li className='border rounded grid m-1 grid-cols-3 overflow-hidden' key={item.id}>
                         <span className="center font-bold"> {item.id}</span>
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
-                        <span className="center"> View Orders </span>
-                        <span className="center"> BAN </span>
+                        <span></span>
+                        <span className="center">Buttons</span>
                     </li>
                 ))}
             </ul>
@@ -73,6 +73,7 @@ const ListUsers = () => {
                         <span className="center font-bold"> {item.id}</span>
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
+                        <span></span>
                         <span className="center"> BAN </span>
                     </li>
                 ))}
@@ -84,6 +85,7 @@ const ListUsers = () => {
                         <span className="center font-bold"> {item.id}</span>
                         <span className="center"> {item.firstName} {item.lastName}</span>
                         <span className="center"> {item.email} </span>
+                        <span></span>
                         <span className="center"> Accept/Deny </span>
                     </li>
                 ))}
