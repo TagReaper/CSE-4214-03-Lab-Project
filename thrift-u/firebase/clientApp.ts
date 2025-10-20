@@ -24,4 +24,10 @@ if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
 
-export { app, db, auth };
+const FireData = {
+    app: app,
+    auth: auth,
+    db: db
+}
+
+export default FireData;

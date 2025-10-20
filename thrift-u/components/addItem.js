@@ -1,7 +1,7 @@
 'use client'
 
 import {useState} from 'react';
-import db from '../firebase/clientApp'
+import FireData from '../firebase/clientApp'
 import {collection, addDoc} from '@firebase/firestore';
 
 const AddItem = () => {
@@ -11,7 +11,7 @@ const AddItem = () => {
         event.preventDefault()
 
         try{
-            const docRef = await addDoc(collection(db, 'items'), {
+            const docRef = await addDoc(collection(FireData.db, 'items'), {
                 name: value,
         })
             console.log('Document written with ID: ', docRef.id)

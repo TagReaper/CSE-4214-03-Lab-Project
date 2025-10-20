@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect} from "react"
-import db from '../firebase/clientApp'
+import FireData from '../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
 import DeleteItem from './deleteItem'
 
@@ -10,7 +10,7 @@ const ListItems = () => {
 
     useEffect(() => {
         const fetchItems = async () => {
-            const querySnapshot = await getDocs(collection(db, 'items'))
+            const querySnapshot = await getDocs(collection(FireData.db, 'items'))
             setItems(querySnapshot.docs.map((doc) => ({...doc.data(), id: doc.id})))
         }
 

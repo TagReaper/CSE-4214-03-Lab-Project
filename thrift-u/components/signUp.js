@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword, validatePassword  } from "firebase/auth";
-import { db, auth } from '../firebase/clientApp'
+import FireData from '../firebase/clientApp'
 import { collection, addDoc, doc, setDoc } from '@firebase/firestore';
 import { useRouter }  from 'next/navigation'
 
@@ -49,16 +49,16 @@ const SignUp = () => {
         }
         try {
             setLoading(true);
-            const passwordValidationStatus = await validatePassword(auth, password);
+            const passwordValidationStatus = await validatePassword(FireData.auth, password);
             if (!passwordValidationStatus.isValid) {
                 setError("Password does not meet the security policy.");
                 setLoading(false);
                 return;
             }
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(FireData.auth, email, password);
             const user = userCredential.user;
             console.log('account created', user.uid);
-            await setDoc(doc(db, 'User', user.uid), {
+            await setDoc(doc(FireData.db, 'User', user.uid), {
                 email: email,
                 firstName: firstName,
                 lastName: lastName,
@@ -70,7 +70,7 @@ const SignUp = () => {
             if (sellerReq) {
                 const confirmed = confirm("Are you sure you want to request a seller account?");
                 if (confirmed) {
-                await addDoc(collection(db, 'Seller'), {
+                await addDoc(collection(FireData.db, 'Seller'), {
                     UserID: user.uid,
                     banned: false,
                     validated: false,
@@ -81,7 +81,7 @@ const SignUp = () => {
                 setSeller(false);
                 }
             } else {
-                await addDoc(collection(db, 'Buyer'), {
+                await addDoc(collection(FireData.db, 'Buyer'), {
                 UserID: user.uid,
                 banned: false,
                 address: "",

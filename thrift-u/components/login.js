@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import {auth} from '../firebase/clientApp'
+import FireData from '../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ const Login = () => {
         setError("");
         setLoading(true);
         try {
-        const credential = await signInWithEmailAndPassword(auth, email, password);
+        const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         const idToken = await credential.user.getIdToken();
 
         await fetch("/api/login", { //send token to api route to set cookie
