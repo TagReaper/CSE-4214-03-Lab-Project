@@ -1,11 +1,11 @@
 'use client'
 
-import db from '../firebase/clientApp'
+import FireData from '../firebase/clientApp'
 import {doc, deleteDoc} from '@firebase/firestore'
 
 const DeleteItem = ({id}) => {
     const handleDelete = async () => {
-        const itemRef = doc(db, 'items', id)
+        const itemRef = doc(FireData.db, 'items', id)
         try{
             await deleteDoc(itemRef)
             try{

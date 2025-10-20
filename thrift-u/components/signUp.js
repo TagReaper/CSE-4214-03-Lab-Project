@@ -1,113 +1,121 @@
 'use client'
 
-import {useState} from 'react';
-import db from '../firebase/clientApp'
-import {collection, addDoc, getDocs} from '@firebase/firestore';
-import {useRouter}  from 'next/navigation'
+import { useState, useEffect } from 'react';
+import { createUserWithEmailAndPassword, validatePassword  } from "firebase/auth";
+import FireData from '../firebase/clientApp'
+import { collection, addDoc, doc, setDoc } from '@firebase/firestore';
+import { useRouter }  from 'next/navigation'
+
+const UIPasswordValidation = (password) => {
+    return {
+        minLength: password.length >= 10,
+        hasLowercase: /[a-z]/.test(password),
+        hasUppercase: /[A-Z]/.test(password),
+        hasNumber: /[0-9]/.test(password),
+        hasSpecialChar: /[!@#$%^&*]/.test(password),
+    };
+};
 
 const SignUp = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPass] = useState('')
-    const [passwordValid, setPassValid] = useState('')
-    const [firstName, setFirst] = useState('')
-    const [lastName, setLast] = useState('')
-    const [sellerReq, setSeller] = useState('')
-    const [users, setUsers] = useState([])
-    const serverTime = new Date()
+    const [email, setEmail] = useState('');
+    const [password, setPass] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [validation, setValidation] = useState({
+        minLength: false,
+        hasLowercase: false,
+        hasUppercase: false,
+        hasNumber: false,
+        hasSpecialChar: false,
+        isValid: false,
+    });
+    const [firstName, setFirst] = useState('');
+    const [lastName, setLast] = useState('');
+    const [sellerReq, setSeller] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const serverTime = new Date();
     const router = useRouter()
 
+    useEffect(() => {
+        setValidation(UIPasswordValidation(password));
+    }, [password]);
     const handleSubmit = async (event) => {
-        event.preventDefault()
-        try{
-            if(password == passwordValid){
-                if(password.length >= 10){
-                    const querySnapshot = await getDocs(collection(db, 'User'))
-                    var valid = true
-                    setUsers(querySnapshot.docs.map((doc) => ({...doc.data()})))
-                    for (let index = 0; index < users.length; index++) {
-                        if (users[index].email == email){
-                            valid = false
-                            break;
-                        }
-                    }
-                    if (valid) {
-                        if(sellerReq){
-                            if (confirm("Are you sure you want to request a seller account?")){
-                                const docRef = await addDoc(collection(db, 'User'), {
-                                    email: email,
-                                    password: password,
-                                    firstName: firstName,
-                                    lastName: lastName,
-                                    accessLevel: 1,
-                                    dateCreated: serverTime.toLocaleString(),
-                                    deletedAt: "",
-                                })
-                                console.log('User written with ID: ', docRef.id)
-                                const docRef2 = await addDoc(collection(db, 'Seller'), {
-                                    UserID: docRef.id,
-                                    banned: false,
-                                    validated: false,
-                                    Flags: 0,
-                                })
-                                console.log('Seller written with ID: ', docRef2.id)
-                                console.log('Notify admins of new seller account.')
-                                router.push('/login')
-                            } else {
-                                setSeller(false)
-                            }
-                        } else {
-                            if (confirm("Are you sure you don't want to create a seller account?")){
-                                const docRef = await addDoc(collection(db, 'User'), {
-                                    email: email,
-                                    password: password,
-                                    firstName: firstName,
-                                    lastName: lastName,
-                                    accessLevel: 2,
-                                    dateCreated: serverTime.toLocaleString(),
-                                    deletedAt: "",
-                                })
-                                console.log('User written with ID: ', docRef.id)
-                                const docRef2 = await addDoc(collection(db, 'Buyer'), {
-                                    UserID: docRef.id,
-                                    banned: false,
-                                    address: "",
-                                    city: "",
-                                    state: "",
-                                    zip: "",
-                                    numOrders: 0,
-                                })
-                                console.log('Buyer written with ID: ', docRef2.id)
-                                router.push('/login')
-                            } else {
-                                setSeller(false)
-                            }
-                        }
-                    } else{
-                        alert('Email is already registred to an account!')
-                        setEmail('')
-                    }
-                }else{
-                    alert('Password must be 10 (or more) characters long')
-                    setPass('')
-                    setPassValid('')
+        event.preventDefault();
+        setError('');
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+        try {
+            setLoading(true);
+            const passwordValidationStatus = await validatePassword(FireData.auth, password);
+            if (!passwordValidationStatus.isValid) {
+                setError("Password does not meet the security policy.");
+                setLoading(false);
+                return;
+            }
+            const userCredential = await createUserWithEmailAndPassword(FireData.auth, email, password);
+            const user = userCredential.user;
+            console.log('account created', user.uid);
+            await setDoc(doc(FireData.db, 'User', user.uid), {
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                accessLevel: sellerReq ? 1 : 2,
+                dateCreated: serverTime.toLocaleString(),
+                deletedAt: "",
+            });
+
+            if (sellerReq) {
+                const confirmed = confirm("Are you sure you want to request a seller account?");
+                if (confirmed) {
+                await addDoc(collection(FireData.db, 'Seller'), {
+                    UserID: user.uid,
+                    banned: false,
+                    validated: false,
+                    Flags: 0,
+                });
+                console.log('Seller record created');
+                } else {
+                setSeller(false);
                 }
             } else {
-                alert('Passwords do not match!')
-                setPass('')
-                setPassValid('')
+                await addDoc(collection(FireData.db, 'Buyer'), {
+                UserID: user.uid,
+                banned: false,
+                address: "",
+                city: "",
+                state: "",
+                zip: "",
+                numOrders: 0,
+                });
+                console.log('Buyer record created');
             }
-        }catch (error){
-            console.log("Error creating account: ", error)
-            alert('Error creating account!')
-            setEmail('')
-            setPass('')
-            setPassValid('')
-            setFirst('')
-            setLast('')
-            setSeller(false)
+
+            alert('Account created successfully');
+            router.push('/login');
+
+        } catch (error) {
+        console.error('error creating account:', error);
+        switch (error.code) {
+        case 'auth/email-already-in-use':
+            setError("This email address is already registered to an account.");
+            break;
+        case 'auth/invalid-email':
+            setError("Email address is invalid.");
+            break;
+        case 'auth/weak-password':
+            setError("Password is too weak. Please choose a stronger password.");
+            break;
+        default:
+            setError("Error creating account, please try again. " + error.code);
+            }
+        }
+        finally {
+            setLoading(false);
         }
     }
-
     return (
         <form className='m-5 flex flex-col' onSubmit={handleSubmit}>
             <input className='m-1 text-black border-1 rounded border-black' required
@@ -134,10 +142,19 @@ const SignUp = () => {
                 onChange={(e) => setPass(e.target.value)}
                 placeholder = "Password (10+ characters)"
             />
+            <div className="m-1 p-2 text-sm">
+                <ul>
+                    <li style={{ color: validation.minLength ? 'green' : 'red' }}> At least 10 characters</li>
+                    <li style={{ color: validation.hasLowercase ? 'green' : 'red' }}> A lowercase letter</li>
+                    <li style={{ color: validation.hasUppercase ? 'green' : 'red' }}>An uppercase letter</li>
+                    <li style={{ color: validation.hasNumber ? 'green' : 'red' }}> A number</li>
+                    <li style={{ color: validation.hasSpecialChar ? 'green' : 'red' }}>A special character (!@#$...)</li>
+                </ul>
+            </div>
             <input className='m-1 text-black border-1 rounded border-black' required
                 type = 'password'
-                value = {passwordValid}
-                onChange={(e) => setPassValid(e.target.value)}
+                value = {confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder = "Confirm password"
             />
             <span className="m-1 text-black border-1 rounded border-black">
@@ -148,8 +165,15 @@ const SignUp = () => {
                     onChange={(e) => setSeller(e.target.checked)}
                 />
             </span>
+            {error && <p className="m-1 text-red-500">{error}</p>}
             &nbsp;&nbsp;
-            <button className='m-1 text-black border-2 rounded border-black' type='submit'>Confirm</button>
+            <button
+                className='m-1 text-black border-2 rounded border-black disabled:opacity-50'
+                type='submit'
+                disabled={loading}
+            >
+            {loading ? 'Creating Account...' : 'Confirm'}
+            </button>
         </form>
     )
 }
