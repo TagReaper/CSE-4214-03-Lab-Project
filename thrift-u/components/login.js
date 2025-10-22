@@ -1,26 +1,29 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import FireData from '../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 import {useAuthState} from "react-firebase-hooks/auth";
+import {doc, getDoc } from '@firebase/firestore'
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPass] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const router = useRouter()
+    const router = useRouter();
 
     //Check sign-in state
     const [user] = useAuthState(FireData.auth);
 
     //Pushed to home if they are signed in
-    if (user) {
-        router.push("/");
-    }
+    useEffect(() => {
+        if (user) {
+            router.push("/");
+        }
+    }, [user, router]);
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -28,6 +31,8 @@ const Login = () => {
         setLoading(true);
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
+        const userRef = await getDoc(doc(FireData.db, 'User', credential.user.uid))
+        credential.user.accessLevel = userRef.data().accessLevel;
         console.log('User logged in:', credential.user);
 
         //Removed due to errors with token verification
