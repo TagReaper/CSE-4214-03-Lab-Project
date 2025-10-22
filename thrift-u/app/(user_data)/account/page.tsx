@@ -1,7 +1,3 @@
-export default function Account() {
-    return (
-        <div className="center">
-            Account
-        </div>
-    );
+export default function AccountPage() {
+    return <div> Account Management Page </div>;
 }

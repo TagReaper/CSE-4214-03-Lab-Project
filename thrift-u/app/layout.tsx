@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import Link from 'next/link';
 import Image from "next/image";
-
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,8 +34,7 @@ export default function RootLayout({
         <div>
           <ul style={{color: 'white', backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
             <li style={{float: "left"}}><span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-              <Image className="dark:invert" src="/Icons/home.svg" alt="Home logo" width={30} height={30} />
-              <Link href = {"/"}> Home </Link>
+              <Link href = {"/"}> <Image className="dark" src="/Graphics/ThriftULogoModern.png" alt="Home logo" width={65} height={42} /> </Link>
             </span></li>
             <li style={{float: "right"}}><span style={{direction: 'rtl', display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
               <Image className="dark:invert" src="/Icons/buyer.svg" alt="Home logo" width={30} height={30} />

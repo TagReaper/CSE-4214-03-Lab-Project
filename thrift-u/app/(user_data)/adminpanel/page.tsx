@@ -1,7 +1,3 @@
-export default function AdminPanel() {
-    return (
-        <div className="center">
-            Admin
-        </div>
-    );
+export default function AdminPage() {
+    return <div> Admin Control Page </div>;
 }
