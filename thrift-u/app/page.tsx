@@ -11,7 +11,10 @@ export default function Home() {
 
   // Check sign-in state
   const [user] = useAuthState(FireData.auth);
-  const userSession = sessionStorage.getItem('user');
+  let userSession;
+  if (sessionStorage) {
+    userSession = sessionStorage.getItem('user');
+  }
 
   console.log('Current user:', user);
 
