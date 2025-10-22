@@ -3,28 +3,29 @@
 import { useState, useEffect} from "react"
 import FireData from '../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
-import DeleteItem from './deleteItem'
+import ItemListing from './seller_itemListing'
 
-const ListItems = () => {
+const SellerListItems = () => {
     const [items, setItems] = useState([])
 
     useEffect(() => {
         const fetchItems = async () => {
-            const querySnapshot = await getDocs(collection(FireData.db, 'items'))
+            const querySnapshot = await getDocs(collection(FireData.db, 'Inventory'))
             setItems(querySnapshot.docs.map((doc) => ({...doc.data(), id: doc.id})))
         }
 
         fetchItems()
     }, [])
 
+    //code to only display items connected to that seller
+
     return (
         <div>
             <h2><u>List of Items</u></h2>
-            <ul className='list-disc'>
+            <ul>
                 {items.map((item) => (
                     <li className='border rounded grid m-1' key={item.id}>
-                        <p className="center font-bold"> {item.name}</p>
-                        <DeleteItem id={item.id}/>
+                        <ItemListing id={item}/>
                     </li>
                 ))}
             </ul>
@@ -32,4 +33,4 @@ const ListItems = () => {
     )
 }
 
-export default ListItems
+export default SellerListItems
