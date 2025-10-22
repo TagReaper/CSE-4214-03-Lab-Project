@@ -1,6 +1,6 @@
 'use client'
 
-import { use } from 'react'
+import { useEffect } from 'react'
 
 const SellerItemListing = ({id}) => {
 
