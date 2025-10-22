@@ -14,6 +14,8 @@ export default function Home() {
   let userSession;
   if (sessionStorage) {
     userSession = sessionStorage.getItem('user');
+  } else {
+    userSession = false;
   }
 
   console.log('Current user:', user);
