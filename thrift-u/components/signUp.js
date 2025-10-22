@@ -62,14 +62,6 @@ const SignUp = () => {
                 }
             }
 
-            console.log("Client Payload:", {
-                email,
-                password,
-                role,
-                firstName,
-                lastName,
-            });
-
             const registerUser = httpsCallable(
                 FireData.functions,
                 "registerUser",

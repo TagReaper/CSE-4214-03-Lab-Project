@@ -8,8 +8,7 @@
  */
 
 const { setGlobalOptions } = require("firebase-functions/v2");
-const { onRequest } = require("firebase-functions/https");
-const { onCall } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
@@ -44,23 +43,15 @@ const roles = {
 };
 
 // assign customclaims role to user on signup
+exports.registerUser = functions.https.onCall(async (request) => {
+    const { email, password, role, firstName, lastName } = request.data;
 
-exports.registerUser = functions.https.onCall(async (data, context) => {
-    const { email, password, role, firstName, lastName } = data;
-    console.log("Data:", {
-        email,
-        password,
-        role,
-        firstName,
-        lastName,
-    });
-
-    // if (!["buyer", "seller"].includes(role)) {
-    //     throw new functions.https.HttpsError(
-    //         "invalid-argument",
-    //         "A valid role ('buyer' or 'seller') must be provided.",
-    //     );
-    // }
+    if (!["buyer", "seller"].includes(role)) {
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "A valid role ('buyer' or 'seller') must be provided.",
+        );
+    }
 
     try {
         const userRecord = await admin.auth().createUser({
