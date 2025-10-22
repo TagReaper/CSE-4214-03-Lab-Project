@@ -31,9 +31,10 @@ const Login = () => {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         console.log('User logged in:', credential.user);
         sessionStorage.setItem('user', true);
-        //const idToken = await credential.user.getIdToken();
 
-        /* await fetch("/api/login", { //send token to api route to set cookie
+        //Removed due to errors with token verification
+        /*const idToken = await credential.user.getIdToken();
+        await fetch("/api/login", { //send token to api route to set cookie
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${idToken}`,
