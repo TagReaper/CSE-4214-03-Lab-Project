@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
 import { clientConfig, serverConfig } from "./app/config";
 
-const PRIVATE_PATHS = ['/', '/profile'];
+const PRIVATE_PATHS = ['/', '/account'];
 const ADMIN_PATHS = ['/adminpanel'];
 const SELLER_PATHS = ['/sellerhub'];
 const PUBLIC_PATHS = ['/signup', '/login'];
