@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+/*import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
 import { clientConfig, serverConfig } from "./app/config";
 
@@ -47,3 +47,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.).*)',
   ],
 };
+*/
