@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import FireData from '../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
+import {useAuthState} from "react-firebase-hooks/auth";
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -12,20 +13,27 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter()
+
+    const [user] = useAuthState(FireData.auth);
+    if (user) {
+    router.push("/");
+    }
+
     const handleLogin = async (event) => {
         event.preventDefault();
         setError("");
         setLoading(true);
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
-        const idToken = await credential.user.getIdToken();
+        console.log('User logged in:', credential.user);
+        //const idToken = await credential.user.getIdToken();
 
-        await fetch("/api/login", { //send token to api route to set cookie
+        /* await fetch("/api/login", { //send token to api route to set cookie
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${idToken}`,
             },
-        });
+        }); */
 
         router.push("/"); //redirect to home page again
         } catch (error) {
