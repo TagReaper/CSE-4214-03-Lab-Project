@@ -39,10 +39,9 @@ const SignUp = () => {
 
     //Check sign-in state
     const [user] = useAuthState(FireData.auth);
-    const userSession = sessionStorage.getItem('user');
 
     //Pushed to home if they are signed in
-    if (user && userSession) {
+    if (user) {
         router.push("/");
     }
 
@@ -67,7 +66,6 @@ const SignUp = () => {
             }
             const userCredential = await createUserWithEmailAndPassword(FireData.auth, email, password);
             const user = userCredential.user;
-            sessionStorage.setItem('user', true);
             console.log('account created', user.uid);
             await setDoc(doc(FireData.db, 'User', user.uid), {
                 email: email,

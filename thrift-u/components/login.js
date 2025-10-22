@@ -16,10 +16,9 @@ const Login = () => {
 
     //Check sign-in state
     const [user] = useAuthState(FireData.auth);
-    const userSession = sessionStorage.getItem('user');
 
     //Pushed to home if they are signed in
-    if (user && userSession) {
+    if (user) {
         router.push("/");
     }
 
@@ -30,7 +29,6 @@ const Login = () => {
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         console.log('User logged in:', credential.user);
-        sessionStorage.setItem('user', true);
 
         //Removed due to errors with token verification
         /*const idToken = await credential.user.getIdToken();
