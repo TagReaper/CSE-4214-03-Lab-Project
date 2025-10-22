@@ -14,9 +14,13 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const router = useRouter()
 
+    //Check sign-in state
     const [user] = useAuthState(FireData.auth);
-    if (user) {
-    router.push("/");
+    const userSession = sessionStorage.getItem('user');
+
+    //Pushed to home if they are signed in
+    if (user || userSession) {
+        router.push("/");
     }
 
     const handleLogin = async (event) => {
@@ -26,6 +30,7 @@ const Login = () => {
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         console.log('User logged in:', credential.user);
+        sessionStorage.setItem('user', true);
         //const idToken = await credential.user.getIdToken();
 
         /* await fetch("/api/login", { //send token to api route to set cookie
