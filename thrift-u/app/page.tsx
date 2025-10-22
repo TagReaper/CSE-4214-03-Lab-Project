@@ -16,7 +16,7 @@ export default function Home() {
   console.log('Current user:', user);
 
   // Pushed to login if they aren't logged in
-  if (!user || !userSession) {
+  if (!user && !userSession) {
     router.push("/login");
   }
 

@@ -19,7 +19,7 @@ const Login = () => {
     const userSession = sessionStorage.getItem('user');
 
     //Pushed to home if they are signed in
-    if (user || userSession) {
+    if (user && userSession) {
         router.push("/");
     }
 
