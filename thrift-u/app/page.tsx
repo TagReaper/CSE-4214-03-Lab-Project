@@ -11,17 +11,11 @@ export default function Home() {
 
   // Check sign-in state
   const [user] = useAuthState(FireData.auth);
-  let userSession;
-  if (sessionStorage) {
-    userSession = sessionStorage.getItem('user');
-  } else {
-    userSession = false;
-  }
 
   console.log('Current user:', user);
 
   // Pushed to login if they aren't logged in
-  if (!user && !userSession) {
+  if (!user) {
     router.push("/login");
   }
 
