@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { validatePassword } from "firebase/auth";
+import { validatePassword, signInWithEmailAndPassword } from "firebase/auth";
 import FireData from "../firebase/clientApp";
 import { httpsCallable } from "firebase/functions";
 import { useRouter } from "next/navigation";
@@ -79,8 +79,15 @@ const SignUp = () => {
                 email,
                 password,
             );
-            const user = userCredential.user;
-            console.log("account created and signed in:", user.uid);
+            const idToken = await userCredential.user.getIdToken();
+
+            await fetch("/api/login", {
+                //send token to api route to set cookie
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
 
             if (sellerReq) {
                 const confirmed = confirm(
@@ -93,7 +100,7 @@ const SignUp = () => {
                 }
             }
 
-            alert("Account created successfully");
+            alert("Account created successfully, you are now logged in.");
             router.push("/"); // redirect to home page
         } catch (error) {
             console.error("error creating account:", error);
