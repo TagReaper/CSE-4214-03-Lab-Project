@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
+import Image from "next/image";
 
-const SellerItemListing = ({id}) => {
+
+const SellerItemListing = ({image, price, productName, sellerName, quantity}) => {
 
 
 

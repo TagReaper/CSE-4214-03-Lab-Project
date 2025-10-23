@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect} from "react"
-import FireData from '../firebase/clientApp'
+import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
-import ItemListing from './seller_itemListing'
+import ItemListing from '../itemListings/seller_itemListing'
 
 const SellerListItems = () => {
     const [items, setItems] = useState([])
