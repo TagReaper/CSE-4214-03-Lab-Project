@@ -3,7 +3,7 @@
 import { useState, useEffect} from "react"
 import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
-import ItemListing from '../productHandler/itemListing'
+import CompactItemListing from '../productHandler/itemListingCompact'
 
 const SellerListItems = ({ sellerId }) => {
     const [items, setItems] = useState([])
@@ -25,7 +25,7 @@ const SellerListItems = ({ sellerId }) => {
             <ul>
                 {items.map((item) => (
                     <li className='border rounded grid m-1' key={item.id}>
-                        <ItemListing id={item}/>
+                        <CompactItemListing />
                     </li>
                 ))}
             </ul>
