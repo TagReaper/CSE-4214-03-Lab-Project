@@ -5,7 +5,6 @@ import { createUserWithEmailAndPassword, validatePassword  } from "firebase/auth
 import FireData from '../../firebase/clientApp'
 import { collection, addDoc, doc, setDoc } from '@firebase/firestore';
 import { useRouter }  from 'next/navigation'
-import {useAuthState} from "react-firebase-hooks/auth";
 
 const UIPasswordValidation = (password) => {
     return {
@@ -36,14 +35,6 @@ const SignUp = () => {
     const [error, setError] = useState('');
     const serverTime = new Date();
     const router = useRouter()
-
-    //Check sign-in state
-    const [user] = useAuthState(FireData.auth);
-
-    //Pushed to home if they are signed in
-    if (user) {
-        router.push("/");
-    }
 
     useEffect(() => {
         setValidation(UIPasswordValidation(password));
