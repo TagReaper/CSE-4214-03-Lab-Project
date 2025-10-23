@@ -2,7 +2,7 @@
 
 import { useState, useEffect} from 'react';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import FireData from '../firebase/clientApp'
+import FireData from '../../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 import {useAuthState} from "react-firebase-hooks/auth";
