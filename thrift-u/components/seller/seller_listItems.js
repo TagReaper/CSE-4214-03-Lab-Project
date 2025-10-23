@@ -36,7 +36,7 @@ const SellerListItems = ({sellerId}) => {
             <div className='flex flex-wrap justify-evenly border-b-8 border-dashed'>
                 {sellerItems.map((item) => (
                     <div key={item.id}>
-                        <CompactItemListing image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                        <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
                     </div>
                 ))}
             </div>
@@ -44,7 +44,7 @@ const SellerListItems = ({sellerId}) => {
             <div className='flex flex-wrap justify-evenly'>
                 {sellerPendingItems.map((item) => (
                     <div key={item.id}>
-                        <CompactItemListing image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                        <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
                     </div>
                 ))}
                 <RequestItem sellerId={sellerId}/>
