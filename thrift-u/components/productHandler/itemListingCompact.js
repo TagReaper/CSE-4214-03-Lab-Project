@@ -10,6 +10,7 @@ const CompactItemListing = ({image, price, productName, quantity}) => {
     const router = useRouter()
 
     const handleClick = async () => {
+        //pushes to individual product page
         router.push('/')
     }
 
