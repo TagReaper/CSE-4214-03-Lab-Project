@@ -1,0 +1,47 @@
+'use client'
+
+import { useEffect } from 'react'
+import Image from "next/image";
+import { useRouter }  from 'next/navigation'
+
+
+
+const CompactItemListing = ({image, price, productName, quantity}) => {
+    const router = useRouter()
+
+    const handleClick = async () => {
+        router.push('/')
+    }
+
+    if (quantity > 0){
+        return (
+        <div className="m-3 bg-white duration-200 flex flex-col w-xs h-fit rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
+            <div className='center m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
+                <Image src={image} alt="Product Image" width={300} height={300}/>
+            </div>
+            <div className='flex flex-col px-4 space-y-1'>
+                <p className='font-medium tracking-wide w-max'>{productName}</p>
+                <p className='font-bold tracking-wide'>${price}</p>
+            </div>
+        </div>
+    )
+    } else {
+        return (
+        <div className="m-3 bg-white duration-200 flex flex-col w-xs h-fit rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
+            <div className='center m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
+                <Image style={{filter: 'grayscale(100%)'}} src={image} alt="Product Image" width={300} height={300}/>
+            </div>
+            <div className='flex flex-col px-4 space-y-1'>
+                <p className='font-medium tracking-wide w-max'>{productName}</p>
+                <span className='inline-flex'>
+                    <p className='font-extrabold tracking-wide text-red-500'>Sold Out</p>
+                    &nbsp;&nbsp;&nbsp;
+                    <p className='tracking-wide line-through'>${price}</p>
+                </span>
+            </div>
+        </div>
+    )
+    }
+}
+
+export default CompactItemListing
