@@ -7,6 +7,7 @@ import CompactItemListing from '../productHandler/itemListingCompact'
 
 const SellerListItems = ({ sellerId }) => {
     const [items, setItems] = useState([])
+    const [sellerItems, setSellerItems] = useState([])
 
     useEffect(() => {
         const fetchItems = async () => {
@@ -17,18 +18,24 @@ const SellerListItems = ({ sellerId }) => {
         fetchItems()
     }, [])
 
-    //code to only display items connected to that seller
+    useEffect(() => {
+        const assignItems = async () => {
+            //seller item assignment
+        }
+
+        assignItems()
+    }, [items])
 
     return (
         <div>
             <h2><u>List of Items</u></h2>
-            <ul>
-                {items.map((item) => (
-                    <li className='border rounded grid m-1' key={item.id}>
-                        <CompactItemListing />
-                    </li>
+            <div className='flex flex-wrap justify-evenly border-b-8 border-dashed'>
+                {sellerItems.map((item) => (
+                    <div key={item.id}>
+                        <CompactItemListing image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     )
 }
