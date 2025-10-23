@@ -1,4 +1,4 @@
-import SignUp from '../../../components/signUp'
+import SignUp from '../../../components/auth/signUp'
 
 export default function SignUpPage() {
     return <div className="center">

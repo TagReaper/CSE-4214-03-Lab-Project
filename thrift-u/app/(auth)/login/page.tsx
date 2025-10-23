@@ -1,6 +1,4 @@
-import Image from "next/image";
-import Link from 'next/link';
-import Login from '../../../components/login'
+import Login from '../../../components/auth/login';
 
 export default function LoginPage() {
     return <div className="center">
