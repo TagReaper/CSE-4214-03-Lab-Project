@@ -4,10 +4,12 @@ import { useState, useEffect} from "react"
 import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
 import CompactItemListing from '../productHandler/itemListingCompact'
+import RequestItem from '../seller/addItem'
 
-const SellerListItems = ({ sellerId, approved}) => {
+const SellerListItems = ({sellerId}) => {
     const [items, setItems] = useState([])
     const [sellerItems, setSellerItems] = useState([])
+    const [sellerPendingItems, setSellerPendingItems] = useState([])
 
     useEffect(() => {
         const fetchItems = async () => {
@@ -20,7 +22,9 @@ const SellerListItems = ({ sellerId, approved}) => {
 
     useEffect(() => {
         const assignItems = async () => {
-            //seller item assignment
+            //if item.sellerID == sellerID
+                //if approved -> SellerItems
+                //else -> SellerPendingItems
         }
 
         assignItems()
@@ -28,13 +32,22 @@ const SellerListItems = ({ sellerId, approved}) => {
 
     return (
         <div>
-            <h2><u>List of Items</u></h2>
+            <h1>Products</h1>
             <div className='flex flex-wrap justify-evenly border-b-8 border-dashed'>
                 {sellerItems.map((item) => (
                     <div key={item.id}>
                         <CompactItemListing image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
                     </div>
                 ))}
+            </div>
+            <h1>Pending Products</h1>
+            <div className='flex flex-wrap justify-evenly'>
+                {sellerPendingItems.map((item) => (
+                    <div key={item.id}>
+                        <CompactItemListing image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                    </div>
+                ))}
+                <RequestItem sellerId={sellerId}/>
             </div>
         </div>
     )
