@@ -1,16 +1,15 @@
 'use client'
 
-import { useEffect } from 'react'
 import Image from "next/image";
 import { useRouter }  from 'next/navigation'
 
 
 
-const CompactItemListing = ({image, price, productName, quantity}) => {
+const CompactItemListing = ({itemId, image, price, productName, quantity}) => {
     const router = useRouter()
 
     const handleClick = async () => {
-        //pushes to individual product page
+        //pushes to individual product page {itemId}
         router.push('/')
     }
 
