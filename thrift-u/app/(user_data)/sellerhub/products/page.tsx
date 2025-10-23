@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import {useAuthState} from "react-firebase-hooks/auth";
