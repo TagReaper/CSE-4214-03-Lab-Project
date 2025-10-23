@@ -35,6 +35,8 @@ const Login = () => {
         credential.user.accessLevel = userRef.data().accessLevel;
         console.log('User logged in:', credential.user);
 
+        // Fetch relevent ID from Buyer/Seller/Admin collections
+
         //Removed due to errors with token verification
         /*const idToken = await credential.user.getIdToken();
         await fetch("/api/login", { //send token to api route to set cookie

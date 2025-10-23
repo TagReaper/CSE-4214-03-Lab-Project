@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import Image from "next/image";
 
 
-const SellerItemListing = ({image, price, productName, sellerName, quantity}) => {
+const ItemListing = ({image, price, productName, sellerName, quantity}) => {
 
 
 
@@ -13,4 +13,4 @@ const SellerItemListing = ({image, price, productName, sellerName, quantity}) =>
     )
 }
 
-export default SellerItemListing
+export default ItemListing

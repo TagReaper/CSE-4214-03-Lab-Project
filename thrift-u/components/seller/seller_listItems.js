@@ -3,9 +3,9 @@
 import { useState, useEffect} from "react"
 import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
-import ItemListing from '../itemListings/seller_itemListing'
+import ItemListing from '../productHandler/itemListing'
 
-const SellerListItems = () => {
+const SellerListItems = ({ sellerId }) => {
     const [items, setItems] = useState([])
 
     useEffect(() => {
