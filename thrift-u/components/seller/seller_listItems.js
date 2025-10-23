@@ -5,7 +5,7 @@ import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
 import CompactItemListing from '../productHandler/itemListingCompact'
 
-const SellerListItems = ({ sellerId }) => {
+const SellerListItems = ({ sellerId, approved}) => {
     const [items, setItems] = useState([])
     const [sellerItems, setSellerItems] = useState([])
 
