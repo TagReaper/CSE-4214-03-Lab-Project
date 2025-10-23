@@ -15,21 +15,21 @@ const CompactItemListing = ({image, price, productName, quantity}) => {
 
     if (quantity > 0){
         return (
-        <div className="m-3 bg-white duration-200 flex flex-col w-xs h-fit rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
-            <div className='center m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
-                <Image src={image} alt="Product Image" width={300} height={300}/>
+        <button className="m-5 bg-white duration-200 flex flex-col w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
+            <div className='flex m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
+                <Image style={{aspectRatio: '3/2', width: '100%', height: 'auto', objectFit: 'cover'}}src={image} alt="Product Image" width={300} height={300}/>
             </div>
             <div className='flex flex-col px-4 space-y-1'>
                 <p className='font-medium tracking-wide w-max'>{productName}</p>
-                <p className='font-bold tracking-wide'>${price}</p>
+                <p className='inline-flex font-bold tracking-wide'>${price}</p>
             </div>
-        </div>
+        </button>
     )
     } else {
         return (
-        <div className="m-3 bg-white duration-200 flex flex-col w-xs h-fit rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
-            <div className='center m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
-                <Image style={{filter: 'grayscale(100%)'}} src={image} alt="Product Image" width={300} height={300}/>
+        <button className="m-5 bg-white duration-200 flex flex-col w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
+            <div className='flex m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
+                <Image style={{aspectRatio: '3/2', width: '100%', height: 'auto', objectFit: 'cover', filter: 'grayscale(100%)'}} src={image} alt="Product Image" width={300} height={300}/>
             </div>
             <div className='flex flex-col px-4 space-y-1'>
                 <p className='font-medium tracking-wide w-max'>{productName}</p>
@@ -39,7 +39,7 @@ const CompactItemListing = ({image, price, productName, quantity}) => {
                     <p className='tracking-wide line-through'>${price}</p>
                 </span>
             </div>
-        </div>
+        </button>
     )
     }
 }
