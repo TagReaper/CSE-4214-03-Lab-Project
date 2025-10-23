@@ -1,5 +1,4 @@
 import ItemListing from '../../../../components/productHandler/itemListing'
-import Image from 'next/image';
 
 export default function ProductsPage() {
   return (
