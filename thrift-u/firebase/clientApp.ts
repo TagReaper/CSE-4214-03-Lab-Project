@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
+import {  getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 const clientCredentials = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,19 +16,19 @@ const clientCredentials = {
 const app = initializeApp(clientCredentials);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
 
-if (process.env.FIRESTORE_EMULATOR_HOST) {
-    connectFirestoreEmulator(db, "127.0.0.1", 8081);
-}
-
-if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+if (typeof window !== 'undefined' && window.location.hostname === "localhost") {
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectFirestoreEmulator(db, "127.0.0.1", 8081);
+    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 
 const FireData = {
     app: app,
     auth: auth,
-    db: db
+    db: db,
+    functions: functions,
 }
 
 export default FireData;
