@@ -19,6 +19,7 @@ const db = getFirestore(app);
 const functions = getFunctions(app);
 
 if (typeof window !== 'undefined' && window.location.hostname === "localhost") {
+    console.log("Connecting to local Firebase emulators...");
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     connectFirestoreEmulator(db, "127.0.0.1", 8081);
     connectFunctionsEmulator(functions, "127.0.0.1", 5001);
