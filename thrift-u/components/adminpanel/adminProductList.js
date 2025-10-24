@@ -10,7 +10,6 @@ const PendingProductList = () => {
 
   // function to fetch pending products
   const fetchPendingProducts = async () => {
-    console.warn("Fetching pending products...");
     setLoading(true);
     // create query for unapproved products
     const q = query(
@@ -25,8 +24,6 @@ const PendingProductList = () => {
       ...doc.data(),
       id: doc.id,
     }));
-
-    console.warn(products);
 
     setPendingProducts(products);
     setLoading(false);
