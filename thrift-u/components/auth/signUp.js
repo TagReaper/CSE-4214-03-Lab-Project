@@ -62,7 +62,7 @@ const SignUp = () => {
                 email: email,
                 firstName: firstName,
                 lastName: lastName,
-                accessLevel: sellerReq ? 1 : 2,
+                accessLevel: sellerReq ? "Seller" : "Buyer",
                 dateCreated: serverTime.toLocaleString(),
                 deletedAt: "",
             });

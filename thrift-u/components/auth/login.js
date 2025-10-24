@@ -21,19 +21,21 @@ const Login = () => {
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         const userRef = await getDoc(doc(FireData.db, 'User', credential.user.uid))
-        credential.user.accessLevel = userRef.data().accessLevel;
         console.log('User logged in:', credential.user);
+        console.log(userRef.data())
 
         // Fetch relevent ID from Buyer/Seller/Admin collections
 
-        //Removed due to errors with token verification
-        /*const idToken = await credential.user.getIdToken();
+        //Readded due to route creation
+        const idToken = await credential.user.getIdToken();
         await fetch("/api/login", { //send token to api route to set cookie
-            method: 'POST',
+            method: "POST",
             headers: {
-                Authorization: `Bearer ${idToken}`,
+                Authorization: `${idToken}`,
+                AccessLevel: `${userRef.data().accessLevel}`,
+                AltID: "AlternateID"
             },
-        }); */
+        });
 
         router.push("/"); //redirect to home page again
         } catch (error) {
