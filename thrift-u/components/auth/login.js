@@ -24,8 +24,6 @@ const Login = () => {
         console.log('User logged in:', credential.user);
         console.log(userRef.data())
 
-        // Fetch relevent ID from Buyer/Seller/Admin collections
-
         //Readded due to route creation
         const idToken = await credential.user.getIdToken();
         await fetch("/api/login", { //send token to api route to set cookie
@@ -33,7 +31,7 @@ const Login = () => {
             headers: {
                 Authorization: `${idToken}`,
                 AccessLevel: `${userRef.data().accessLevel}`,
-                AltID: "AlternateID"
+                AltID: "AlternateID"//`${userRef.data().altID}`
             },
         });
 
