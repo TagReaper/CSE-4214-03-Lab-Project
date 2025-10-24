@@ -13,7 +13,7 @@ export default function ProductsPage() {
     //Pushed to home if they are signed in
     useEffect(() => {
       if(user){
-        if (user.uid != 'beacon') {
+        if (user.uid == 'beacon') {
             router.push("/");
         }
       }
