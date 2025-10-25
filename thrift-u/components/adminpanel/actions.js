@@ -29,7 +29,34 @@ export async function approveProduct(productId) {
   }
 
   // refresh data on page
-  revalidatePath("/admin/products");
+  revalidatePath("/adminpanel");
 
   return { success: `Product ${productId} has been approved.` };
+}
+
+export async function approveSeller(sellerId) {
+  // permission check
+  //   try {
+  //     await verifyUserAndCheckRole("admin");
+  //   } catch (error) {
+  //     return { error: error.message };
+  //   }
+  if (!sellerId) {
+    return { error: "Seller ID is required." };
+  }
+
+  // pull product from db
+  try {
+    const sellerDoc = adminDb.collection("Seller").doc(sellerId);
+
+    // update db entry
+    await sellerDoc.update({
+      validated: "true",
+    });
+  } catch (error) {
+    console.error("Error approving seller:", error);
+    return { error: "Failed to update the seller in the database." };
+  }
+  revalidatePath("/adminpanel");
+  return { success: `Product ${sellerId} has been approved.` };
 }
