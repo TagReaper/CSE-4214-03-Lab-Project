@@ -84,7 +84,7 @@ const ListUsers = () => {
 
     if (result.success) {
       alert(result.message || "Seller approved!");
-      await fetchUsers();
+      await fetchItems();
     } else {
       alert(`Error: ${result.message || "Failed to approve seller."}`);
     }
