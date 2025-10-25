@@ -99,6 +99,10 @@ export async function toggleBanStatus(id, access) {
     return { error: "User ID is required." };
   }
 
+  if (!access) {
+    return { error: "Access level is required." };
+  }
+
   let collectionName;
   if (access === 1) {
     collectionName = "Seller";
@@ -110,7 +114,7 @@ export async function toggleBanStatus(id, access) {
 
   try {
     // pull from db
-    const profileDocRef = adminDb.collection(collectionName).doc(profileId);
+    const profileDocRef = adminDb.collection(collectionName).doc(id);
     const profileDoc = await profileDocRef.get();
 
     if (!profileDoc.exists) {
@@ -125,7 +129,7 @@ export async function toggleBanStatus(id, access) {
     const uid = profileData.UserID;
     if (!uid) {
       return {
-        error: `UserID not found on ${collectionName} doc ${profileId}.`,
+        error: `UserID not found on ${collectionName} doc ${id}.`,
       };
     }
 
