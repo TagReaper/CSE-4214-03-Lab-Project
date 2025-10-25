@@ -60,14 +60,29 @@ export async function approveSeller(sellerId) {
       return { error: "UserID (uid) not found in the seller document." };
     }
 
+    // update custom claims
+    const userRecord = await adminAuth.getUser(uid);
+    const customClaims = userRecord.customClaims || {};
+
+    const newClaims = {
+      ...customClaims,
+      role: "seller",
+      status: "approved_seller",
+    };
+
+    await adminAuth.setCustomUserClaims(uid, newClaims);
+
     // update db entry
-    await sellerDoc.update({
+    await sellerDocRef.update({
       validated: "true",
     });
   } catch (error) {
     console.error("Error approving seller:", error);
+    if (error.code === "auth/user-not-found") {
+      return { error: "Firebase Auth user not found. Cannot set claims." };
+    }
     return { error: "Failed to update the seller in the database." };
   }
   revalidatePath("/adminpanel");
-  return { success: `Product ${sellerId} has been approved.` };
+  return { success: `UserID: ${sellerId} has been approved to be a seller.` };
 }
