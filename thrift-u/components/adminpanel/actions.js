@@ -87,3 +87,69 @@ export async function approveSeller(sellerId) {
   revalidatePath("/adminpanel");
   return { success: `UserID: ${sellerId} has been approved to be a seller.` };
 }
+
+export async function toggleBanStatus(id, access) {
+  // permission check
+  //   try {
+  //     await verifyUserAndCheckRole("admin");
+  //   } catch (error) {
+  //     return { error: error.message };
+  //   }
+  if (!id) {
+    return { error: "User ID is required." };
+  }
+
+  let collectionName;
+  if (access === 1) {
+    collectionName = "Seller";
+  } else if (access === 2) {
+    collectionName = "Buyer";
+  } else {
+    return { error: "Invalid access type provided." };
+  }
+
+  try {
+    // pull from db
+    const profileDocRef = adminDb.collection(collectionName).doc(profileId);
+    const profileDoc = await profileDocRef.get();
+
+    if (!profileDoc.exists) {
+      return { error: "Seller/Buyer document not found." };
+    }
+
+    const profileData = profileDoc.data();
+    const currentBannedStatus = profileData.banned || false;
+    const newBannedStatus = !currentBannedStatus;
+
+    // get user id from document
+    const uid = profileData.UserID;
+    if (!uid) {
+      return {
+        error: `UserID not found on ${collectionName} doc ${profileId}.`,
+      };
+    }
+
+    // update document banned status
+    await profileDocRef.update({
+      banned: newBannedStatus,
+    });
+
+    // update main document
+    await adminDb.collection("User").doc(uid).update({
+      banned: newBannedStatus,
+    });
+
+    // update firebase auth disabled status
+    await adminAuth.updateUser(uid, {
+      disabled: newBannedStatus,
+    });
+
+    return {
+      success: `User has been ${newBannedStatus ? "banned" : "unbanned"}.`,
+      newBannedStatus: newBannedStatus,
+    };
+  } catch (error) {
+    console.error("Error toggling ban status:", error);
+    return { error: "A server error occurred." };
+  }
+}
