@@ -83,13 +83,23 @@ const ListUsers = () => {
     const result = await approveSeller(sellerUid);
 
     if (result.success) {
+      //manually update lists instead of refreshing old data
       alert(result.message || "Seller approved!");
-      await fetchItems();
+      const approvedUser = sellerPendList.find((user) => user.id === sellerUid);
+      if (approvedUser) {
+        //move seller from pending to approved list
+        setSPList((currentList) =>
+          currentList.filter((user) => user.id !== sellerUid)
+        );
+        setSList((currentList) => [approvedUser, ...currentList]);
+      } else {
+        await fetchUsers(); //go back to fetching regularly if error
+      }
     } else {
       alert(`Error: ${result.message || "Failed to approve seller."}`);
     }
 
-    setisApproving(null);
+    setisApproving(false);
   };
 
   if (listLoading) {
