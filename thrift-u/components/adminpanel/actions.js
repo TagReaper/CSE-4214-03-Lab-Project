@@ -1,6 +1,6 @@
 "use server";
 import { adminDb, adminAuth } from "@/firebase/adminApp";
-import { verifyUserAndCheckRole } from "@/lib/auth";
+//import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function approveProduct(productId) {
@@ -45,7 +45,7 @@ export async function approveSeller(sellerId) {
     return { error: "Seller ID is required." };
   }
 
-  // pull product from db
+  // pull seller from db
   try {
     const sellerDocRef = adminDb.collection("Seller").doc(sellerId);
     const sellerDoc = await sellerDocRef.get();
@@ -83,6 +83,7 @@ export async function approveSeller(sellerId) {
     }
     return { error: "Failed to update the seller in the database." };
   }
+
   revalidatePath("/adminpanel");
   return { success: `UserID: ${sellerId} has been approved to be a seller.` };
 }
