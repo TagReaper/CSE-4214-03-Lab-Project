@@ -4,8 +4,7 @@
 import { useState, useEffect } from "react";
 import FireData from "../../firebase/clientApp";
 import { collection, doc, getDoc, getDocs } from "@firebase/firestore";
-import BanUser from "./banUser";
-import { approveSeller } from "./actions";
+import { approveSeller, toggleBanStatus } from "./actions";
 
 const ListUsers = () => {
   const [buyerList, setBList] = useState([]);
@@ -13,7 +12,7 @@ const ListUsers = () => {
   const [sellerPendList, setSPList] = useState([]);
   const [listLoading, setListLoading] = useState(true);
   const [isApproving, setisApproving] = useState(null);
-
+  const [isBanning, setisBanning] = useState(null);
   const fetchItems = async () => {
     setListLoading(true);
     try {
@@ -43,6 +42,7 @@ const ListUsers = () => {
           ...docRef.data(),
           id: sellers[index].UserID,
           SellerID: sellers[index].id,
+          banned: sellers[index].banned || false,
         };
 
         if (sellers[index].validated == true) {
@@ -61,6 +61,7 @@ const ListUsers = () => {
           ...docRef.data(),
           id: buyers[index].UserID,
           BuyerID: buyers[index].id,
+          banned: buyers[index].banned || false,
         });
       }
       setBList(buyerListTemp);
@@ -99,7 +100,39 @@ const ListUsers = () => {
       alert(`Error: ${result.message || "Failed to approve seller."}`);
     }
 
-    setisApproving(false);
+    setisApproving(null);
+  };
+
+  const handleBan = async (id, access) => {
+    setisBanning(id);
+    const result = await toggleBanStatus(id, access);
+
+    if (result.success) {
+      // Manually update the state
+      if (access === 1) {
+        // Seller
+        setSList((currentList) =>
+          currentList.map((user) =>
+            user.SellerID === id
+              ? { ...user, banned: result.newBannedStatus }
+              : user
+          )
+        );
+      } else {
+        // Buyer
+        setBList((currentList) =>
+          currentList.map((user) =>
+            user.BuyerID === id
+              ? { ...user, banned: result.newBannedStatus }
+              : user
+          )
+        );
+      }
+    } else {
+      alert(`Error: ${result.error}`);
+    }
+
+    setisBanning(null);
   };
 
   if (listLoading) {
@@ -125,7 +158,18 @@ const ListUsers = () => {
             <span className="center"> {item.email} </span>
             <span></span>
             <span className="center">
-              <BanUser id={item.BuyerID} access={2} />
+              <button
+                onClick={() => handleBan(item.BuyerID, 2)}
+                disabled={isBanning != null}
+                className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
+                  ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
+              >
+                {isBanning === item.BuyerID
+                  ? "..."
+                  : item.banned
+                  ? "UN-BAN"
+                  : "BAN"}
+              </button>
             </span>
           </li>
         ))}
@@ -144,7 +188,18 @@ const ListUsers = () => {
             <span className="center"> {item.email} </span>
             <span></span>
             <span className="center">
-              <BanUser id={item.SellerID} access={1} />
+              <button
+                onClick={() => handleBan(item.SellerID, 1)}
+                disabled={isBanning != null}
+                className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
+                  ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
+              >
+                {isBanning === item.SellerID
+                  ? "..."
+                  : item.banned
+                  ? "UN-BAN"
+                  : "BAN"}
+              </button>
             </span>
           </li>
         ))}
