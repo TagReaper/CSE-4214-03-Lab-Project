@@ -1,5 +1,5 @@
 "use server";
-import { adminDb } from "@/firebase/adminApp";
+import { adminDb, adminAuth } from "@/firebase/adminApp";
 import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -47,7 +47,18 @@ export async function approveSeller(sellerId) {
 
   // pull product from db
   try {
-    const sellerDoc = adminDb.collection("Seller").doc(sellerId);
+    const sellerDocRef = adminDb.collection("Seller").doc(sellerId);
+    const sellerDoc = await sellerDocRef.get();
+
+    if (!sellerDoc.exists) {
+      return { error: "Seller document not found." };
+    }
+
+    const uid = sellerDoc.data().UserID;
+
+    if (!uid) {
+      return { error: "UserID (uid) not found in the seller document." };
+    }
 
     // update db entry
     await sellerDoc.update({
