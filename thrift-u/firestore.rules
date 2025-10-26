@@ -26,11 +26,12 @@ service cloud.firestore {
       allow read: if request.auth != null;
 
       // sellers can create products only if they match the seller id in the request
-      allow create: if (request.auth.token.role == 'seller' && request.auth.uid == request.resource.data.sellerId);
+      allow create: if (request.auth.token.role == 'seller' && request.auth.token.status == 'approved_seller' && request.auth.uid == request.resource.data.sellerId);
 
       // admins can update any product
       // approved sellers can update their own products
-      allow update: if request.auth.token.role == 'admin'|| (request.auth.token.role == 'seller' && request.auth.token.status == 'approved_seller' && request.auth.uid == resource.data.sellerId);
+      allow update: if request.auth.token.role == 'admin'|| (request.auth.token.role == 'seller' && request.auth.token.status == 'approved_seller' &&
+        request.auth.uid == resource.data.sellerId);
       }
   }
 }
