@@ -11,8 +11,6 @@ export async function POST() {
     cookieStore.set("altID", `${altId}`);
     cookieStore.set("accessLevel", `${access}`);
 
-    console.log(cookieStore);
-
     return new Response('success',{
         status: 200
     })

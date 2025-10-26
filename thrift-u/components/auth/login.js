@@ -26,7 +26,7 @@ const Login = () => {
 
         //Readded due to route creation
         const idToken = await credential.user.getIdToken();
-        await fetch("/api/login", { //send token to api route to set cookie
+        await fetch("/api/auth", { //send token to api route to set cookie
             method: "POST",
             headers: {
                 Authorization: `${idToken}`,
