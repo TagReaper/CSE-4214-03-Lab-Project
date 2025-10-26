@@ -1,9 +1,36 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    // user rules
+    match /User/{userId} {
+      // user can create a new user document if the userid matches their own userid
+      allow create: if request.auth.uid == userId;
+      // user can read their own document
+      allow read: if request.auth.uid == userId;
     }
+    // buyer rules
+    match /Buyer/{buyerId} {
+      // user can create a new seller document if the userid matches their own userid
+      allow create: if request.auth.uid == request.resource.data.UserID;
+      allow read: if request.auth.uid == resource.data.UserID;
+    }
+    // seller rules
+    match /Seller/{sellerId} {
+      // user can create a new seller document if the userid matches their own userid
+      allow create: if request.auth.uid == request.resource.data.UserID;
+      allow read: if request.auth.token.role == 'admin';
+    }
+    // inventory rules
+      match /Inventory/{productId} {
+      // any authenticated user can read
+      allow read: if request.auth != null;
+
+      // sellers can create products only if they match the seller id in the request
+      allow create: if (request.auth.token.role == 'seller' && request.auth.uid == request.resource.data.sellerId);
+
+      // admins can update any product
+      // approved sellers can update their own products
+      allow update: if request.auth.token.role == 'admin'|| (request.auth.token.role == 'seller' && request.auth.token.status == 'approved_seller' && request.auth.uid == resource.data.sellerId);
+      }
   }
 }
