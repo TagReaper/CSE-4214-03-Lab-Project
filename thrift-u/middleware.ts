@@ -2,12 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest} from 'next/server.js';
 import FireData from "./firebase/clientApp";
 
+
 export function middleware(request: NextRequest){
-    console.log(FireData.auth)
+    console.log("Fire DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", FireData.auth)
     const response = NextResponse.next();
     const token = request.cookies.get("idToken");
-
-    const decoded = tokenVerification(token)
     interface CustomClaims {
         role?: ('admin' | 'seller' | 'buyer')[];
         status?: 'pending_seller' | 'approved_seller';
@@ -15,7 +14,7 @@ export function middleware(request: NextRequest){
 
     if (token != undefined){
         if (token.value != null){
-            console.log("TokenID: ", decoded);
+            console.log("TokenID: ", token);
         } else {
             console.log("User is logged out!");
         }
