@@ -36,6 +36,7 @@ admin.initializeApp({
 exports.setCustomClaims = functions.https.onCall(async (data) => {
   const uid = data.uid;
   const claims = data.claims;
+  console.log(uid, claims)
 
   await admin.auth().setCustomUserClaims(uid, claims)
 })

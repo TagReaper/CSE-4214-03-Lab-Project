@@ -6,6 +6,7 @@ import FireData from '../../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 import {doc, getDoc } from '@firebase/firestore'
+import {httpsCallable} from 'firebase/functions'
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -23,6 +24,49 @@ const Login = () => {
         const userRef = await getDoc(doc(FireData.db, 'User', credential.user.uid))
         console.log('User logged in:', credential.user);
         console.log(userRef.data())
+
+        const setClaims = httpsCallable(
+                FireData.functions,
+                "setCustomClaims",
+        );
+
+        if (userRef.data().accessLevel == "Buyer"){
+            await setClaims({
+                uid: credential.uid,
+                claims: {
+                    role: "Buyer",
+                    status: "null"
+                }
+            });
+        } else if (userRef.data().accessLevel == "Admin"){
+            await setClaims({
+                uid: credential.uid,
+                claims: {
+                    role: "Admin",
+                    status: "null"
+                }
+            });
+        } else if (userRef.data().accessLevel == "Seller"){
+            sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+            if (sellerRef.data().validated == true){
+                await setClaims({
+                uid: credential.uid,
+                claims: {
+                    role: "Seller",
+                    status: "approved"
+                }
+            });
+            } else {
+                await setClaims({
+                uid: credential.uid,
+                claims: {
+                    role: "Seller",
+                    status: "pending"
+                }
+            });
+            }
+        }
+
 
         //Readded due to route creation
         const idToken = await credential.user.getIdToken();
