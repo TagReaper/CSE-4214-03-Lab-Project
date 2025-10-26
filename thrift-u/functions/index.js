@@ -33,6 +33,14 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+exports.setCustomClaims = functions.https.onCall(async (data) => {
+  const uid = data.uid;
+  const claims = data.claims;
+
+  await admin.auth().setCustomUserClaims(uid, claims)
+})
+
+
 
 // exports.helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});
