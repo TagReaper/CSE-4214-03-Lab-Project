@@ -30,8 +30,6 @@ const Login = () => {
             method: "POST",
             headers: {
                 Authorization: `${idToken}`,
-                AccessLevel: `${userRef.data().accessLevel}`,
-                AltID: "AlternateID"//`${userRef.data().altID}`
             },
         });
 

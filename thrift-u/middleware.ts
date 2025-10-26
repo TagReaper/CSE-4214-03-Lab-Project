@@ -1,22 +1,25 @@
 import { NextResponse } from "next/server";
 import type { NextRequest} from 'next/server.js';
+import FireData from "./firebase/clientApp";
 
 export function middleware(request: NextRequest){
+    console.log(FireData.auth)
     const response = NextResponse.next();
-    const token = request.cookies.get("idToken")
+    const token = request.cookies.get("idToken");
 
+    const decoded = tokenVerification(token)
     interface CustomClaims {
-    role?: ('admin' | 'seller' | 'buyer')[];
-    status?: 'pending_seller' | 'approved_seller';
+        role?: ('admin' | 'seller' | 'buyer')[];
+        status?: 'pending_seller' | 'approved_seller';
     }
 
     if (token != undefined){
         if (token.value != null){
-            console.log("TokenID: ", token.value)
+            console.log("TokenID: ", decoded);
         } else {
-            console.log("User is logged out!")
+            console.log("User is logged out!");
         }
     } else {
-        console.log("User has no cookies")
+        console.log("User has no cookies");
     }
 }
