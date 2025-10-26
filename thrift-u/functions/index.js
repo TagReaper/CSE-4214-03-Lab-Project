@@ -12,6 +12,7 @@ const {onRequest} = require("firebase-functions/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
+const functions = require("firebase-functions")
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
