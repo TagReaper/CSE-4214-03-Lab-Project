@@ -26,7 +26,9 @@ export default function Home() {
       Home Page
       <button className="loginbutton" onClick={async () => {
           await FireData.auth.signOut();
-          sessionStorage.removeItem('user');
+          await fetch("/api/auth", { //send token to api route to set cookie
+            method: "POST",
+        });
       }}>Sign Out</button>
       </div>
 }
