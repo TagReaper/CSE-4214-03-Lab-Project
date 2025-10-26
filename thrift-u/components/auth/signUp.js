@@ -58,8 +58,7 @@ const SignUp = () => {
             const userCredential = await createUserWithEmailAndPassword(FireData.auth, email, password);
             const user = userCredential.user;
             console.log('account created', user.uid);
-            await setDoc(doc(FireData.db, 'User', user.uid), {//move to below sellerReq if Alt ID gets the green light
-                //altID: altRef.id
+            await setDoc(doc(FireData.db, 'User', user.uid), {
                 email: email,
                 firstName: firstName,
                 lastName: lastName,
@@ -70,8 +69,8 @@ const SignUp = () => {
 
             if (sellerReq) {
                 const confirmed = confirm("Are you sure you want to request a seller account?");
-                if (confirmed) {//make a const \/ if Alt ID gets the green light
-                await addDoc(collection(FireData.db, 'Seller'), {
+                if (confirmed) {
+                await setDoc(doc(FireData.db, 'Seller', user.uid), {
                     UserID: user.uid,
                     banned: false,
                     validated: false,
@@ -81,8 +80,8 @@ const SignUp = () => {
                 } else {
                 setSeller(false);
                 }
-            } else {//make a const \/ if Alt ID gets the green light
-                await addDoc(collection(FireData.db, 'Buyer'), {
+            } else {
+                await setDoc(doc(FireData.db, 'Buyer', user.uid), {
                 UserID: user.uid,
                 banned: false,
                 address: "",
