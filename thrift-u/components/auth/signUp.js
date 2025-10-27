@@ -61,7 +61,6 @@ const SignUp = () => {
             const parts = idToken.split('.');
             var payload = JSON.parse(atob(parts[1]));
 
-            console.log('account created', user.uid);
             await setDoc(doc(FireData.db, 'User', user.uid), {
                 email: email,
                 firstName: firstName,
@@ -81,7 +80,6 @@ const SignUp = () => {
                     validated: false,
                     Flags: 0,
                 });
-                console.log('Seller record created');
                 } else {
                     setSeller(false);
                 }
@@ -96,7 +94,6 @@ const SignUp = () => {
                 zip: "",
                 numOrders: 0,
                 });
-                console.log('Buyer record created');
             }
 
             payload = btoa(JSON.stringify(payload))

@@ -23,8 +23,6 @@ const Login = () => {
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         const userRef = await getDoc(doc(FireData.db, 'User', credential.user.uid))
-        console.log('User logged in:', credential.user);
-        console.log(userRef.data())
 
         var idToken = await credential.user.getIdToken();
         const parts = idToken.split('.');
