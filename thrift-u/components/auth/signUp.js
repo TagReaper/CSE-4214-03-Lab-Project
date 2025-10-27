@@ -57,6 +57,10 @@ const SignUp = () => {
             }
             const userCredential = await createUserWithEmailAndPassword(FireData.auth, email, password);
             const user = userCredential.user;
+            var idToken = await user.getIdToken();
+            const parts = idToken.split('.');
+            var payload = JSON.parse(atob(parts[1]));
+
             console.log('account created', user.uid);
             await setDoc(doc(FireData.db, 'User', user.uid), {
                 email: email,
@@ -68,21 +72,23 @@ const SignUp = () => {
             });
 
             if (sellerReq) {
-                const confirmed = confirm("Are you sure you want to request a seller account?");
+                const confirmed = await confirm("Are you sure you want to request a seller account?");
                 if (confirmed) {
-                await setDoc(doc(FireData.db, 'Seller', user.uid), {
-                    UserID: user.uid,
+                    payload.role = "Seller"
+                    payload.status = "pending"
+                    await setDoc(doc(FireData.db, 'Seller', user.uid), {
                     banned: false,
                     validated: false,
                     Flags: 0,
                 });
                 console.log('Seller record created');
                 } else {
-                setSeller(false);
+                    setSeller(false);
                 }
             } else {
+                payload.role = "Buyer"
+                payload.status = "null"
                 await setDoc(doc(FireData.db, 'Buyer', user.uid), {
-                UserID: user.uid,
                 banned: false,
                 address: "",
                 city: "",
@@ -93,8 +99,18 @@ const SignUp = () => {
                 console.log('Buyer record created');
             }
 
+            payload = btoa(JSON.stringify(payload))
+            idToken = parts[0]+"."+payload+"."+parts[2]
+
+            await fetch("/api/auth", { //send token to api route to set cookie
+            method: "POST",
+            headers: {
+                Authorization: `${idToken}`,
+            },
+            });
+
             alert('Account created successfully');
-            router.push('/login');
+            router.push('/');
 
         } catch (error) {
         console.error('error creating account:', error);

@@ -7,6 +7,7 @@ import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 import {doc, getDoc } from '@firebase/firestore'
 import {httpsCallable} from 'firebase/functions'
+import { match } from 'assert';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -25,51 +26,35 @@ const Login = () => {
         console.log('User logged in:', credential.user);
         console.log(userRef.data())
 
-        const setClaims = httpsCallable(
-                FireData.functions,
-                "setCustomClaims",
-        );
+        var idToken = await credential.user.getIdToken();
+        const parts = idToken.split('.');
+        const access = userRef.data().accessLevel
+        var payload = JSON.parse(atob(parts[1]));
 
-        if (userRef.data().accessLevel == "Buyer"){
-            await setClaims({
-                uid: credential.uid,
-                claims: {
-                    role: "Buyer",
-                    status: "null"
-                }
-            });
-        } else if (userRef.data().accessLevel == "Admin"){
-            await setClaims({
-                uid: credential.uid,
-                claims: {
-                    role: "Admin",
-                    status: "null"
-                }
-            });
-        } else if (userRef.data().accessLevel == "Seller"){
-            sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
-            if (sellerRef.data().validated == true){
-                await setClaims({
-                uid: credential.uid,
-                claims: {
-                    role: "Seller",
-                    status: "approved"
-                }
-            });
-            } else {
-                await setClaims({
-                uid: credential.uid,
-                claims: {
-                    role: "Seller",
-                    status: "pending"
-                }
-            });
-            }
+        switch(access) {
+            case "Admin":
+                payload.role = "Admin"
+                payload.status = "null"
+                break;
+            case "Buyer":
+                payload.role = "Buyer"
+                payload.status = "null"
+                break;
+            case "Seller":
+                payload.role = "Seller"
+                payload.status = "Pending Check"
+                // const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+                // if (sellerRef.data().validated){
+                //     payload.status = "approved"
+                // } else {
+                //     payload.status = "pending"
+                // }
+                break;
         }
 
+        payload = btoa(JSON.stringify(payload))
+        idToken = parts[0]+"."+payload+"."+parts[2]
 
-        //Readded due to route creation
-        const idToken = await credential.user.getIdToken();
         await fetch("/api/auth", { //send token to api route to set cookie
             method: "POST",
             headers: {
