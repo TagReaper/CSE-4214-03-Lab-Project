@@ -1,12 +1,12 @@
 "use server";
 import { adminDb, adminAuth } from "@/firebase/adminApp";
-//import { verifyUserAndCheckRole } from "@/lib/auth";
+//import { verifyRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function approveProduct(productId) {
   // permission check
   //   try {
-  //     await verifyUserAndCheckRole("admin");
+  //     await verifyRole("admin");
   //   } catch (error) {
   //     return { error: error.message };
   //   }
@@ -37,7 +37,7 @@ export async function approveProduct(productId) {
 export async function approveSeller(sellerId) {
   // permission check
   //   try {
-  //     await verifyUserAndCheckRole("admin");
+  //     await verifyRole("admin");
   //   } catch (error) {
   //     return { error: error.message };
   //   }
@@ -91,7 +91,7 @@ export async function approveSeller(sellerId) {
 export async function toggleBanStatus(id, access) {
   // permission check
   //   try {
-  //     await verifyUserAndCheckRole("admin");
+  //     await verifyRole("admin");
   //   } catch (error) {
   //     return { error: error.message };
   //   }
