@@ -1,5 +1,4 @@
 "use server";
-import { adminDb, adminAuth } from "@/firebase/adminApp";
 import { getDoc, doc, updateDoc} from "@firebase/firestore";
 import FireData from "@/firebase/clientApp";
 //import { verifyUserAndCheckRole } from "@/lib/auth";
@@ -19,10 +18,8 @@ export async function approveProduct(productId) {
 
   // pull product from db
   try {
-    const productDoc = adminDb.collection("Inventory").doc(productId);
-
     // update db entry
-    await productDoc.update({
+    await updateDoc(doc(FireData.db, "Inventory", productId),{
       approved: "true",
     });
   } catch (error) {
@@ -116,9 +113,7 @@ export async function toggleBanStatus(id, access) {
 
   try {
     // pull from db
-    const profileDocRef = adminDb.collection(collectionName).doc(id);
-    const profileDoc = await profileDocRef.get();
-
+    const profileDoc = await getDoc(doc(FireData.db, collectionName, id))
     if (!profileDoc.exists) {
       return { error: "Seller/Buyer document not found." };
     }
@@ -128,7 +123,7 @@ export async function toggleBanStatus(id, access) {
     const newBannedStatus = !currentBannedStatus;
 
     // get user id from document
-    const uid = profileData.UserID;
+    const uid = id;
     if (!uid) {
       return {
         error: `UserID not found on ${collectionName} doc ${id}.`,
@@ -136,18 +131,8 @@ export async function toggleBanStatus(id, access) {
     }
 
     // update document banned status
-    await profileDocRef.update({
+    await updateDoc(doc(FireData.db, collectionName, id),{
       banned: newBannedStatus,
-    });
-
-    // update main document
-    await adminDb.collection("User").doc(uid).update({
-      banned: newBannedStatus,
-    });
-
-    // update firebase auth disabled status
-    await adminAuth.updateUser(uid, {
-      disabled: newBannedStatus,
     });
 
     return {

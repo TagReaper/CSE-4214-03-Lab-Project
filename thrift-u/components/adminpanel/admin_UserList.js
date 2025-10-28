@@ -110,7 +110,7 @@ const ListUsers = () => {
         // Seller
         setSList((currentList) =>
           currentList.map((user) =>
-            user.SellerID === id
+            user.id
               ? { ...user, banned: result.newBannedStatus }
               : user
           )
@@ -119,7 +119,7 @@ const ListUsers = () => {
         // Buyer
         setBList((currentList) =>
           currentList.map((user) =>
-            user.BuyerID === id
+            user.id === id
               ? { ...user, banned: result.newBannedStatus }
               : user
           )
@@ -156,12 +156,12 @@ const ListUsers = () => {
             <span></span>
             <span className="center">
               <button
-                onClick={() => handleBan(item.BuyerID, 2)}
+                onClick={() => handleBan(item.id, 2)}
                 disabled={isBanning != null}
                 className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
-                {isBanning === item.BuyerID
+                {isBanning === item.id
                   ? "..."
                   : item.banned
                   ? "UN-BAN"
@@ -186,12 +186,12 @@ const ListUsers = () => {
             <span></span>
             <span className="center">
               <button
-                onClick={() => handleBan(item.SellerID, 1)}
+                onClick={() => handleBan(item.id, 1)}
                 disabled={isBanning != null}
                 className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
-                {isBanning === item.SellerID
+                {isBanning === item.id
                   ? "..."
                   : item.banned
                   ? "UN-BAN"
