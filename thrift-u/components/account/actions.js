@@ -2,3 +2,47 @@
 import { adminDb } from "@/firebase/adminApp";
 import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+
+export async function updateAddressAction(input) {
+  let authenticatedUser;
+  try {
+    authenticatedUser = await getAuthUser();
+  } catch (error) {
+    return { error: error.message };
+  }
+
+  const address = {
+    Address: input.get("address"),
+    City: input.get("city"),
+    State: input.get("state"),
+    ZipCode: input.get("zipCode"),
+  };
+
+  try {
+    // find buyer doc that matches the authenticated user's uid
+    const buyerQuery = adminDb
+      .collection("Buyer")
+      .where("UserID", "==", authenticatedUser.uid)
+      .limit(1);
+
+    const buyerSnapshot = await buyerQuery.get();
+
+    if (buyerSnapshot.empty) {
+      return { error: "Buyer profile not found for this user." };
+    }
+    // update the address fields
+    const buyerDocRef = buyerSnapshot.docs[0].ref;
+    await buyerDocRef.update({
+      Address: address.Address,
+      City: address.City,
+      State: address.State,
+      ZipCode: address.ZipCode,
+    });
+  } catch (error) {
+    console.error("Error updating address:", error);
+    return { error: "Failed to update the address in the database." };
+  }
+
+  revalidatePath("/account/addresses");
+  return { success: "Address has been updated." };
+}
