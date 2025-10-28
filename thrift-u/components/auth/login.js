@@ -6,6 +6,8 @@ import FireData from '../../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 import {doc, getDoc } from '@firebase/firestore'
+import {httpsCallable} from 'firebase/functions'
+import { match } from 'assert';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -21,11 +23,36 @@ const Login = () => {
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
         const userRef = await getDoc(doc(FireData.db, 'User', credential.user.uid))
-        console.log('User logged in:', credential.user);
-        console.log(userRef.data())
 
-        //Readded due to route creation
-        const idToken = await credential.user.getIdToken();
+        var idToken = await credential.user.getIdToken();
+        const parts = idToken.split('.');
+        const access = userRef.data().accessLevel
+        var payload = JSON.parse(atob(parts[1]));
+
+        switch(access) {
+            case "Admin":
+                payload.role = "Admin"
+                payload.status = "null"
+                break;
+            case "Buyer":
+                payload.role = "Buyer"
+                payload.status = "null"
+                break;
+            case "Seller":
+                payload.role = "Seller"
+                payload.status = "Pending Check"
+                // const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+                // if (sellerRef.data().validated){
+                //     payload.status = "approved"
+                // } else {
+                //     payload.status = "pending"
+                // }
+                break;
+        }
+
+        payload = btoa(JSON.stringify(payload))
+        idToken = parts[0]+"."+payload+"."+parts[2]
+
         await fetch("/api/auth", { //send token to api route to set cookie
             method: "POST",
             headers: {

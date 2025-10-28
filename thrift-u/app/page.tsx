@@ -15,7 +15,6 @@ export default function Home() {
 
   useEffect(() => {
     // Pushed to login if they aren't logged in
-    console.log('Current user:', user);
     if (!user) {
       router.push("/login");
     }
