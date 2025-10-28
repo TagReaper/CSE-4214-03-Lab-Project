@@ -6,8 +6,6 @@ import FireData from '../../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
 import {doc, getDoc } from '@firebase/firestore'
-import {httpsCallable} from 'firebase/functions'
-import { match } from 'assert';
 
 const Login = () => {
     const [email, setEmail] = useState('');
