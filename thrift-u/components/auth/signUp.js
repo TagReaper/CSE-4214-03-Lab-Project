@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword, validatePassword  } from "firebase/auth";
@@ -7,34 +7,34 @@ import { doc, setDoc } from '@firebase/firestore';
 import { useRouter }  from 'next/navigation'
 
 const UIPasswordValidation = (password) => {
-    return {
-        minLength: password.length >= 10,
-        hasLowercase: /[a-z]/.test(password),
-        hasUppercase: /[A-Z]/.test(password),
-        hasNumber: /[0-9]/.test(password),
-        hasSpecialChar: /[!@#$%^&*]/.test(password),
-    };
+  return {
+    minLength: password.length >= 10,
+    hasLowercase: /[a-z]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[!@#$%^&*]/.test(password),
+  };
 };
 
 const SignUp = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPass] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [validation, setValidation] = useState({
-        minLength: false,
-        hasLowercase: false,
-        hasUppercase: false,
-        hasNumber: false,
-        hasSpecialChar: false,
-        isValid: false,
-    });
-    const [firstName, setFirst] = useState('');
-    const [lastName, setLast] = useState('');
-    const [sellerReq, setSeller] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const serverTime = new Date();
-    const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPass] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [validation, setValidation] = useState({
+    minLength: false,
+    hasLowercase: false,
+    hasUppercase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+    isValid: false,
+  });
+  const [firstName, setFirst] = useState("");
+  const [lastName, setLast] = useState("");
+  const [sellerReq, setSeller] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const serverTime = new Date();
+  const router = useRouter();
 
     useEffect(() => {
         setValidation(UIPasswordValidation(password));
@@ -122,73 +122,95 @@ const SignUp = () => {
             setError("Password is too weak. Please choose a stronger password.");
             break;
         default:
-            setError("Error creating account, please try again. " + error.code);
-            }
-        }
-        finally {
-            setLoading(false);
-        }
+          setError("Error creating account, please try again. " + error.code);
+      }
+    } finally {
+      setLoading(false);
     }
-    return (
-        <form className='m-5 flex flex-col' onSubmit={handleSubmit}>
-            <input className='m-1 text-black border-1 rounded border-black' required
-                type = 'text'
-                value = {firstName}
-                onChange={(e) => setFirst(e.target.value)}
-                placeholder = "First name"
-            />
-            <input className='m-1 text-black border-1 rounded border-black' required
-                type = 'text'
-                value = {lastName}
-                onChange={(e) => setLast(e.target.value)}
-                placeholder = "Last name"
-            />
-            <input className='m-1 text-black border-1 rounded border-black' required
-                type = 'email'
-                value = {email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder = "Email"
-            />
-            <input className='m-1 text-black border-1 rounded border-black' required
-                type = 'password'
-                value = {password}
-                onChange={(e) => setPass(e.target.value)}
-                placeholder = "Password (10+ characters)"
-            />
-            <div className="m-1 p-2 text-sm">
-                <ul>
-                    <li style={{ color: validation.minLength ? 'green' : 'red' }}> At least 10 characters</li>
-                    <li style={{ color: validation.hasLowercase ? 'green' : 'red' }}> A lowercase letter</li>
-                    <li style={{ color: validation.hasUppercase ? 'green' : 'red' }}>An uppercase letter</li>
-                    <li style={{ color: validation.hasNumber ? 'green' : 'red' }}> A number</li>
-                    <li style={{ color: validation.hasSpecialChar ? 'green' : 'red' }}>A special character (!@#$...)</li>
-                </ul>
-            </div>
-            <input className='m-1 text-black border-1 rounded border-black' required
-                type = 'password'
-                value = {confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder = "Confirm password"
-            />
-            <span className="m-1 text-black border-1 rounded border-black">
-                Request Seller Account?&nbsp;
-                <input
-                    type="checkbox"
-                    checked={sellerReq}
-                    onChange={(e) => setSeller(e.target.checked)}
-                />
-            </span>
-            {error && <p className="m-1 text-red-500">{error}</p>}
-            &nbsp;&nbsp;
-            <button
-                className='m-1 text-black border-2 rounded border-black disabled:opacity-50'
-                type='submit'
-                disabled={loading}
-            >
-            {loading ? 'Creating Account...' : 'Confirm'}
-            </button>
-        </form>
-    )
-}
+  };
+  return (
+    <form className="m-5 flex flex-col" onSubmit={handleSubmit}>
+      <input
+        className="m-1 text-black border-1 rounded border-black"
+        required
+        type="text"
+        value={firstName}
+        onChange={(e) => setFirst(e.target.value)}
+        placeholder="First name"
+      />
+      <input
+        className="m-1 text-black border-1 rounded border-black"
+        required
+        type="text"
+        value={lastName}
+        onChange={(e) => setLast(e.target.value)}
+        placeholder="Last name"
+      />
+      <input
+        className="m-1 text-black border-1 rounded border-black"
+        required
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+      />
+      <input
+        className="m-1 text-black border-1 rounded border-black"
+        required
+        type="password"
+        value={password}
+        onChange={(e) => setPass(e.target.value)}
+        placeholder="Password (10+ characters)"
+      />
+      <div className="m-1 p-2 text-sm">
+        <ul>
+          <li style={{ color: validation.minLength ? "green" : "red" }}>
+            {" "}
+            At least 10 characters
+          </li>
+          <li style={{ color: validation.hasLowercase ? "green" : "red" }}>
+            {" "}
+            A lowercase letter
+          </li>
+          <li style={{ color: validation.hasUppercase ? "green" : "red" }}>
+            An uppercase letter
+          </li>
+          <li style={{ color: validation.hasNumber ? "green" : "red" }}>
+            {" "}
+            A number
+          </li>
+          <li style={{ color: validation.hasSpecialChar ? "green" : "red" }}>
+            A special character (!@#$...)
+          </li>
+        </ul>
+      </div>
+      <input
+        className="m-1 text-black border-1 rounded border-black"
+        required
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="Confirm password"
+      />
+      <span className="m-1 text-black border-1 rounded border-black">
+        Request Seller Account?&nbsp;
+        <input
+          type="checkbox"
+          checked={sellerReq}
+          onChange={(e) => setSeller(e.target.checked)}
+        />
+      </span>
+      {error && <p className="m-1 text-red-500">{error}</p>}
+      &nbsp;&nbsp;
+      <button
+        className="m-1 text-black border-2 rounded border-black disabled:opacity-50"
+        type="submit"
+        disabled={loading}
+      >
+        {loading ? "Creating Account..." : "Confirm"}
+      </button>
+    </form>
+  );
+};
 
-export default SignUp
+export default SignUp;
