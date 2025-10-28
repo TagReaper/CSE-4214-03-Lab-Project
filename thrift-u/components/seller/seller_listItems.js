@@ -32,32 +32,57 @@ const SellerListItems = ({sellerId}) => {
                         sellerPendingTemp.push(items[index])
                     }
             }
+            setSellerItems(sellerItemsTemp)
+            setSellerPendingItems(sellerPendingTemp)
         }
 
         assignItems()
-    }, [items])
+    }, [sellerId, items])
 
-    return (
-        <div>
-            <h1>Products</h1>
-            <div className='flex flex-wrap justify-evenly border-b-8 border-dashed'>
-                {sellerItems.map((item) => (
-                    <div key={item.id}>
-                        <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
-                    </div>
-                ))}
+    if (sellerItems.length != 0){
+        return (
+            <div>
+                <h1>Products</h1>
+                <div className='flex flex-wrap justify-evenly border-b-8 border-dashed'>
+                    {sellerItems.map((item) => (
+                        <div key={item.id}>
+                            <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                        </div>
+                    ))}
+                </div>
+                <h1>Pending Products</h1>
+                <div className='flex flex-wrap justify-evenly'>
+                    {sellerPendingItems.map((item) => (
+                        <div key={item.id}>
+                            <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                        </div>
+                    ))}
+                    <RequestItem sellerId={sellerId}/>
+                </div>
             </div>
-            <h1>Pending Products</h1>
-            <div className='flex flex-wrap justify-evenly'>
-                {sellerPendingItems.map((item) => (
-                    <div key={item.id}>
-                        <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
-                    </div>
-                ))}
-                <RequestItem sellerId={sellerId}/>
+        )
+    } else {
+        return (
+            <div>
+                <h1>Products</h1>
+                <div className='flex flex-wrap justify-evenly border-b-8 border-dashed'>
+                    <p className='text-2xl font-bold mb-5'>
+                        No Approved Products
+                    </p>
+                </div>
+                <h1>Pending Products</h1>
+                <div className='flex flex-wrap justify-evenly'>
+                    {sellerPendingItems.map((item) => (
+                        <div key={item.id}>
+                            <CompactItemListing itemId={item.id} image={''} price={item.price} productName={item.name} quantity={item.quantity}/>
+                        </div>
+                    ))}
+                    <RequestItem sellerId={sellerId}/>
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
+
 }
 
 export default SellerListItems
