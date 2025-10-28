@@ -2,25 +2,19 @@
 
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import FireData from '../firebase/clientApp'
+import FireData from '../../firebase/clientApp'
 import { useRouter }  from 'next/navigation'
 import Link from "next/link";
-import {useAuthState} from "react-firebase-hooks/auth";
+import {doc, getDoc } from '@firebase/firestore'
+import {httpsCallable} from 'firebase/functions'
+import { match } from 'assert';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPass] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const router = useRouter()
-
-    //Check sign-in state
-    const [user] = useAuthState(FireData.auth);
-
-    //Pushed to home if they are signed in
-    if (user) {
-        router.push("/");
-    }
+    const router = useRouter();
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -28,16 +22,43 @@ const Login = () => {
         setLoading(true);
         try {
         const credential = await signInWithEmailAndPassword(FireData.auth, email, password);
-        console.log('User logged in:', credential.user);
+        const userRef = await getDoc(doc(FireData.db, 'User', credential.user.uid))
 
-        //Removed due to errors with token verification
-        /*const idToken = await credential.user.getIdToken();
-        await fetch("/api/login", { //send token to api route to set cookie
-            method: 'POST',
+        var idToken = await credential.user.getIdToken();
+        const parts = idToken.split('.');
+        const access = userRef.data().accessLevel
+        var payload = JSON.parse(atob(parts[1]));
+
+        switch(access) {
+            case "Admin":
+                payload.role = "Admin"
+                payload.status = "null"
+                break;
+            case "Buyer":
+                payload.role = "Buyer"
+                payload.status = "null"
+                break;
+            case "Seller":
+                payload.role = "Seller"
+                payload.status = "Pending Check"
+                // const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+                // if (sellerRef.data().validated){
+                //     payload.status = "approved"
+                // } else {
+                //     payload.status = "pending"
+                // }
+                break;
+        }
+
+        payload = btoa(JSON.stringify(payload))
+        idToken = parts[0]+"."+payload+"."+parts[2]
+
+        await fetch("/api/auth", { //send token to api route to set cookie
+            method: "POST",
             headers: {
-                Authorization: `Bearer ${idToken}`,
+                Authorization: `${idToken}`,
             },
-        }); */
+        });
 
         router.push("/"); //redirect to home page again
         } catch (error) {
