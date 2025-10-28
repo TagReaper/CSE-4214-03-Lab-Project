@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-array-constructor */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,14 +33,13 @@ const ListUsers = () => {
 
       for (let index = 0; index < sellers.length; index++) {
         const docRef = await getDoc(
-          doc(FireData.db, "User", sellers[index].UserID)
+          doc(FireData.db, "User", sellers[index].id)
         );
         if (!docRef.exists()) continue;
 
         const userData = {
           ...docRef.data(),
-          id: sellers[index].UserID,
-          SellerID: sellers[index].id,
+          id: sellers[index].id,
           banned: sellers[index].banned || false,
         };
 
@@ -53,14 +51,13 @@ const ListUsers = () => {
       }
       for (let index = 0; index < buyers.length; index++) {
         const docRef = await getDoc(
-          doc(FireData.db, "User", buyers[index].UserID)
+          doc(FireData.db, "User", buyers[index].id)
         );
         if (!docRef.exists()) continue;
 
         buyerListTemp.push({
           ...docRef.data(),
-          id: buyers[index].UserID,
-          BuyerID: buyers[index].id,
+          id: buyers[index].id,
           banned: buyers[index].banned || false,
         });
       }
