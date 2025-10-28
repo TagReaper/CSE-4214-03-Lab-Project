@@ -93,18 +93,19 @@ const SignUp = () => {
           "Are you sure you want to request a seller account?"
         );
         if (confirmed) {
-          await addDoc(collection(FireData.db, "Seller"), {
+          await setDoc(doc(FireData.db, "Seller", user.uid), {
             UserID: user.uid,
             banned: false,
             validated: false,
             Flags: 0,
           });
+
           console.log("Seller record created");
         } else {
           setSeller(false);
         }
       } else {
-        await addDoc(collection(FireData.db, "Buyer"), {
+        await setDoc(doc(FireData.db, "Buyer", user.uid), {
           UserID: user.uid,
           banned: false,
           address: "",
