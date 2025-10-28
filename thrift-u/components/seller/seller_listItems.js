@@ -22,9 +22,16 @@ const SellerListItems = ({sellerId}) => {
 
     useEffect(() => {
         const assignItems = async () => {
-            //if item.sellerID == sellerID
-                //if approved -> SellerItems
-                //else -> SellerPendingItems
+            var sellerItemsTemp = []
+            var sellerPendingTemp = []
+            for (let index = 0; index < items.length; index++) {
+                if (items[index].sellerId == sellerId)
+                    if (items[index].approved == true){
+                        sellerItemsTemp.push(items[index])
+                    } else {
+                        sellerPendingTemp.push(items[index])
+                    }
+            }
         }
 
         assignItems()

@@ -28,9 +28,9 @@ const ListUsers = () => {
         id: doc.id,
       }));
 
-      var sellerListTemp = new Array();
-      var sellerPendListTemp = new Array();
-      var buyerListTemp = new Array();
+      var sellerListTemp = []
+      var sellerPendListTemp = []
+      var buyerListTemp = []
 
       for (let index = 0; index < sellers.length; index++) {
         const docRef = await getDoc(
