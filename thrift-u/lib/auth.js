@@ -1,6 +1,25 @@
-import { getTokens } from "next-firebase-auth-edge";
-import { serverConfig } from "../config/config";
+//import { serverConfig } from "../config/config";
 import { cookies } from "next/headers";
+import { adminAuth } from "@/firebase/adminApp";
+
+const getDecodedToken = async () => {
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get("FireToken");
+
+  if (!sessionCookie) {
+    throw new Error("Unauthorized: You must be logged in.");
+  }
+
+  const token = sessionCookie.value;
+
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    return decodedToken;
+  } catch (error) {
+    console.error("Firebase Auth Error:", error.message);
+    throw new Error("Unauthorized: Session is invalid or expired.");
+  }
+};
 
 export const verifyRole = async (requiredRole) => {
   if (!requiredRole) {
@@ -9,36 +28,24 @@ export const verifyRole = async (requiredRole) => {
     );
   }
 
-  const tokens = await getTokens(cookies(), { ...serverConfig });
-  //no cookies returned
-  if (!tokens) {
-    throw new Error("Unauthorized: You must be logged in.");
-  }
-  //role doesn't match
-  if (tokens.decodedToken.role !== requiredRole) {
+  const decodedToken = await getDecodedToken();
+  // role doesn't match
+  if (decodedToken.role !== requiredRole) {
     throw new Error(
       `Forbidden: This action requires the "${requiredRole}" role.`
     );
   }
 
-  //seller status check
-  if (
-    requiredRole === "seller" &&
-    tokens.decodedToken.status !== "approved_seller"
-  ) {
+  // seller status check
+  if (requiredRole === "seller" && decodedToken.status !== "approved_seller") {
     throw new Error(`Forbidden: Seller account is not approved.`);
   }
 
-  return tokens.decodedToken;
+  return decodedToken;
 };
 
 export const getAuthUser = async () => {
-  const tokens = await getTokens(cookies(), { ...serverConfig });
+  const decodedToken = await getDecodedToken();
 
-  //no cookies returned
-  if (!tokens) {
-    throw new Error("Unauthorized: You must be logged in.");
-  }
-
-  return tokens.decodedToken;
+  return decodedToken;
 };
