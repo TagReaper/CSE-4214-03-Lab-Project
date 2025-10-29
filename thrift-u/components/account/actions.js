@@ -31,6 +31,7 @@ export async function updateAddressAction(previousState, formData) {
     const buyerSnapshot = await buyerQuery.get();
 
     if (buyerSnapshot.empty) {
+      console.error("No buyer profile found for user:", authenticatedUser.uid);
       return { error: "Buyer profile not found for this user." };
     }
 
