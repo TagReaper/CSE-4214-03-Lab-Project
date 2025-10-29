@@ -1,5 +1,6 @@
 "use server";
-import { adminDb, adminAuth } from "@/firebase/adminApp";
+import { getDoc, doc, updateDoc} from "@firebase/firestore";
+import FireData from "@/firebase/clientApp";
 //import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -17,11 +18,9 @@ export async function approveProduct(productId) {
 
   // pull product from db
   try {
-    const productDoc = adminDb.collection("Inventory").doc(productId);
-
     // update db entry
-    await productDoc.update({
-      approved: "true",
+    await updateDoc(doc(FireData.db, "Inventory", productId),{
+      approved: true,
     });
   } catch (error) {
     console.error("Error approving product:", error);
@@ -47,34 +46,34 @@ export async function approveSeller(sellerId) {
 
   // pull seller from db
   try {
-    const sellerDocRef = adminDb.collection("Seller").doc(sellerId);
-    const sellerDoc = await sellerDocRef.get();
+    const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId))
+    console.log(':', sellerDoc.data())
 
-    if (!sellerDoc.exists) {
+  if (!sellerDoc.exists) {
       return { error: "Seller document not found." };
     }
 
-    const uid = sellerDoc.data().UserID;
+    const uid = sellerId;
 
     if (!uid) {
       return { error: "UserID (uid) not found in the seller document." };
     }
 
-    // update custom claims
-    const userRecord = await adminAuth.getUser(uid);
-    const customClaims = userRecord.customClaims || {};
+    // removed custom claims
+    // const userRecord = await adminAuth.getUser(uid);
+    // const customClaims = userRecord.customClaims || {};
 
-    const newClaims = {
-      ...customClaims,
-      role: "seller",
-      status: "approved_seller",
-    };
+    // const newClaims = {
+    //   ...customClaims,
+    //   role: "seller",
+    //   status: "approved_seller",
+    // };
 
-    await adminAuth.setCustomUserClaims(uid, newClaims);
+    // await adminAuth.setCustomUserClaims(uid, newClaims);
 
     // update db entry
-    await sellerDocRef.update({
-      validated: "true",
+    await updateDoc(doc(FireData.db, "Seller", sellerId),{
+      validated: true,
     });
   } catch (error) {
     console.error("Error approving seller:", error);
@@ -114,9 +113,7 @@ export async function toggleBanStatus(id, access) {
 
   try {
     // pull from db
-    const profileDocRef = adminDb.collection(collectionName).doc(id);
-    const profileDoc = await profileDocRef.get();
-
+    const profileDoc = await getDoc(doc(FireData.db, collectionName, id))
     if (!profileDoc.exists) {
       return { error: "Seller/Buyer document not found." };
     }
@@ -126,7 +123,7 @@ export async function toggleBanStatus(id, access) {
     const newBannedStatus = !currentBannedStatus;
 
     // get user id from document
-    const uid = profileData.UserID;
+    const uid = id;
     if (!uid) {
       return {
         error: `UserID not found on ${collectionName} doc ${id}.`,
@@ -134,18 +131,8 @@ export async function toggleBanStatus(id, access) {
     }
 
     // update document banned status
-    await profileDocRef.update({
+    await updateDoc(doc(FireData.db, collectionName, id),{
       banned: newBannedStatus,
-    });
-
-    // update main document
-    await adminDb.collection("User").doc(uid).update({
-      banned: newBannedStatus,
-    });
-
-    // update firebase auth disabled status
-    await adminAuth.updateUser(uid, {
-      disabled: newBannedStatus,
     });
 
     return {

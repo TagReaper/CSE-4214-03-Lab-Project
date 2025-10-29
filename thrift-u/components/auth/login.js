@@ -39,12 +39,12 @@ const Login = () => {
             case "Seller":
                 payload.role = "Seller"
                 payload.status = "Pending Check"
-                // const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
-                // if (sellerRef.data().validated){
-                //     payload.status = "approved"
-                // } else {
-                //     payload.status = "pending"
-                // }
+                const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+                if (sellerRef.data().validated){
+                    payload.status = "approved"
+                } else {
+                    payload.status = "pending"
+                }
                 break;
         }
 
