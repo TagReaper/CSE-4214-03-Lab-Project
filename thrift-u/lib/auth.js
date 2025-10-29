@@ -4,7 +4,7 @@ import { adminAuth } from "@/firebase/adminApp";
 
 const getDecodedToken = async () => {
   const cookieStore = cookies();
-  const sessionCookie = cookieStore.get("FireToken");
+  const sessionCookie = await cookieStore.get("FireToken");
 
   if (!sessionCookie) {
     throw new Error("Unauthorized: You must be logged in.");
