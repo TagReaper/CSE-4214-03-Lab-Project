@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; //Import react hooks (useState for state management, useEffect for side effects)
 import Link from "next/link";
 
-// Same interface as your store items
+//Item structure from store
 interface Item {
   id: number;
   name: string;
@@ -12,53 +12,54 @@ interface Item {
   stock: number;
 }
 
+//Cart item with quantity
 interface CartItem {
   item: Item;
   quantity: number;
 }
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]); //Cart state
 
-  // Load cart from localStorage
+  //Loads cart from localStorage
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart"); // get cart object
-    const storedItems = localStorage.getItem("items"); // get item details
+    const storedCart = localStorage.getItem("cart"); //Get cart object from localStorage
+    const storedItems = localStorage.getItem("items"); //Get item details from localStorage
     if (storedCart && storedItems) {
       const cart = JSON.parse(storedCart) as { [key: number]: number };
       const items = JSON.parse(storedItems) as Item[];
       
-      // Build array of cart items with quantity and details
+      //Combine quantities and item details
       const cartArray: CartItem[] = Object.entries(cart).map(([itemId, quantity]) => {
         const item = items.find(i => i.id === parseInt(itemId));
         if (!item) throw new Error("Item not found in store data!");
         return { item, quantity };
       });
 
-      setCartItems(cartArray);
+      setCartItems(cartArray); //Set cart state
     }
   }, []);
 
-  // Update quantity in cart
+  //Update quantity of item in cart
   const updateQuantity = (itemId: number, newQuantity: number) => {
     setCartItems(prev =>
       prev.map(ci => ci.item.id === itemId ? { ...ci, quantity: newQuantity } : ci)
     );
 
     const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
-    storedCart[itemId] = newQuantity;
+    storedCart[itemId] = newQuantity; //Update localStorage
     localStorage.setItem("cart", JSON.stringify(storedCart));
   };
 
-  // Remove item from cart
+  //Remove item from cart
   const removeItem = (itemId: number) => {
     setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
     const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
-    delete storedCart[itemId];
+    delete storedCart[itemId]; //Update localStorage
     localStorage.setItem("cart", JSON.stringify(storedCart));
   };
 
-  const total = cartItems.reduce((sum, ci) => sum + ci.item.price * ci.quantity, 0);
+  const total = cartItems.reduce((sum, ci) => sum + ci.item.price * ci.quantity, 0); //Calculate total
 
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
@@ -82,16 +83,16 @@ export default function CartPage() {
                   min={1} 
                   max={item.stock} 
                   value={quantity} 
-                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))} //Update quantity
                   style={{ marginLeft: "0.5rem", width: "60px" }}
                 />
               </p>
-              <p>Subtotal: ${(item.price * quantity).toFixed(2)}</p>
-              <button onClick={() => removeItem(item.id)}>Remove</button>
+              <p>Subtotal: ${(item.price * quantity).toFixed(2)}</p> {/*Item subtotal*/}
+              <button onClick={() => removeItem(item.id)}>Remove</button> {/*Remove item*/}
             </div>
           ))}
 
-          <h2>Total: ${total.toFixed(2)}</h2>
+          <h2>Total: ${total.toFixed(2)}</h2> {/*Cart total*/}
           <button style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}>Proceed to Checkout</button>
         </div>
       )}
