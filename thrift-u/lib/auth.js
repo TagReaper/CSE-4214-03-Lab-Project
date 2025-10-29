@@ -3,21 +3,32 @@ import { cookies } from "next/headers";
 import { adminAuth } from "@/firebase/adminApp";
 
 const getDecodedToken = async () => {
-  const cookieStore = cookies();
-  const sessionCookie = await cookieStore.get("FireToken");
-
-  if (!sessionCookie) {
-    throw new Error("Unauthorized: You must be logged in.");
-  }
-
-  const token = sessionCookie.value;
-
+  console.log("getDecodedToken: Starting...");
   try {
+    console.log("getDecodedToken: Awaiting cookies...");
+    const cookieStore = await cookies();
+    console.log("getDecodedToken: Got cookie store");
+
+    const sessionCookie = cookieStore.get("FireToken");
+    console.log("getDecodedToken: Session cookie exists?", !!sessionCookie);
+
+    if (!sessionCookie) {
+      throw new Error("Unauthorized: You must be logged in.");
+    }
+
+    const token = sessionCookie.value;
+    console.log("getDecodedToken: Token length:", token?.length);
+
+    console.log("getDecodedToken: Verifying token...");
     const decodedToken = await adminAuth.verifyIdToken(token);
+    console.log(
+      "getDecodedToken: Token verified successfully. UID:",
+      decodedToken.uid
+    );
     return decodedToken;
   } catch (error) {
-    console.error("Firebase Auth Error:", error.message);
-    throw new Error("Unauthorized: Session is invalid or expired.");
+    console.error("getDecodedToken: Error occurred:", error);
+    throw error;
   }
 };
 
@@ -45,7 +56,8 @@ export const verifyRole = async (requiredRole) => {
 };
 
 export const getAuthUser = async () => {
+  console.log("getAuthUser: Called");
   const decodedToken = await getDecodedToken();
-
+  console.log("getAuthUser: Returning decoded token");
   return decodedToken;
 };
