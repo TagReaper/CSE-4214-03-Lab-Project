@@ -40,6 +40,31 @@ const RequestItem = ({sellerId}) => {
     const [condition, setCondition] = useState("");
     const [tags, setTags] = useState([]);
     const [image, setImage] = useState();
+    const tagOptions = [
+        "Sports",
+        "Clothing",
+        "College",
+        "Kitchen",
+        "Hoodie",
+        "Shirt",
+        "Hat",
+        "Football",
+        "Baseball",
+        "Basketball",
+        "Soccer",
+        "Hockey",
+        "Crafts",
+        "Gym",
+        "Hand-Made",
+        "Decoration",
+        "Misc",
+        "Tennis",
+        "Equipment",
+        "Tech",
+        "Jewlery",
+        "Living",
+        "Dining"
+    ]
 
     const handleRequest = async () => {
         console.log("Adding item to: ", sellerId)
@@ -90,7 +115,7 @@ const RequestItem = ({sellerId}) => {
                                         <SelectValue placeholder="Condition" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Pristine">Pristine</SelectItem>
+                                        <SelectItem value="New">New</SelectItem>
                                         <SelectItem value="Like-New">Like-New</SelectItem>
                                         <SelectItem value="Used">Used</SelectItem>
                                         <SelectItem value="Worn">Worn</SelectItem>
@@ -106,13 +131,11 @@ const RequestItem = ({sellerId}) => {
                                 </MultiSelectTrigger>
                                 <MultiSelectContent>
                                     <MultiSelectGroup>
-                                        <MultiSelectItem value="next.js">Next.js</MultiSelectItem>
-                                        <MultiSelectItem value="sveltekit">SvelteKit</MultiSelectItem>
-                                        <MultiSelectItem value="nuxt.js">Nuxt.js</MultiSelectItem>
-                                        <MultiSelectItem value="remix">Remix</MultiSelectItem>
-                                        <MultiSelectItem value="astro">Astro</MultiSelectItem>
-                                        <MultiSelectItem value="vue">Vue.js</MultiSelectItem>
-                                        <MultiSelectItem value="react">React</MultiSelectItem>
+                                        {tagOptions.map((tag) => (
+                                            <div key={tag}>
+                                                <MultiSelectItem value={tag}> {tag} </MultiSelectItem>
+                                            </div>
+                                        ))}
                                     </MultiSelectGroup>
                                 </MultiSelectContent>
                             </MultiSelect>
