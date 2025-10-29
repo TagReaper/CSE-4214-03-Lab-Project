@@ -3,7 +3,7 @@ import { adminDb } from "@/firebase/adminApp";
 import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
-export async function updateAddressAction(input) {
+export async function updateAddressAction(previousState, formData) {
   let authenticatedUser;
   try {
     authenticatedUser = await getAuthUser();
@@ -12,14 +12,17 @@ export async function updateAddressAction(input) {
   }
 
   const address = {
-    Address: input.get("address"),
-    City: input.get("city"),
-    State: input.get("state"),
-    ZipCode: input.get("zipCode"),
+    Address: formData.get("address"),
+    City: formData.get("city"),
+    State: formData.get("state"),
+    ZipCode: formData.get("zipCode"),
   };
 
+  if (!address.Address || !address.City || !address.State || !address.ZipCode) {
+    return { error: "All address fields are required." };
+  }
+
   try {
-    // find buyer doc that matches the authenticated user's uid
     const buyerQuery = adminDb
       .collection("Buyer")
       .where("UserID", "==", authenticatedUser.uid)
@@ -30,7 +33,7 @@ export async function updateAddressAction(input) {
     if (buyerSnapshot.empty) {
       return { error: "Buyer profile not found for this user." };
     }
-    // update the address fields
+
     const buyerDocRef = buyerSnapshot.docs[0].ref;
     await buyerDocRef.update({
       Address: address.Address,
