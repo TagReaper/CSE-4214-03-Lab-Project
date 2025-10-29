@@ -18,12 +18,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
 
-if (typeof window !== 'undefined' && window.location.hostname === "localhost") {
-    console.log("Connecting to local Firebase emulators...");
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    connectFirestoreEmulator(db, "127.0.0.1", 8081);
-    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-}
+// if (process.env.FIRESTORE_EMULATOR_HOST) {
+//     connectFirestoreEmulator(db, "127.0.0.1", 8081);
+// }
+
+// if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+//     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+// }
 
 const FireData = {
     app: app,

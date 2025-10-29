@@ -5,10 +5,9 @@ import {
   createUserWithEmailAndPassword,
   validatePassword,
 } from "firebase/auth";
-import FireData from "../firebase/clientApp";
-import { collection, addDoc, doc, setDoc } from "@firebase/firestore";
+import FireData from "../../firebase/clientApp";
+import { doc, setDoc } from "@firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useAuthState } from "react-firebase-hooks/auth";
 
 const UIPasswordValidation = (password) => {
   return {
@@ -40,14 +39,6 @@ const SignUp = () => {
   const serverTime = new Date();
   const router = useRouter();
 
-  //Check sign-in state
-  const [user] = useAuthState(FireData.auth);
-
-  //Pushed to home if they are signed in
-  if (user) {
-    router.push("/");
-  }
-
   useEffect(() => {
     setValidation(UIPasswordValidation(password));
   }, [password]);
@@ -61,16 +52,14 @@ const SignUp = () => {
     }
     try {
       setLoading(true);
-      if (process.env.NODE_ENV === "production") {
-        const passwordValidationStatus = await validatePassword(
-          FireData.auth,
-          password
-        );
-        if (!passwordValidationStatus.isValid) {
-          setError("Password does not meet the security policy.");
-          setLoading(false);
-          return;
-        }
+      const passwordValidationStatus = await validatePassword(
+        FireData.auth,
+        password
+      );
+      if (!passwordValidationStatus.isValid) {
+        setError("Password does not meet the security policy.");
+        setLoading(false);
+        return;
       }
       const userCredential = await createUserWithEmailAndPassword(
         FireData.auth,
@@ -78,35 +67,38 @@ const SignUp = () => {
         password
       );
       const user = userCredential.user;
-      console.log("account created", user.uid);
+      var idToken = await user.getIdToken();
+      const parts = idToken.split(".");
+      var payload = JSON.parse(atob(parts[1]));
+
       await setDoc(doc(FireData.db, "User", user.uid), {
         email: email,
         firstName: firstName,
         lastName: lastName,
-        accessLevel: sellerReq ? 1 : 2,
+        accessLevel: sellerReq ? "Seller" : "Buyer",
         dateCreated: serverTime.toLocaleString(),
         deletedAt: "",
       });
 
       if (sellerReq) {
-        const confirmed = confirm(
+        const confirmed = await confirm(
           "Are you sure you want to request a seller account?"
         );
         if (confirmed) {
+          payload.role = "Seller";
+          payload.status = "pending";
           await setDoc(doc(FireData.db, "Seller", user.uid), {
-            UserID: user.uid,
             banned: false,
             validated: false,
             Flags: 0,
           });
-
-          console.log("Seller record created");
         } else {
           setSeller(false);
         }
       } else {
+        payload.role = "Buyer";
+        payload.status = "null";
         await setDoc(doc(FireData.db, "Buyer", user.uid), {
-          UserID: user.uid,
           banned: false,
           address: "",
           city: "",
@@ -114,11 +106,21 @@ const SignUp = () => {
           zip: "",
           numOrders: 0,
         });
-        console.log("Buyer record created");
       }
 
+      payload = btoa(JSON.stringify(payload));
+      idToken = parts[0] + "." + payload + "." + parts[2];
+
+      await fetch("/api/auth", {
+        //send token to api route to set cookie
+        method: "POST",
+        headers: {
+          Authorization: `${idToken}`,
+        },
+      });
+
       alert("Account created successfully");
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       console.error("error creating account:", error);
       switch (error.code) {
