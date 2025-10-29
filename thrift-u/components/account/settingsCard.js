@@ -1,15 +1,25 @@
 "use client";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { ShieldCheck, MapPin, ShoppingBag, User } from "lucide-react";
+
+const iconMap = {
+  ShieldCheck,
+  MapPin,
+  ShoppingBag,
+  User,
+};
 
 export function SettingsCard({
   title,
   description,
-  icon: Icon,
+  iconName,
   href,
   color,
   iconColor,
 }) {
+  const Icon = iconMap[iconName];
+
   return (
     <Link href={href}>
       <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary">
