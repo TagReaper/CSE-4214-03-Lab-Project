@@ -18,6 +18,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectGroup,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from "@/components/ui/multi-select"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -92,6 +100,22 @@ const RequestItem = ({sellerId}) => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Tags">Tags</Label>
+                            <MultiSelect onValuesChange={(e) => setTags(e)} form="prodReq">
+                                <MultiSelectTrigger className="w-[375px]">
+                                    <MultiSelectValue placeholder="Select Tags" />
+                                </MultiSelectTrigger>
+                                <MultiSelectContent>
+                                    <MultiSelectGroup>
+                                        <MultiSelectItem value="next.js">Next.js</MultiSelectItem>
+                                        <MultiSelectItem value="sveltekit">SvelteKit</MultiSelectItem>
+                                        <MultiSelectItem value="nuxt.js">Nuxt.js</MultiSelectItem>
+                                        <MultiSelectItem value="remix">Remix</MultiSelectItem>
+                                        <MultiSelectItem value="astro">Astro</MultiSelectItem>
+                                        <MultiSelectItem value="vue">Vue.js</MultiSelectItem>
+                                        <MultiSelectItem value="react">React</MultiSelectItem>
+                                    </MultiSelectGroup>
+                                </MultiSelectContent>
+                            </MultiSelect>
                         </div>
                     </div>
                     <DialogFooter>
