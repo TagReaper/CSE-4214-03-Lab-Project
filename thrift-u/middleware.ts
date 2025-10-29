@@ -37,6 +37,7 @@ export const config = {
         "/sellerhub/:path*",
         "/login/:path*",
         "/signup/:path*",
-        "/api/:path*"
+        "/api/:path*",
+        "/adminpanel/:path*"
         ]
 }
