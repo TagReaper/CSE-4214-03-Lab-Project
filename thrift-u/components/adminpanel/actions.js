@@ -20,7 +20,7 @@ export async function approveProduct(productId) {
   try {
     // update db entry
     await updateDoc(doc(FireData.db, "Inventory", productId),{
-      approved: "true",
+      approved: true,
     });
   } catch (error) {
     console.error("Error approving product:", error);
