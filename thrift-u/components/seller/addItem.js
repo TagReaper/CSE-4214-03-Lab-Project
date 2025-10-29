@@ -11,20 +11,36 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useState } from "react"
+import { Textarea } from "@/components/ui/textarea"
 
 const RequestItem = ({sellerId}) => {
+    const [title, setTitle] = useState("");
+    const [desc, setDesc] = useState("");
+    const [price, setPrice] = useState("");
+    const [qty, setQTY] = useState("");
+    const [condition, setCondition] = useState("");
+    const [tags, setTags] = useState([]);
+    const [image, setImage] = useState();
 
     const handleRequest = async () => {
-        //add item
+        console.log("Adding item to: ", sellerId)
     }
 
     return (
         <div>
             <Dialog>
-                <form>
+                <form onSubmit={handleRequest} id="prodReq">
                     <DialogTrigger asChild>
                         <button className='m-5 center bg-white duration-200 w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400'>
                             <Image src={'/Icons/roundPlus.svg'} alt="Product Image" width={200} height={200}/>
@@ -33,27 +49,56 @@ const RequestItem = ({sellerId}) => {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Edit profile</DialogTitle>
+                        <DialogTitle>Request Item</DialogTitle>
                         <DialogDescription>
-                        Make changes to your profile here. Click save when you&apos;re
-                        done.
+                        Input all product information here.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4">
                         <div className="grid gap-3">
-                        <Label htmlFor="name-1">Name</Label>
-                        <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
+                            <Label htmlFor="Image">Image</Label>
+                            <Input id="Image" value={image} onChange={(e) => setImage(e.target.value)} type="file" form="prodReq"/>
                         </div>
                         <div className="grid gap-3">
-                        <Label htmlFor="username-1">Username</Label>
-                        <Input id="username-1" name="username" defaultValue="@peduarte" />
+                            <Label htmlFor="Title">Title</Label>
+                            <Input id="Title" value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required />
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="Description">Description</Label>
+                            <Textarea id="Description" value={desc} onChange={(e) => setDesc(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required />
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="Price">Price</Label>
+                            <Input id="Price" value={price} onChange={(e) => setPrice(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required/>
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="Quantity">Quantity</Label>
+                            <Input id="Quantity" value={qty} onChange={(e) => setQTY(e.target.value)} type="number" placeholder="1, 2, 3, etc" form="prodReq" required/>
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="Condition">Condition</Label>
+                            <Select onValueChange={(e) => setCondition(e)} form="prodReq" required>
+                                    <SelectTrigger className="w-[375px]">
+                                        <SelectValue placeholder="Condition" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Pristine">Pristine</SelectItem>
+                                        <SelectItem value="Like-New">Like-New</SelectItem>
+                                        <SelectItem value="Used">Used</SelectItem>
+                                        <SelectItem value="Worn">Worn</SelectItem>
+                                        <SelectItem value="Damaged">Damaged</SelectItem>
+                                    </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-3">
+                            <Label htmlFor="Tags">Tags</Label>
                         </div>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                            <Button variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit">Save changes</Button>
+                        <Button type="submit" form="prodReq">Save changes</Button>
                     </DialogFooter>
                     </DialogContent>
                 </form>
