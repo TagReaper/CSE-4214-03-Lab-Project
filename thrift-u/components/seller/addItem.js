@@ -31,15 +31,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
+import { addDoc, collection} from "@firebase/firestore"
+import FireData from "@/firebase/clientApp"
+import {ref, uploadBytes, getDownloadURL} from "firebase/storage"
 
 const RequestItem = ({sellerId}) => {
+
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
     const [price, setPrice] = useState("");
     const [qty, setQTY] = useState("");
     const [condition, setCondition] = useState("");
     const [tags, setTags] = useState([]);
-    const [image, setImage] = useState();
+    const [image, setImage] = useState(null);
     const tagOptions = [
         "Sports",
         "Clothing",
@@ -66,8 +70,28 @@ const RequestItem = ({sellerId}) => {
         "Dining"
     ]
 
-    const handleRequest = async () => {
-        console.log("Adding item to: ", sellerId)
+    const handleRequest = async (event) => {
+        event.preventDefault();
+        try{
+            const imageRef = ref(FireData.storage, `images/${image.name + Math.floor(Math.random()*10000)}`)
+            await uploadBytes(imageRef, image)
+            const u = await getDownloadURL(imageRef)
+
+            await addDoc(collection(FireData.db, "Inventory"), {
+                sellerId: sellerId,
+                condition: condition,
+                quantity: qty,
+                price: price,
+                name: title,
+                description: desc,
+                approved: false,
+                tags: tags,
+                image: u
+            })
+            location.reload();
+        } catch(error) {
+            console.log("Error requesting item creation: ", error)
+        }
     }
 
     return (
@@ -90,7 +114,7 @@ const RequestItem = ({sellerId}) => {
                     <div className="grid gap-4">
                         <div className="grid gap-3">
                             <Label htmlFor="Image">Image</Label>
-                            <Input id="Image" value={image} onChange={(e) => setImage(e.target.value)} type="file" form="prodReq"/>
+                            <Input id="Image" accept="image/*" onChange={(e) => setImage(e.target.files[0])} type="file" form="prodReq"/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Title">Title</Label>
@@ -102,7 +126,7 @@ const RequestItem = ({sellerId}) => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Price">Price</Label>
-                            <Input id="Price" value={price} onChange={(e) => setPrice(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required/>
+                            <Input id="Price" value={price} onChange={(e) => setPrice(e.target.value)} type="number" placeholder="Pedro Duarte" form="prodReq" required/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Quantity">Quantity</Label>
@@ -145,7 +169,7 @@ const RequestItem = ({sellerId}) => {
                         <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" form="prodReq">Save changes</Button>
+                        <Button type="submit" form="prodReq">Submit Request</Button>
                     </DialogFooter>
                     </DialogContent>
                 </form>

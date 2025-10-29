@@ -11,7 +11,7 @@ export default function ProductsPage() {
   if (user){
     return (
     <div>
-      <SellerItemList sellerId={"user.uid"}/>
+      <SellerItemList sellerId={user.uid}/>
     </div>
   );
   } else {
