@@ -22,15 +22,46 @@ export default function StorePage() {
   
   // List of items for sale
   const[items] = useState<Item[]>([
+    //Clothing
     { id: 1, name: "Hoodie", category: "Clothing", price: 20.00, stock: 5 },
     { id: 2, name: "Jeans", category: "Clothing", price: 15.00, stock: 3 },
-    { id: 3, name: "Poster", category: "Home", price: 10.00, stock: 10 },
-    { id: 4, name: "Shoes", category: "Shoes", price: 100.00, stock: 2 },
+    { id: 3, name: "Red Shirt", category: "Clothing", price: 10.00, stock: 10 },
+    { id: 4, name: "Blue Shirt", category: "Clothing", price: 10.00, stock: 2 },
+    { id: 5, name: "Green Shirt", category: "Clothing", price: 20.00, stock: 5 },
+    { id: 6, name: "Purple Shirt", category: "Clothing", price: 15.00, stock: 3 },
+    { id: 7, name: "Shorts", category: "Clothing", price: 10.00, stock: 0 },
+    { id: 8, name: "Pants", category: "Clothing", price: 100.0, stock: 2 },
+
+    //Shoes
+    { id: 9, name: "Jordan 1", category: "Shoes", price: 120.00, stock: 5 },
+    { id: 10, name: "Jordan 2", category: "Shoes", price: 115.00, stock: 3 },
+    { id: 11, name: "Jordan 3", category: "Shoes", price: 110.00, stock: 10 },
+    { id: 12, name: "Jordan 4", category: "Shoes", price: 100.00, stock: 2 },
+    { id: 13, name: "Jordan 5", category: "Shoes", price: 120.00, stock: 5 },
+    { id: 14, name: "Jordan 6", category: "Shoes", price: 115.00, stock: 3 },
+    { id: 15, name: "Jordan 7", category: "Shoes", price: 110.00, stock: 10 },
+    { id: 16, name: "Jordan 8", category: "Shoes", price: 100.00, stock: 2 },
+
+    //Home
+    { id: 17, name: "Lamp", category: "Home", price: 20.00, stock: 5 },
+    { id: 18, name: "Couch", category: "Home", price: 15.00, stock: 3 },
+    { id: 19, name: "Framed Picture 1", category: "Home", price: 10.00, stock: 10 },
+    { id: 20, name: "Framed Picture 2", category: "Home", price: 100.00, stock: 2 },
+    { id: 21, name: "Framed Picture 3", category: "Home", price: 20.00, stock: 5 },
+    { id: 22, name: "Framed Picture 4", category: "Home", price: 15.00, stock: 3 },
+    { id: 23, name: "Framed Picture 5", category: "Home", price: 10.00, stock: 10 },
+    { id: 24, name: "Framed Picture 6", category: "Home", price: 100.00, stock: 2 },
+    { id: 25, name: "Framed Picture 7", category: "Home", price: 20.00, stock: 5 },
+    { id: 26, name: "Framed Picture 8", category: "Home", price: 15.00, stock: 3 },
+    { id: 27, name: "Framed Picture 9", category: "Home", price: 10.00, stock: 10 },
+    { id: 28, name: "Framed Picture 10", category: "Home", price: 100.00, stock: 2 },
+    { id: 29, name: "Framed Picture 11", category: "Home", price: 20.00, stock: 5 },
+    { id: 30, name: "Framed Picture 12", category: "Home", price: 15.00, stock: 3 },
   ]);
 
   //Stores search text entered by user
   const [search, setSearch] = useState("");
-  //Stores category selected by yser
+  //Stores category selected by user
   const [selectedCategory, setSelectedCategory] = useState("All");
   //Stores items in cart: itemId: quantity
   const [cart, setCart] = useState<{[key: number]: number}>({}); // Keeps track of items added to the cart
@@ -58,10 +89,18 @@ export default function StorePage() {
     }
 
     //Updates cart with additional items
-    setCart(prev => ({
-      ...prev, //stores previous # of an item in cart
-      [item.id]: currentQuantity + 1 //increases quantity of specific item selected
-    }));
+    setCart(prev => {
+      const newCart = {
+        ...prev,
+        [item.id]: currentQuantity + 1,
+      };
+      
+      localStorage.setItem("cart", JSON.stringify(newCart));
+
+      localStorage.setItem("items", JSON.stringify(items));
+
+      return newCart;
+    });
     
     console.log(`Added ${item.name} to cart`);
   };
