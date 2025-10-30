@@ -1,5 +1,5 @@
 "use server";
-import { getDoc, doc, updateDoc} from "@firebase/firestore";
+import { getDoc, doc, updateDoc } from "@firebase/firestore";
 import FireData from "@/firebase/clientApp";
 //import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -19,8 +19,8 @@ export async function approveProduct(productId) {
   // pull product from db
   try {
     // update db entry
-    await updateDoc(doc(FireData.db, "Inventory", productId),{
-      approved: true,
+    await updateDoc(doc(FireData.db, "Inventory", productId), {
+      approved: "true",
     });
   } catch (error) {
     console.error("Error approving product:", error);
@@ -46,8 +46,8 @@ export async function approveSeller(sellerId) {
 
   // pull seller from db
   try {
-    const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId))
-    console.log(':', sellerDoc.data())
+    const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId));
+    console.log(":", sellerDoc.data());
 
   if (!sellerDoc.exists) {
       return { error: "Seller document not found." };
@@ -72,7 +72,7 @@ export async function approveSeller(sellerId) {
     // await adminAuth.setCustomUserClaims(uid, newClaims);
 
     // update db entry
-    await updateDoc(doc(FireData.db, "Seller", sellerId),{
+    await updateDoc(doc(FireData.db, "Seller", sellerId), {
       validated: true,
     });
   } catch (error) {
@@ -113,7 +113,7 @@ export async function toggleBanStatus(id, access) {
 
   try {
     // pull from db
-    const profileDoc = await getDoc(doc(FireData.db, collectionName, id))
+    const profileDoc = await getDoc(doc(FireData.db, collectionName, id));
     if (!profileDoc.exists) {
       return { error: "Seller/Buyer document not found." };
     }
@@ -131,7 +131,7 @@ export async function toggleBanStatus(id, access) {
     }
 
     // update document banned status
-    await updateDoc(doc(FireData.db, collectionName, id),{
+    await updateDoc(doc(FireData.db, collectionName, id), {
       banned: newBannedStatus,
     });
 
