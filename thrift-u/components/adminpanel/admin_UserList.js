@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-array-constructor */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,20 +27,19 @@ const ListUsers = () => {
         id: doc.id,
       }));
 
-      var sellerListTemp = new Array();
-      var sellerPendListTemp = new Array();
-      var buyerListTemp = new Array();
+      var sellerListTemp = []
+      var sellerPendListTemp = []
+      var buyerListTemp = []
 
       for (let index = 0; index < sellers.length; index++) {
         const docRef = await getDoc(
-          doc(FireData.db, "User", sellers[index].UserID)
+          doc(FireData.db, "User", sellers[index].id)
         );
         if (!docRef.exists()) continue;
 
         const userData = {
           ...docRef.data(),
-          id: sellers[index].UserID,
-          SellerID: sellers[index].id,
+          id: sellers[index].id,
           banned: sellers[index].banned || false,
         };
 
@@ -53,14 +51,13 @@ const ListUsers = () => {
       }
       for (let index = 0; index < buyers.length; index++) {
         const docRef = await getDoc(
-          doc(FireData.db, "User", buyers[index].UserID)
+          doc(FireData.db, "User", buyers[index].id)
         );
         if (!docRef.exists()) continue;
 
         buyerListTemp.push({
           ...docRef.data(),
-          id: buyers[index].UserID,
-          BuyerID: buyers[index].id,
+          id: buyers[index].id,
           banned: buyers[index].banned || false,
         });
       }
@@ -113,7 +110,7 @@ const ListUsers = () => {
         // Seller
         setSList((currentList) =>
           currentList.map((user) =>
-            user.SellerID === id
+            user.id
               ? { ...user, banned: result.newBannedStatus }
               : user
           )
@@ -122,7 +119,7 @@ const ListUsers = () => {
         // Buyer
         setBList((currentList) =>
           currentList.map((user) =>
-            user.BuyerID === id
+            user.id === id
               ? { ...user, banned: result.newBannedStatus }
               : user
           )
@@ -159,12 +156,12 @@ const ListUsers = () => {
             <span></span>
             <span className="center">
               <button
-                onClick={() => handleBan(item.BuyerID, 2)}
+                onClick={() => handleBan(item.id, 2)}
                 disabled={isBanning != null}
                 className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
-                {isBanning === item.BuyerID
+                {isBanning === item.id
                   ? "..."
                   : item.banned
                   ? "UN-BAN"
@@ -189,12 +186,12 @@ const ListUsers = () => {
             <span></span>
             <span className="center">
               <button
-                onClick={() => handleBan(item.SellerID, 1)}
+                onClick={() => handleBan(item.id, 1)}
                 disabled={isBanning != null}
                 className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
-                {isBanning === item.SellerID
+                {isBanning === item.id
                   ? "..."
                   : item.banned
                   ? "UN-BAN"

@@ -49,7 +49,7 @@ export async function approveSeller(sellerId) {
     const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId));
     console.log(":", sellerDoc.data());
 
-    if (!sellerDoc.exists) {
+  if (!sellerDoc.exists) {
       return { error: "Seller document not found." };
     }
 

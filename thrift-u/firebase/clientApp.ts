@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import {  getFunctions, connectFunctionsEmulator } from "firebase/functions";
+import {getStorage} from "firebase/storage"
 
 const clientCredentials = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,6 +18,7 @@ const app = initializeApp(clientCredentials);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
+const storage = getStorage(app)
 
 // if (process.env.FIRESTORE_EMULATOR_HOST) {
 //     connectFirestoreEmulator(db, "127.0.0.1", 8081);
@@ -31,6 +33,7 @@ const FireData = {
     auth: auth,
     db: db,
     functions: functions,
+    storage: storage
 }
 
 export default FireData;
