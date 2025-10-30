@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AddressForm } from "./addressForm";
 import { Button } from "@/components/ui/button";
 
-export function AddressDisplayManager({ currentAddress }) {
+export function AddressDisplay({ currentAddress }) {
   const [isEditing, setIsEditing] = useState(false);
   const [displayAddress, setDisplayAddress] = useState(currentAddress);
 
