@@ -1,3 +1,4 @@
+"use server";
 //import { serverConfig } from "../config/config";
 import { cookies } from "next/headers";
 import { adminAuth } from "@/firebase/adminApp";
