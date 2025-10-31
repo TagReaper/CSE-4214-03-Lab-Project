@@ -1,4 +1,4 @@
-import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextResponse } from "next/server";
 import type { NextRequest} from 'next/server.js';
 
@@ -37,11 +37,8 @@ export function middleware(request: NextRequest){
 
     if (token != undefined){
         if (token.value != "null"){
-            console.log(getDecodedToken(token))
+            const decodedToken = getDecodedToken(token)
             console.log("User is logged in!")
-            // console.log("Token:", token.value);
-            // console.log("Header:", header);
-            // console.log("Payload:", payload);
         } else {
             console.log("User is logged out!");
         }
