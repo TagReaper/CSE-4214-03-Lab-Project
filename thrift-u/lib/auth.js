@@ -60,7 +60,11 @@ export const verifyRole = async (requiredRole) => {
 
 export const getAuthUser = async () => {
   console.log("getAuthUser: Called");
-  const decodedToken = await getDecodedToken();
-  console.log("getAuthUser: Returning decoded token");
-  return decodedToken;
+  try{
+    const decodedToken = await getDecodedToken();
+    console.log("getAuthUser: Returning decoded token");
+    return decodedToken;
+  } catch(error){
+    throw(error)
+  }
 };
