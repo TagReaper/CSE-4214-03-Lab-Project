@@ -91,6 +91,7 @@ const SignUp = () => {
             banned: false,
             validated: false,
             Flags: 0,
+            deletedAt: "",
           });
         } else {
           setSeller(false);
@@ -105,6 +106,7 @@ const SignUp = () => {
           state: "",
           zip: "",
           numOrders: 0,
+          deletedAt: "",
         });
       }
 
