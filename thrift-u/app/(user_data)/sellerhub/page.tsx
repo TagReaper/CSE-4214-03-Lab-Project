@@ -5,7 +5,7 @@ import Link from "next/link"; // ✅ import Next.js Link for routing
 export default function SellerHubPage() {
   return (
     <div>
-      {/* ✅ Remove <style jsx> (only works in client components, can be fragile) */}
+      {/*  Remove <style jsx> (only works in client components, can be fragile) */}
       <style jsx>{`
         body {
           font-family: Arial, sans-serif;
