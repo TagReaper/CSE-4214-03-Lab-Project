@@ -86,7 +86,8 @@ const RequestItem = ({sellerId}) => {
                 description: desc,
                 approved: false,
                 tags: tags,
-                image: u
+                image: u,
+                deletedAt: "",
             })
             location.reload();
         } catch(error) {
