@@ -68,7 +68,6 @@ const SignUp = () => {
       );
       const user = userCredential.user;
       var idToken = await user.getIdToken();
-      const original = idToken;
       const parts = idToken.split(".");
       var payload = JSON.parse(atob(parts[1]));
 
@@ -117,7 +116,6 @@ const SignUp = () => {
         method: "POST",
         headers: {
           Authorization: `${idToken}`,
-          Secondary: `${original}`,
         },
       });
 
