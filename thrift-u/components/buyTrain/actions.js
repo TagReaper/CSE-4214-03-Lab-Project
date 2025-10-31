@@ -50,3 +50,33 @@ export async function checkout(cartItems, cartQTY, Address, Payment) {
         return false
     }
 }
+
+export async function addToCart(ItemId, qty) {
+    /*
+    */
+    if (verifyRole("Buyer")){
+        return true
+    } else {
+        return false
+    }
+}
+
+export async function removeFromCart(cartItemId, qty) {
+    /*
+    */
+    if (verifyRole("Buyer")){
+        return true
+    } else {
+        return false
+    }
+}
+
+export async function clearCart() {
+    /*
+    */
+    if (verifyRole("Buyer")){
+        return true
+    } else {
+        return false
+    }
+}
