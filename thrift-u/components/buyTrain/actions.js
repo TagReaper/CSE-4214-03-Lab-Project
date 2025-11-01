@@ -3,7 +3,7 @@ import { getDoc, getDocs, doc, updateDoc, addDoc, setDoc} from "@firebase/firest
 import FireData from "@/firebase/clientApp";
 import { verifyRole } from "@/lib/auth";
 
-export async function checkout(cartItems, cartQTY, Address, Payment) {
+export async function checkout(Cart, Address, Payment) {
     /*
     get Inventory
     Items = []
@@ -20,20 +20,17 @@ export async function checkout(cartItems, cartQTY, Address, Payment) {
             orderSum += item.sum
             Items.push(item)
 
-        orderRef=addDoc to Orders : cartQTY, orderSum, date, Address, deletedAt: ""
+        orderRef=addDoc to Orders : cart.length, orderSum, date, Address, deletedAt: ""
 
         for each item in Items
             get Seller from item.sellerId
             income = item.sum + Seller.income
             unclaimedIncome = item.sum + Seller.unclaimedIncome
             update Seller at item.sellerId: seller.income & seller.unclaimedIncome
-            addDoc to OrderItems : OrderRef.id, item.orderqty, status:"pending", TrackingNumber: "", date, deletedAt: ""
+            addDoc to OrderItems : OrderRef.id, item.id, item.orderqty, status:"pending", TrackingNumber: "", date, deletedAt: ""
 
         BuyerRef = get buyer from user.id
-        update Buyer at user.id: numOrders: BuyerRef.numOrders+1, cartQTY: 0
-
-        for each cartItems
-            delete cartItems[index]
+        update Buyer at user.id: numOrders: BuyerRef.numOrders+1, cart: []
 
         return true
 
