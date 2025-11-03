@@ -12,7 +12,7 @@ export async function checkout(Address, Payment) {
         try{
             const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
             const Inventory = await getDocs(collection(FireData.db, "Inventory"))
-            const Cart = Buyer.cart
+            const Cart = Buyer.data().cart
             if(!Payment) {throw Error("Payment Declined")}
             if (Payment.default){
                 await setDoc(doc(FireData.db, "Payment", token.user_id), {
@@ -25,7 +25,8 @@ export async function checkout(Address, Payment) {
             }
 
             for (let index = 0; index < Cart.length; index++) {
-                const item = Inventory.find(obj => obj.id == Cart[index].itemId)
+                const itemRef = Inventory.find(obj => obj.id == Cart[index].itemId)
+                const item = itemRef.data()
                 if (!item) {throw Error("ItemId not found")}
                 item.id = Cart[index].itemId
                 item.orderqty = Cart[index].qty
@@ -47,7 +48,8 @@ export async function checkout(Address, Payment) {
             })
 
             for (let index = 0; index < Items.length; index++) {
-                const seller = await getDoc(doc(FireData.db, "Seller", Items[index].sellerId))
+                const sellerRef = await getDoc(doc(FireData.db, "Seller", Items[index].sellerId))
+                const seller = sellerRef.data()
                 let income = Items[index] + seller.income
                 let unclaimedIncome = Items[index].sum + seller.unclaimedIncome
                 await updateDoc(doc(FireData.db, "Seller", Items[index].sellerId), {
@@ -83,8 +85,9 @@ export async function editCart(ItemId, qty) {
     if (verifyRole("Buyer")){
         try {
             const token = await getAuthUser()
+            console.log(token)
             const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
-            const Cart = Buyer.cart
+            const Cart = Buyer.data().cart
             for (let index = 0; index < Cart.length; index++) {
                 if (Cart[index].itemId == ItemId){
                     Cart[index].qty += qty
