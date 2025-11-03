@@ -54,7 +54,10 @@ export const CartMenu = () => {
             })
             .filter((ci): ci is CartItem => ci !== null);
 
+          console.log('Final cartArray:', cartArray);
           setCartItems(cartArray);
+        } else {
+          console.log('Cart or items not found in localStorage');
         }
       } catch (error) {
         console.error('Error loading cart:', error);
@@ -96,6 +99,7 @@ export const CartMenu = () => {
       console.error('Error removing from cart:', error);
     }
   };
+
   const cartCount = cartItems.reduce((total, ci) => total + ci.quantity, 0);
   const cartTotal = cartItems.reduce((total, ci) => total + (ci.item.price * ci.quantity), 0);
 
@@ -119,6 +123,7 @@ export const CartMenu = () => {
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel>Shopping Cart</DropdownMenuLabel>
         <DropdownMenuSeparator />
+
         {cartItems.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Your cart is empty
