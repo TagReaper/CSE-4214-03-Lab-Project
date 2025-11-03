@@ -81,7 +81,7 @@ const SignUp = () => {
       });
 
       if (sellerReq) {
-        const confirmed = await confirm(
+        const confirmed = confirm(
           "Are you sure you want to request a seller account?"
         );
         if (confirmed) {
