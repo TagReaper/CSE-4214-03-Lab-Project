@@ -19,9 +19,9 @@ import { CartMenu } from './cartmenu';
 // Logo component
 const Logo = () => {
   return (
-    <Image 
-      src="/Graphics/ThriftULogoModern.png" 
-      alt="Thrift-U logo" 
+    <Image
+      src="/Graphics/ThriftULogoModern.png"
+      alt="Thrift-U logo"
       width={30}
       height={30}
     />
@@ -104,7 +104,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
             {/* Left side */}
             <div className="flex flex-1 items-center gap-2">
               {/* Logo */}
-              <Link 
+              <Link
                 href="/"
                 className="flex items-center space-x-2 text-white hover:text-[#a8a8a8] transition-colors no-underline"
               >
@@ -137,7 +137,6 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 </div>
               </form>
             </div>
-            
             {/* Right side */}
             <div className="flex flex-1 items-center justify-end gap-2">
               {!authLoading && (
@@ -145,15 +144,13 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                   {user ? (
                     <>
                       {/* Cart Menu */}
-                      <CartMenu userId={user.uid} />
-                      
+                      <CartMenu />
                       {/* Notifications */}
-                      <NotificationMenu 
+                      <NotificationMenu
                         notificationCount={0}
                       />
-                      
                       {/* User menu */}
-                      <UserMenu 
+                      <UserMenu
                         userName={user.displayName || 'User'}
                         userEmail={user.email || ''}
                         userAvatar={user.photoURL || undefined}

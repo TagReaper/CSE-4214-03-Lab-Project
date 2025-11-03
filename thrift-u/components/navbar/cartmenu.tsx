@@ -13,69 +13,91 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
-import FireData from '@/firebase/clientApp';
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  doc,
-  deleteDoc,
-} from 'firebase/firestore';
 
-export interface CartItem {
-  id: string;
+// Item structure from store
+interface Item {
+  id: number;
   name: string;
+  category: string;
   price: number;
+  stock: number;
+}
+
+// Cart item with quantity
+interface CartItem {
+  item: Item;
   quantity: number;
-  imageUrl?: string;
-  productId: string;
 }
 
-export interface CartMenuProps {
-  userId: string;
-}
-
-export const CartMenu = ({ userId }: CartMenuProps) => {
+export const CartMenu = () => {
   const router = useRouter();
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Load cart from localStorage
   useEffect(() => {
-    if (!userId) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
+    const loadCart = () => {
+      try {
+        const storedCart = localStorage.getItem("cart");
+        const storedItems = localStorage.getItem("items");
 
-    const cartRef = collection(FireData.db, 'carts');
-    const q = query(cartRef, where('userId', '==', userId));
+        if (storedCart && storedItems) {
+          const cart = JSON.parse(storedCart) as { [key: number]: number };
+          const items = JSON.parse(storedItems) as Item[];
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const cartItems: CartItem[] = [];
-      snapshot.forEach((doc) => {
-        cartItems.push({ id: doc.id, ...doc.data() } as CartItem);
-      });
-      setItems(cartItems);
-      setLoading(false);
-    }, (error) => {
-      console.error('Error fetching cart:', error);
-      setLoading(false);
-    });
+          // Combine quantities and item details
+          const cartArray: CartItem[] = Object.entries(cart)
+            .map(([itemId, quantity]) => {
+              const item = items.find(i => i.id === parseInt(itemId));
+              if (!item) return null;
+              return { item, quantity };
+            })
+            .filter((ci): ci is CartItem => ci !== null);
 
-    return () => unsubscribe();
-  }, [userId]);
+          setCartItems(cartArray);
+        }
+      } catch (error) {
+        console.error('Error loading cart:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const removeFromCart = async (itemId: string) => {
+    loadCart();
+
+    // Listener for Localstorage changes when cart is updated from other places
+    const handleStorageChange = () => {
+      loadCart();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Listener for same-tab cart updates
+    window.addEventListener('cartUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdated', handleStorageChange);
+    };
+  }, []);
+
+  // Remove item from cart
+  const removeFromCart = (itemId: number) => {
     try {
-      await deleteDoc(doc(FireData.db, 'carts', itemId));
+      const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
+      delete storedCart[itemId];
+      localStorage.setItem("cart", JSON.stringify(storedCart));
+
+      // Update local state
+      setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
+
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error removing from cart:', error);
     }
   };
-  const cartCount = items.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartCount = cartItems.reduce((total, ci) => total + ci.quantity, 0);
+  const cartTotal = cartItems.reduce((total, ci) => total + (ci.item.price * ci.quantity), 0);
 
   const handleViewCart = () => {
     router.push('/cart');
@@ -97,36 +119,29 @@ export const CartMenu = ({ userId }: CartMenuProps) => {
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel>Shopping Cart</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {items.length === 0 ? (
+        {cartItems.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Your cart is empty
           </div>
         ) : (
           <>
             <div className="max-h-[300px] overflow-y-auto">
-              {items.map((item) => (
+              {cartItems.map(({ item, quantity }) => (
                 <DropdownMenuItem
                   key={item.id}
                   className="flex items-start gap-3 p-3 cursor-pointer"
                   onSelect={(e) => e.preventDefault()}
                 >
-                  {item.imageUrl && (
-                    <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-muted">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      ${item.price.toFixed(2)} × {item.quantity}
+                      {item.category}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ${item.price.toFixed(2)} × {quantity}
                     </p>
                     <p className="text-sm font-medium mt-1">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ${(item.price * quantity).toFixed(2)}
                     </p>
                   </div>
                   <Button
@@ -150,7 +165,7 @@ export const CartMenu = ({ userId }: CartMenuProps) => {
                 <span className="font-bold text-lg">${cartTotal.toFixed(2)}</span>
               </div>
               <Button
-                className="w-full bg-[#8B1538] hover:bg-[#6B0F2A]" 
+                className="w-full bg-[#8B1538] hover:bg-[#6B0F2A]"
                 onClick={handleViewCart}
               >
                 View Cart & Checkout
