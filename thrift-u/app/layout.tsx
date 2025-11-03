@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from 'next/link';
 import Image from "next/image";
 import "./globals.css";
+import { Navbar } from "@/components/navbar/navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +32,9 @@ export default function RootLayout({
         </style>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <div>
-          <ul style={{color: 'white', backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
+        <div className="relative w-full">
+          <Navbar />
+          {/* <ul style={{color: 'white', backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
             <li style={{float: "left"}}><span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
               <Link href = {"/"}> <Image className="dark" src="/Graphics/ThriftULogoModern.png" alt="Home logo" width={65} height={42} /> </Link>
             </span></li>
@@ -40,7 +42,7 @@ export default function RootLayout({
               <Image className="dark:invert" src="/Icons/buyer.svg" alt="Home logo" width={30} height={30} />
               <Link href = {"/login"}> Login </Link>
             </span></li>
-          </ul>
+          </ul> */}
         </div>
         <div>
           {""}
