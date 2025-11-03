@@ -3,15 +3,16 @@ import { getDoc, getDocs, collection, doc, updateDoc, addDoc, setDoc} from "@fir
 import FireData from "@/firebase/clientApp";
 import { getAuthUser, verifyRole } from "@/lib/auth";
 
-export async function checkout(Cart, Address, Payment) {
-    const token = await getAuthUser()
-
+export async function checkout(Address, Payment) {
     if (verifyRole("Buyer")){
-        const Inventory = await getDocs(collection(FireData.db, "Inventory"))
-        const serverTime = new Date();
+        const token = await getAuthUser()
         var Items = []
         var orderSum = 0
+        const serverTime = new Date();
         try{
+            const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
+            const Inventory = await getDocs(collection(FireData.db, "Inventory"))
+            const Cart = Buyer.cart
             if(!Payment) {throw Error("Payment Declined")}
             if (Payment.default){
                 await setDoc(doc(FireData.db, "Payment", token.user_id), {
@@ -63,9 +64,7 @@ export async function checkout(Cart, Address, Payment) {
                 })
             }
 
-            const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
-
-            await await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
+            await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
                     numOrders: Buyer.numOrders + 1,
                     cart: [],
                 })
@@ -80,31 +79,56 @@ export async function checkout(Cart, Address, Payment) {
     }
 }
 
-export async function addToCart(ItemId, qty) {
-    /*
-    */
+export async function editCart(ItemId, qty) {
     if (verifyRole("Buyer")){
-        return true
-    } else {
-        return false
-    }
-}
+        try {
+            const token = await getAuthUser()
+            const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
+            const Cart = Buyer.cart
+            for (let index = 0; index < Cart.length; index++) {
+                if (Cart[index].itemId == ItemId){
+                    Cart[index].qty += qty
+                    if (Cart[index].qty <= 0){
+                        Cart.splice(index, 1)
+                    }
+                    await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
+                        cart: Cart,
+                    })
+                    return true
+                }
+            }
 
-export async function removeFromCart(cartItemId, qty) {
-    /*
-    */
-    if (verifyRole("Buyer")){
-        return true
+            if (qty > 0){
+                Cart.push({
+                    itemId: ItemId,
+                    qty: qty
+                })
+                await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
+                    cart: Cart,
+                })
+            }
+
+            return true
+        } catch(error) {
+            console.error("Failed to edit cart:", error);
+            throw error
+        }
     } else {
         return false
     }
 }
 
 export async function clearCart() {
-    /*
-    */
     if (verifyRole("Buyer")){
-        return true
+        try {
+            const token = await getAuthUser()
+            await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
+                cart: [],
+            })
+        } catch (error) {
+            console.error("Failed to clear cart:", error);
+            throw error
+        }
     } else {
         return false
     }
