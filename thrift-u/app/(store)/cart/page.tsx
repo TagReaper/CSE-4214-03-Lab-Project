@@ -65,7 +65,7 @@ export default function CartPage() {
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
       <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
         <h1>Cart</h1>
-        <Link href="/store"><button>Back to Store</button></Link>
+        <Link href="/search"><button>Back to Search</button></Link>
       </header>
 
       {cartItems.length === 0 ? (
@@ -76,17 +76,33 @@ export default function CartPage() {
             <div key={item.id} style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem", borderRadius: "8px" }}>
               <h3>{item.name}</h3>
               <p>Price: ${item.price.toFixed(2)}</p>
-              <p>
-                Quantity: 
-                <input 
-                  type="number" 
-                  min={1} 
-                  max={item.stock} 
-                  value={quantity} 
-                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))} //Update quantity
-                  style={{ marginLeft: "0.5rem", width: "60px" }}
+
+              <div className="flex items-center gap-2">
+              <span>Quantity:</span>
+              <div className="number-control ml-2">
+                <span
+                  className="number-left"
+                  onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1))}
+                >
+                  -
+                </span>
+
+                <input
+                  className="number-quantity"
+                  type="text"
+                  readOnly
+                  value={quantity}
                 />
-              </p>
+
+                <span
+                  className="number-right"
+                  onClick={() => updateQuantity(item.id, Math.min(item.stock, quantity + 1))}
+                >
+                  +
+                </span>
+              </div>
+            </div>
+
               <p>Subtotal: ${(item.price * quantity).toFixed(2)}</p> {/*Item subtotal*/}
               <button onClick={() => removeItem(item.id)}>Remove</button> {/*Remove item*/}
             </div>
