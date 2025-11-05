@@ -9,7 +9,7 @@ const CompactItemListing = ({itemId, image, price, productName, quantity}) => {
 
     const handleClick = async () => {
         //pushes to individual product page {itemId}
-        router.push('/')
+        router.push(`/listing/${itemId}`)
     }
 
     if (quantity > 0){

@@ -4,7 +4,7 @@ export default function InvalidAccess() {
     return (
         <div className={"flex flex-col justify-center items-center h-dvh text-center"}>
             <h1 className="m-2">
-                Oops!
+                Oops!!
             </h1>
             <h3 className="text-2xl mt-3 underline">
                 Invalid Access Level
