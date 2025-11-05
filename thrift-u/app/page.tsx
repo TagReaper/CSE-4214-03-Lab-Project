@@ -6,6 +6,14 @@ import {useAuthState} from "react-firebase-hooks/auth";
 import FireData from "../firebase/clientApp";
 import { useRouter } from "next/navigation";
 import "./globals.css";
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 export default function Home() {
   const router = useRouter();
@@ -30,4 +38,117 @@ export default function Home() {
         });
       }}>Sign Out</button>
       </div>
+}
+
+export function CarouselMain() {
+  return (
+    <div className="relative w-full max-w-sm mx-auto text-center">
+    
+      <h2 className="text-3xl font-bold mb-4 text-black">
+        Hot New Sellers
+      </h2>
+
+    
+      <Carousel
+        opts={{ align: "start" }}
+        className="w-full max-w-sm"
+      >
+        <CarouselContent>
+          {Array.from({ length: 9 }).map((_, index) => (
+            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex aspect-square items-center justify-center p-6">
+                    <span className="text-3xl font-semibold">
+                      {index + 1}
+                    </span>
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+            
+          ))}
+        </CarouselContent>
+
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  );
+}
+
+
+export function Carousel1() {
+  return (
+    <div className="relative w-full max-w-xs mx-auto text-center">
+      <h2 className="text-2xl font-bold mb-4 text-black">Sports</h2>
+      <Carousel className="w-full">
+        <CarouselContent>
+          {Array.from({ length: 7 }).map((_, index) => (
+            <CarouselItem key={index}>
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex aspect-square items-center justify-center p-6">
+                    <span className="text-4xl font-semibold">{index + 1}</span>
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  )
+}
+
+export function Carousel2() {
+  return (
+    <div className="relative w-full max-w-xs mx-auto text-center">
+      <h2 className="text-2xl font-bold mb-4 text-black">Clothing</h2>
+      <Carousel className="w-full">
+        <CarouselContent>
+          {Array.from({ length: 7 }).map((_, index) => (
+            <CarouselItem key={index}>
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex aspect-square items-center justify-center p-6">
+                    <span className="text-4xl font-semibold">{index + 1}</span>
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  )
+}
+
+export function Carousel3() {
+  return (
+    <div className="relative w-full max-w-xs mx-auto text-center">
+      <h2 className="text-2xl font-bold mb-4 text-black">College</h2>
+      <Carousel className="w-full">
+        <CarouselContent>
+          {Array.from({ length: 7 }).map((_, index) => (
+            <CarouselItem key={index}>
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex aspect-square items-center justify-center p-6">
+                    <span className="text-4xl font-semibold">{index + 1}</span>
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  )
 }
