@@ -12,6 +12,7 @@ const Login = () => {
   const [password, setPass] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [banned, setBanned] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (event) => {
@@ -28,11 +29,12 @@ const Login = () => {
         doc(FireData.db, "User", credential.user.uid)
       );
 
-      if (userRef.data().banned || userRef.data().detetedAt != ""){
+      if (userRef.data().deletedAt != ""){
         await FireData.auth.signOut();
         await fetch("/api/auth", { //send empty token to api route to set cookie
           method: "POST",
         });
+        setBanned(true)
         throw new Error("Your account was banned from, or was denied access to, ThriftU.\nContact us if you believe this to be a mistake.")
       }
 
@@ -49,10 +51,27 @@ const Login = () => {
         case "Buyer":
           payload.role = "Buyer";
           payload.status = "null";
+          const buyerRef = await getDoc(doc(FireData.db, 'Buyer', credential.user.uid))
+          if (buyerRef.data().banned){
+            await FireData.auth.signOut();
+            await fetch("/api/auth", { //send empty token to api route to set cookie
+              method: "POST",
+            });
+            setBanned(true)
+            throw new Error("Your account was banned from, or was denied access to, ThriftU.\nContact us if you believe this to be a mistake.")
+          }
           break;
         case "Seller":
           payload.role = "Seller";
           const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+          if (sellerRef.data().banned){
+            await FireData.auth.signOut();
+            await fetch("/api/auth", { //send empty token to api route to set cookie
+              method: "POST",
+            });
+            setBanned(true)
+            throw new Error("Your account was banned from, or was denied access to, ThriftU.\nContact us if you believe this to be a mistake.")
+          }
           if (sellerRef.data().validated){
               payload.status = "approved"
           } else {
@@ -60,7 +79,6 @@ const Login = () => {
           }
           break;
       }
-
       payload = btoa(JSON.stringify(payload));
       idToken = parts[0] + "." + payload + "." + parts[2];
 
@@ -75,8 +93,11 @@ const Login = () => {
       router.push("/"); //redirect to home page again
     } catch (error) {
       console.error("error during account login:", error);
-      setError("Failed to log in. Please check your email and password.");
-      alert("Unable to login:", error)
+      if(!banned){
+        setError("Failed to log in. Please check your email and password.");
+      } else {
+        setError("Your account was banned from, or was denied access to, ThriftU.\nContact us if you believe this to be a mistake.");
+      }
     } finally {
       setLoading(false);
     }

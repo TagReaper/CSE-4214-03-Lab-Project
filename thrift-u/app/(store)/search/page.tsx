@@ -1,10 +1,8 @@
 "use client"; //Makes this a client-side component (allows for user action)
 
 import { useState, useEffect } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
-import Link from "next/link"; //Allows navigation between pages
-import { useAuthState } from "react-firebase-hooks/auth"; //Checks if user is logged into Firebase
 import FireData from "../../../firebase/clientApp"; //Imports Firebase setup and connection
-import { collection, getDocs, query, where } from "@firebase/firestore"; 
+import { collection, getDocs, query, where } from "@firebase/firestore";
 
 //Details of an Item
 interface Item {
@@ -22,10 +20,6 @@ interface Item {
 }
 
 export default function SearchPage() {
-  //Check if user is logged in and firebase load status
-  const [user] = useAuthState(FireData.auth);
-  const isLoggedIn = !!user; //turns the object into a boolean
-  
   //List of items for sale
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +41,9 @@ export default function SearchPage() {
         //Query approved items only
         const inventoryQuery = query(
           collection(FireData.db, "Inventory"),
-          where("approved", "==", true)
+          where("approved", "==", true),
+          where("quantity", ">", 0),
+          where("deletedAt", "==", "")
         );
 
         const querySnapshot = await getDocs(inventoryQuery);
@@ -56,7 +52,7 @@ export default function SearchPage() {
         const fetchedItems = querySnapshot.docs.map((doc) =>  ({
           id: doc.id,
           name: doc.data().name,
-          price: Number(doc.data().price),
+          price: doc.data().price,
           quantity: doc.data().quantity,
           stock: doc.data().quantity, //
           tags: doc.data().tags || [],
@@ -71,7 +67,7 @@ export default function SearchPage() {
 
         setItems(fetchedItems);
       }
-      
+
       catch (err) {
         console.error("Error fetching items: ", err);
         setError("Failed to load items. Please try again.");
@@ -103,13 +99,9 @@ const filteredItems = items.filter(item => {
 
   //Runs when user clicks "add to cart"
   const handleAddToCart = (item: Item) => {
-    if (!isLoggedIn) {
-      alert("Please log in to add items to cart."); //displayed if a guest attempts to add item to cart
-      return;
-    }
 
     const currentQuantity = cart[item.id] || 0; //Get how many of this item are already in cart
-    
+
     //Prevents adding more items in cart than are in stock
     if (currentQuantity >= item.stock) {
       alert(`Sorry, only ${item.stock} ${item.name}(s) in stock!`);
@@ -122,12 +114,12 @@ const filteredItems = items.filter(item => {
         ...prev,
         [item.id]: currentQuantity + 1,
       };
-      
+
       localStorage.setItem("cart", JSON.stringify(newCart));
 
       return newCart;
     });
-    
+
     console.log(`Added ${item.name} to cart`);
   };
 
@@ -157,12 +149,6 @@ const filteredItems = items.filter(item => {
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
       <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
         <h1>Search</h1>
-        <div>
-          <span style={{ marginRight: "1rem", color: isLoggedIn ? "green" : "red" }}>{/*ternary operator, if/else statement for JavaScript/TypeScript. condition ? valueIfTrue : valueIfFalse*/}
-            {isLoggedIn ? "Logged In" : "Not Logged In"}
-          </span>
-          <Link href="/cart"><button>Cart</button></Link> {/*Use link for user interaction to next page, use useRouter/useEffect/router.push for an automatic redirect*/}
-        </div>
       </header>
 
       {/*Search bar and category dropdown*/}
@@ -198,7 +184,7 @@ const filteredItems = items.filter(item => {
         {filteredItems.map((item) => {
           const quantity = getItemQuantity(item.id);
           const isOutOfStock = quantity >= item.stock;
-          
+
           return (
             <div
               key={item.id}
@@ -252,9 +238,9 @@ const filteredItems = items.filter(item => {
                   In Cart: {quantity}
                 </p>
               )}
-              
+
               {/*Add to cart button (disabled if out of stock)*/}
-              <button 
+              <button
                 onClick={() => handleAddToCart(item)}
                 disabled={isOutOfStock}
                 style={{

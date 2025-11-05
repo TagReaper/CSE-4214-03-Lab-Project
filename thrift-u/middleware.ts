@@ -25,13 +25,13 @@ function getDecodedToken(token: RequestCookie) {
 };
 
 export function middleware(request: NextRequest){
-    const response = NextResponse.next();
-
     const token = request.cookies.get("idToken");
-    interface CustomClaims {
-        role?: ('admin' | 'seller' | 'buyer')[];
-        status?: 'pending_seller' | 'approved_seller';
-    }
+
+    const authPaths = ["login", "signup"]
+    const publicPaths = ["listing", "search"]
+    const buyerPaths = ["cart", "checkout", "account/orders", "account"]
+    const sellerPaths = ["sellerhub", "account", "sellerhub/orders"]
+    const adminPaths = ["adminpanel", "adminpanel/orders", "adminpanel/products", "adminpanel/users"]
 
     console.log(request.nextUrl.pathname)
 
@@ -39,11 +39,39 @@ export function middleware(request: NextRequest){
         if (token.value != "null"){
             const decodedToken = getDecodedToken(token)
             console.log("User is logged in!")
+            if (authPaths.some(item => request.nextUrl.pathname.includes(item))) {
+                return NextResponse.redirect(new URL('/', request.url));
+            }
+            switch (decodedToken.role) {
+                case "Admin":
+                    if(request.nextUrl.pathname != "/" && (!adminPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
+                        return NextResponse.redirect(new URL('/invalidAccess', request.url));
+                    }
+                    break;
+                case "Buyer":
+                    if(request.nextUrl.pathname != "/" && (!buyerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
+                        return NextResponse.redirect(new URL('/invalidAccess', request.url));
+                    }
+                    break;
+                case "Seller":
+                    if (request.nextUrl.pathname != "/" && (decodedToken.status != "approved" && (!sellerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item))))){
+                        return NextResponse.redirect(new URL('/invalidAccess', request.url));
+                    }
+                    break;
+                default:
+                    return NextResponse.redirect(new URL('/invalidAccess', request.url));
+            }
         } else {
+            if (!authPaths.some(item => request.nextUrl.pathname.includes(item))) {
+                return NextResponse.redirect(new URL('/login', request.url));
+            }
             console.log("User is logged out!");
         }
     } else {
         console.log("User has no cookies");
+        if (!authPaths.some(item => request.nextUrl.pathname.includes(item))){
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
     }
 }
 
@@ -53,7 +81,6 @@ export const config = {
         "/sellerhub/:path*",
         "/login/:path*",
         "/signup/:path*",
-        "/api/:path*",
         "/adminpanel/:path*",
         "/search/:path*"
         ]
