@@ -146,8 +146,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                       {/* Cart Menu */}
                       <CartMenu />
                       {/* Notifications */}
-                      <NotificationMenu
-                        notificationCount={0}
+                      <NotificationMenu userId={user.uid}
                       />
                       {/* User menu */}
                       <UserMenu
