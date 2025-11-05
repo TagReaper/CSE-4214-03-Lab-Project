@@ -28,8 +28,15 @@ const Login = () => {
         doc(FireData.db, "User", credential.user.uid)
       );
 
+      if (userRef.data().banned || userRef.data().detetedAt != ""){
+        await FireData.auth.signOut();
+        await fetch("/api/auth", { //send empty token to api route to set cookie
+          method: "POST",
+        });
+        throw new Error("Your account was banned from, or was denied access to, ThriftU.\nContact us if you believe this to be a mistake.")
+      }
+
       var idToken = await credential.user.getIdToken();
-      const original = idToken;
       const parts = idToken.split(".");
       const access = userRef.data().accessLevel;
       var payload = JSON.parse(atob(parts[1]));
@@ -45,13 +52,12 @@ const Login = () => {
           break;
         case "Seller":
           payload.role = "Seller";
-          payload.status = "Pending Check";
-          // const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
-          // if (sellerRef.data().validated){
-          //     payload.status = "approved"
-          // } else {
-          //     payload.status = "pending"
-          // }
+          const sellerRef = await getDoc(doc(FireData.db, 'Seller', credential.user.uid))
+          if (sellerRef.data().validated){
+              payload.status = "approved"
+          } else {
+              payload.status = "pending"
+          }
           break;
       }
 
@@ -63,7 +69,6 @@ const Login = () => {
         method: "POST",
         headers: {
           Authorization: `${idToken}`,
-          Secondary: `${original}`,
         },
       });
 
@@ -71,6 +76,7 @@ const Login = () => {
     } catch (error) {
       console.error("error during account login:", error);
       setError("Failed to log in. Please check your email and password.");
+      alert("Unable to login:", error)
     } finally {
       setLoading(false);
     }

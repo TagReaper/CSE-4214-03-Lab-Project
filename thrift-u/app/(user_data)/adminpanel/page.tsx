@@ -1,3 +1,4 @@
+'use client'
 import ListUsers from '../../../components/adminpanel/admin_UserList'
 import PendingProductList from '../../../components/adminpanel/adminProductList'
 
@@ -9,10 +10,10 @@ export default function AdminPage() {
             </h1>
             <div className="flex flex-row gap-4">
                 <div className="flex-1">
-                <ListUsers />
+                    <ListUsers />
                 </div>
                 <div className="flex-1">
-                <PendingProductList />
+                    <PendingProductList />
                 </div>
             </div>
         </div>

@@ -1,16 +1,14 @@
 "use server";
-//import { serverConfig } from "../config/config";
 import { cookies } from "next/headers";
-import { adminAuth } from "@/firebase/adminApp";
 
-const getDecodedToken = async () => {
+export const getDecodedToken = async () => {
   console.log("getDecodedToken: Starting...");
   try {
     console.log("getDecodedToken: Awaiting cookies...");
     const cookieStore = await cookies();
     console.log("getDecodedToken: Got cookie store");
 
-    const sessionCookie = cookieStore.get("FireToken");
+    const sessionCookie = cookieStore.get("idToken");
     console.log("getDecodedToken: Session cookie exists?", !!sessionCookie);
 
     if (!sessionCookie) {
@@ -18,14 +16,14 @@ const getDecodedToken = async () => {
     }
 
     const token = sessionCookie.value;
-    console.log("getDecodedToken: Token length:", token?.length);
+    const parts = token.split('.');
+    const payload = JSON.parse(atob(parts[1]));
 
     console.log("getDecodedToken: Verifying token...");
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    console.log(
-      "getDecodedToken: Token verified successfully. UID:",
-      decodedToken.uid
-    );
+    const decodedToken = payload;
+    if (!(!!decodedToken.user_id)) {
+      throw new Error("Invalid Cookie: Logout, then Login.");
+    }
     return decodedToken;
   } catch (error) {
     console.error("getDecodedToken: Error occurred:", error);
@@ -34,31 +32,39 @@ const getDecodedToken = async () => {
 };
 
 export const verifyRole = async (requiredRole) => {
-  if (!requiredRole) {
-    throw new Error(
-      "A required role must be provided to the verification function."
-    );
-  }
+  try{
+    if (!requiredRole) {
+      throw new Error(
+        "A required role must be provided to the verification function."
+      );
+    }
 
-  const decodedToken = await getDecodedToken();
-  // role doesn't match
-  if (decodedToken.role !== requiredRole) {
-    throw new Error(
-      `Forbidden: This action requires the "${requiredRole}" role.`
-    );
-  }
+    const decodedToken = await getDecodedToken();
+    // role doesn't match
+    if (decodedToken.role !== requiredRole) {
+      throw new Error(
+        `Forbidden: This action requires the "${requiredRole}" role.`
+      );
+    }
 
-  // seller status check
-  if (requiredRole === "seller" && decodedToken.status !== "approved_seller") {
-    throw new Error(`Forbidden: Seller account is not approved.`);
+    // seller status check
+    if (requiredRole === "Seller" && decodedToken.status !== "approved") {
+      throw new Error(`Forbidden: Seller account is not approved.`);
+    }
+    return true;
+  } catch(error){
+    console.error(error)
+    return false
   }
-
-  return decodedToken;
 };
 
 export const getAuthUser = async () => {
   console.log("getAuthUser: Called");
-  const decodedToken = await getDecodedToken();
-  console.log("getAuthUser: Returning decoded token");
-  return decodedToken;
+  try{
+    const decodedToken = await getDecodedToken();
+    console.log("getAuthUser: Returning decoded token");
+    return decodedToken;
+  } catch(error){
+    throw(error)
+  }
 };

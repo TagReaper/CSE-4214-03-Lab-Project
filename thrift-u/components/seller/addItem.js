@@ -19,110 +19,87 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  MultiSelect,
-  MultiSelectContent,
-  MultiSelectGroup,
-  MultiSelectItem,
-  MultiSelectTrigger,
-  MultiSelectValue,
-} from "@/components/ui/multi-select";
-import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { addDoc, collection } from "@firebase/firestore";
-import FireData from "@/firebase/clientApp";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectGroup,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from "@/components/ui/multi-select"
+import Image from "next/image"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useState } from "react"
+import { Textarea } from "@/components/ui/textarea"
+import { addDoc, collection} from "@firebase/firestore"
+import FireData from "@/firebase/clientApp"
+import {ref, uploadBytes, getDownloadURL} from "firebase/storage"
+import { verifyRole } from "@/lib/auth"
 
 async function getSellerName(userId) {
   try {
     const userRef = doc(FireData.db, "users", userId);
     const docSnap = await getDoc(userRef);
 
-    if (!docSnap.exists()) {
-      console.warn(`User not found: ${userId}`);
-      return "Unknown Seller";
-    }
+    const [title, setTitle] = useState("");
+    const [desc, setDesc] = useState("");
+    const [price, setPrice] = useState(0);
+    const [qty, setQTY] = useState(0);
+    const [condition, setCondition] = useState("");
+    const [tags, setTags] = useState([]);
+    const [image, setImage] = useState(null);
+    const tagOptions = [
+        "Sports",
+        "Clothing",
+        "College",
+        "Kitchen",
+        "Hoodie",
+        "Shirt",
+        "Hat",
+        "Football",
+        "Baseball",
+        "Basketball",
+        "Soccer",
+        "Hockey",
+        "Crafts",
+        "Gym",
+        "Hand-Made",
+        "Decoration",
+        "Misc",
+        "Tennis",
+        "Equipment",
+        "Tech",
+        "Jewlery",
+        "Living",
+        "Dining"
+    ]
 
-    const data = docSnap.data();
-    const firstName = data?.firstname || "";
-    const lastName = data?.lastname || "";
+    const handleRequest = async (event) => {
+        event.preventDefault();
+        try{
+            if (!(await verifyRole("Seller"))){
+                throw new Error("Invalid access")
+            }
+            const imageRef = ref(FireData.storage, `images/${image.name + Math.floor(Math.random()*10000)}`)
+            await uploadBytes(imageRef, image)
+            const u = await getDownloadURL(imageRef)
 
-    const fullName = `${firstName} ${lastName}`.trim();
-
-    return fullName || "Unknown Seller";
-  } catch (error) {
-    console.error("Error fetching seller name:", error);
-    return "Error: See Logs";
-  }
-}
-
-const RequestItem = ({ sellerId }) => {
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [price, setPrice] = useState("");
-  const [qty, setQTY] = useState("");
-  const [condition, setCondition] = useState("");
-  const [tags, setTags] = useState([]);
-  const [image, setImage] = useState(null);
-  const tagOptions = [
-    "Sports",
-    "Clothing",
-    "College",
-    "Kitchen",
-    "Hoodie",
-    "Shirt",
-    "Hat",
-    "Football",
-    "Baseball",
-    "Basketball",
-    "Soccer",
-    "Hockey",
-    "Crafts",
-    "Gym",
-    "Hand-Made",
-    "Decoration",
-    "Misc",
-    "Tennis",
-    "Equipment",
-    "Tech",
-    "Jewlery",
-    "Living",
-    "Dining",
-  ];
-
-  const handleRequest = async (event) => {
-    event.preventDefault();
-    try {
-      const imageRef = ref(
-        FireData.storage,
-        `images/${image.name + Math.floor(Math.random() * 10000)}`
-      );
-      await uploadBytes(imageRef, image);
-      const u = await getDownloadURL(imageRef);
-
-      const newProductRef = await addDoc(collection(FireData.db, "Inventory"), {
-        sellerId: sellerId,
-        condition: condition,
-        quantity: qty,
-        price: price,
-        name: title,
-        description: desc,
-        approved: false,
-        tags: tags,
-        image: u,
-      });
-
-      const productId = newProductRef.id;
-      const sellerName = await getSellerName(sellerId);
-
-      await notificationService.notifyAllAdmins(
-        NotificationType.NEW_SELLER_PRODUCT,
-        {
-          productId: productId,
-          sellerId: sellerId,
-          sellerName: sellerName,
+            await addDoc(collection(FireData.db, "Inventory"), {
+                sellerId: sellerId,
+                condition: condition,
+                quantity: qty,
+                price: price,
+                name: title,
+                description: desc,
+                approved: false,
+                tags: tags,
+                image: u,
+                deletedAt: "",
+            })
+            location.reload();
+        } catch(error) {
+            console.error("Error requesting item creation: ", error)
+            alert("Error requesting item creation: ", error)
         }
       );
 

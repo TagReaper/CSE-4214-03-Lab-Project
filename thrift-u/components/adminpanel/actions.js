@@ -3,6 +3,7 @@ import { getDoc, doc, updateDoc } from "@firebase/firestore";
 import FireData from "@/firebase/clientApp";
 //import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { verifyRole } from '../../lib/auth'
 
 async function getProductName(productId) {
   try {
@@ -24,12 +25,9 @@ async function getProductName(productId) {
 }
 
 export async function approveProduct(productId) {
-  // permission check
-  //   try {
-  //     await verifyUserAndCheckRole("admin");
-  //   } catch (error) {
-  //     return { error: error.message };
-  //   }
+  if (!(await verifyRole("Admin"))){
+    return { error: "Invalid Access." }
+  }
 
   if (!productId) {
     return { error: "Product ID is required." };
@@ -39,7 +37,7 @@ export async function approveProduct(productId) {
   try {
     // update db entry
     await updateDoc(doc(FireData.db, "Inventory", productId), {
-      approved: "true",
+      approved: true,
     });
 
     const productName = await getProductName(productId);
@@ -60,13 +58,38 @@ export async function approveProduct(productId) {
   return { success: `Product ${productId} has been approved.` };
 }
 
+export async function denyProduct(productId) {
+  if (!(await verifyRole("Admin"))){
+    return { error: "Invalid Access." }
+  }
+
+  if (!productId) {
+    return { error: "Product ID is required." };
+  }
+
+  // pull product from db
+  try {
+    // update db entry
+    const date = new Date()
+    await updateDoc(doc(FireData.db, "Inventory", productId), {
+      deletedAt: date.toLocaleString(),
+    });
+  } catch (error) {
+    console.error("Error denying product:", error);
+    return { error: "Failed to update the product in the database." };
+  }
+
+  // refresh data on page
+  revalidatePath("/adminpanel");
+
+  return { success: `Product ${productId} has been denied.` };
+}
+
 export async function approveSeller(sellerId) {
-  // permission check
-  //   try {
-  //     await verifyUserAndCheckRole("admin");
-  //   } catch (error) {
-  //     return { error: error.message };
-  //   }
+  if (!(await verifyRole("Admin"))){
+    return { error: "Invalid Access." }
+  }
+
   if (!sellerId) {
     return { error: "Seller ID is required." };
   }
@@ -85,18 +108,6 @@ export async function approveSeller(sellerId) {
     if (!uid) {
       return { error: "UserID (uid) not found in the seller document." };
     }
-
-    // removed custom claims
-    // const userRecord = await adminAuth.getUser(uid);
-    // const customClaims = userRecord.customClaims || {};
-
-    // const newClaims = {
-    //   ...customClaims,
-    //   role: "seller",
-    //   status: "approved_seller",
-    // };
-
-    // await adminAuth.setCustomUserClaims(uid, newClaims);
 
     // update db entry
     await updateDoc(doc(FireData.db, "Seller", sellerId), {
@@ -119,13 +130,49 @@ export async function approveSeller(sellerId) {
   return { success: `UserID: ${sellerId} has been approved to be a seller.` };
 }
 
+export async function denySeller(sellerId) {
+  if (!(await verifyRole("Admin"))){
+    return { error: "Invalid Access." }
+  }
+
+  if (!sellerId) {
+    return { error: "Seller ID is required." };
+  }
+
+  // pull seller from db
+  try {
+    const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId));
+    console.log(":", sellerDoc.data());
+
+  if (!sellerDoc.exists) {
+      return { error: "Seller document not found." };
+    }
+
+    const uid = sellerId;
+
+    if (!uid) {
+      return { error: "UserID (uid) not found in the seller document." };
+    }
+
+    // update db entry
+    const date = new Date()
+    await updateDoc(doc(FireData.db, "Seller", sellerId), {
+      deletedAt: date.toLocaleString(),
+    });
+  } catch (error) {
+    console.error("Error denying seller:", error);
+    return { error: "Failed to update the seller in the database." };
+  }
+
+  revalidatePath("/adminpanel");
+  return { success: `UserID: ${sellerId} has been denied seller access.` };
+}
+
 export async function toggleBanStatus(id, access) {
-  // permission check
-  //   try {
-  //     await verifyUserAndCheckRole("admin");
-  //   } catch (error) {
-  //     return { error: error.message };
-  //   }
+  if (!(await verifyRole("Admin"))){
+    return { error: "Invalid Access." }
+  }
+
   if (!id) {
     return { error: "User ID is required." };
   }

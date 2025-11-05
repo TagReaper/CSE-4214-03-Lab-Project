@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from "react"; //Import react hooks (useState for state management, useEffect for side effects)
 import Link from "next/link";
+import FireData from "../../../firebase/clientApp";
+import { collection, getDocs, query, where, documentId } from "@firebase/firestore"
 
 //Item structure from store
 interface Item {
-  id: number;
+  id: string;
   name: string;
-  category: string;
   price: number;
   stock: number;
+  quantity: number;
+  tags: string[];
+  image?: string;
+  description?: string;
+  condition?: string;
+  sellerId: string;
+  approved: boolean;
 }
 
 //Cart item with quantity
@@ -23,25 +31,62 @@ export default function CartPage() {
 
   //Loads cart from localStorage
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart"); //Get cart object from localStorage
-    const storedItems = localStorage.getItem("items"); //Get item details from localStorage
-    if (storedCart && storedItems) {
-      const cart = JSON.parse(storedCart) as { [key: number]: number };
-      const items = JSON.parse(storedItems) as Item[];
-      
-      //Combine quantities and item details
-      const cartArray: CartItem[] = Object.entries(cart).map(([itemId, quantity]) => {
-        const item = items.find(i => i.id === parseInt(itemId));
-        if (!item) throw new Error("Item not found in store data!");
-        return { item, quantity };
-      });
+    const loadCart = async () => {
+      const storedCart = localStorage.getItem("cart");
 
-      setCartItems(cartArray); //Set cart state
-    }
+      if (storedCart) {
+        const cart = JSON.parse(storedCart) as { [key: string]: number };
+        const itemIds = Object.keys(cart);
+
+        if (itemIds.length === 0) {
+          setCartItems([]);
+          return;
+        }
+
+        try {
+          //Fetch items from Firestore using IDs from cart
+          const itemsQuery = query(
+          collection(FireData.db, "Inventory"),
+          where(documentId(), "in", itemIds)
+        );
+
+        const querySnapshot = await getDocs(itemsQuery);
+
+        const items: Item[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          price: Number(doc.data().price),
+          quantity: doc.data().quantity,
+          stock: doc.data().quantity,
+          tags: doc.data().tags || [],
+          image: doc.data().image,
+          description: doc.data().description,
+          condition: doc.data().condition,
+          sellerId: doc.data().sellerId,
+          approved: doc.data().approved,
+        }));
+
+        //Combine cart quantities with fetched items
+        const cartArray: CartItem[] = itemIds.map((itemId) => {
+          const item = items.find(i => i.id === itemId);
+          if (!item) throw new Error("Item not found in Firestore");
+          return { item, quantity: cart[itemId] };
+        });
+
+        setCartItems(cartArray);
+        }
+        catch (error) {
+          console.error("Error loading cart: ", error);
+          alert("Failed to load cart items. Please try again.");
+        }
+      }
+    };
+
+    loadCart();
   }, []);
 
   //Update quantity of item in cart
-  const updateQuantity = (itemId: number, newQuantity: number) => {
+  const updateQuantity = (itemId: string, newQuantity: number) => {
     setCartItems(prev =>
       prev.map(ci => ci.item.id === itemId ? { ...ci, quantity: newQuantity } : ci)
     );
@@ -52,7 +97,7 @@ export default function CartPage() {
   };
 
   //Remove item from cart
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemId: string) => {
     setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
     const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
     delete storedCart[itemId]; //Update localStorage
@@ -65,7 +110,7 @@ export default function CartPage() {
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
       <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
         <h1>Cart</h1>
-        <Link href="/store"><button>Back to Store</button></Link>
+        <Link href="/search"><button>Back to Search</button></Link>
       </header>
 
       {cartItems.length === 0 ? (
@@ -76,17 +121,33 @@ export default function CartPage() {
             <div key={item.id} style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem", borderRadius: "8px" }}>
               <h3>{item.name}</h3>
               <p>Price: ${item.price.toFixed(2)}</p>
-              <p>
-                Quantity: 
-                <input 
-                  type="number" 
-                  min={1} 
-                  max={item.stock} 
-                  value={quantity} 
-                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))} //Update quantity
-                  style={{ marginLeft: "0.5rem", width: "60px" }}
+
+              <div className="flex items-center gap-2">
+              <span>Quantity:</span>
+              <div className="number-control ml-2">
+                <span
+                  className="number-left"
+                  onClick={() => updateQuantity(item.id, Math.max(1, quantity - 1))}
+                >
+                  -
+                </span>
+
+                <input
+                  className="number-quantity"
+                  type="text"
+                  readOnly
+                  value={quantity}
                 />
-              </p>
+
+                <span
+                  className="number-right"
+                  onClick={() => updateQuantity(item.id, Math.min(item.stock, quantity + 1))}
+                >
+                  +
+                </span>
+              </div>
+            </div>
+
               <p>Subtotal: ${(item.price * quantity).toFixed(2)}</p> {/*Item subtotal*/}
               <button onClick={() => removeItem(item.id)}>Remove</button> {/*Remove item*/}
             </div>

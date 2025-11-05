@@ -121,17 +121,17 @@ export async function updateAddressAction(previousState, formData) {
   }
 
   const rawAddress = {
-    Address: formData.get("address")?.toString() || "",
-    City: formData.get("city")?.toString() || "",
-    State: formData.get("state")?.toString() || "",
-    ZipCode: formData.get("zipCode")?.toString() || "",
+    address: formData.get("address")?.toString() || "",
+    city: formData.get("city")?.toString() || "",
+    state: formData.get("state")?.toString() || "",
+    zip: formData.get("zipCode")?.toString() || "",
   };
 
   if (
-    !rawAddress.Address ||
-    !rawAddress.City ||
-    !rawAddress.State ||
-    !rawAddress.ZipCode
+    !rawAddress.address ||
+    !rawAddress.city ||
+    !rawAddress.state ||
+    !rawAddress.zip
   ) {
     return {
       error: "All address fields are required.",
@@ -140,40 +140,40 @@ export async function updateAddressAction(previousState, formData) {
     };
   }
 
-  const addressError = validateAddress(rawAddress.Address);
+  const addressError = validateAddress(rawAddress.address);
   if (addressError) {
     return { error: addressError, success: null, data: null };
   }
 
-  const cityError = validateCity(rawAddress.City);
+  const cityError = validateCity(rawAddress.city);
   if (cityError) {
     return { error: cityError, success: null, data: null };
   }
 
-  const stateError = validateState(rawAddress.State);
+  const stateError = validateState(rawAddress.state);
   if (stateError) {
     return { error: stateError, success: null, data: null };
   }
 
-  const zipError = validateZipCode(rawAddress.ZipCode);
+  const zipError = validateZipCode(rawAddress.zip);
   if (zipError) {
     return { error: zipError, success: null, data: null };
   }
 
   const address = {
-    Address: rawAddress.Address.trim(),
-    City: rawAddress.City.trim(),
-    State: rawAddress.State.trim().toUpperCase(),
-    ZipCode: rawAddress.ZipCode.trim(),
+    address: rawAddress.address.trim(),
+    city: rawAddress.city.trim(),
+    state: rawAddress.state.trim().toUpperCase(),
+    zip: rawAddress.zip.trim(),
   };
 
   try {
-    const buyerDocRef = adminDb.collection("Buyer").doc(authenticatedUser.uid);
+    const buyerDocRef = adminDb.collection("Buyer").doc(authenticatedUser.user_id);
 
     const buyerSnapshot = await buyerDocRef.get();
 
     if (!buyerSnapshot.exists) {
-      console.error("No buyer profile found for user:", authenticatedUser.uid);
+      console.error("No buyer profile found for user:", authenticatedUser.user_id);
       return {
         error: "Buyer profile not found for this user.",
         success: null,
@@ -182,10 +182,10 @@ export async function updateAddressAction(previousState, formData) {
     }
 
     await buyerDocRef.update({
-      Address: address.Address,
-      City: address.City,
-      State: address.State,
-      ZipCode: address.ZipCode,
+      address: address.address,
+      city: address.cisty,
+      state: address.state,
+      zip: address.zip,
     });
 
     revalidatePath("/account/addresses");

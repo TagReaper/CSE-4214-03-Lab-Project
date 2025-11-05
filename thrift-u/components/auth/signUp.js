@@ -68,7 +68,6 @@ const SignUp = () => {
       );
       const user = userCredential.user;
       var idToken = await user.getIdToken();
-      const original = idToken;
       const parts = idToken.split(".");
       var payload = JSON.parse(atob(parts[1]));
 
@@ -82,7 +81,7 @@ const SignUp = () => {
       });
 
       if (sellerReq) {
-        const confirmed = await confirm(
+        const confirmed = confirm(
           "Are you sure you want to request a seller account?"
         );
         if (confirmed) {
@@ -92,6 +91,7 @@ const SignUp = () => {
             banned: false,
             validated: false,
             Flags: 0,
+            deletedAt: "",
           });
 
           await notificationService.notifyAllAdmins(
@@ -114,6 +114,8 @@ const SignUp = () => {
           state: "",
           zip: "",
           numOrders: 0,
+          cartQTY: 0,
+          deletedAt: "",
         });
       }
 
@@ -125,7 +127,6 @@ const SignUp = () => {
         method: "POST",
         headers: {
           Authorization: `${idToken}`,
-          Secondary: `${original}`,
         },
       });
 
