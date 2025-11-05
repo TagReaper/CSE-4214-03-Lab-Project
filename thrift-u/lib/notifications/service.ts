@@ -22,7 +22,7 @@ import {
 export class NotificationService {
   private static instance: NotificationService;
   private handlers: Map<NotificationType, INotificationHandler>;
-  private collectionName: string = "notifications";
+  private collectionName: string = "Notifications";
 
   private constructor() {
     this.handlers = new Map();
@@ -105,7 +105,10 @@ export class NotificationService {
     }
 
     const notificationData = handler.process(userId, data, userRole);
-    const notificationId = Date.now();
+
+    const newNotificationRef = adminDb.collection(this.collectionName).doc();
+
+    const notificationId = newNotificationRef.id;
 
     const notification: NotificationDocument = {
       notificationId,
@@ -114,13 +117,10 @@ export class NotificationService {
       ...notificationData,
     };
 
-    await adminDb
-      .collection(this.collectionName)
-      .doc(notification.notificationId.toString())
-      .set({
-        ...notification,
-        date: notification.date.toISOString(),
-      });
+    await newNotificationRef.set({
+      ...notification,
+      date: notification.date.toISOString(),
+    });
 
     return notification;
   }
