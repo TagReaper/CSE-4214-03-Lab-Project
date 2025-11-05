@@ -19,8 +19,10 @@ const AddToCart = ({itemId, stock}) =>{
         const token = await getAuthUser()
         const buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
         const item = buyer.data().cart.find(obj => obj.itemId == itemId)
-        const qty = item.qty
-        setCartQTY(qty)
+        if (item){
+            const qty = item.qty
+            setCartQTY(qty)
+        }
     }
 
     const handleConfirm = async () => {
