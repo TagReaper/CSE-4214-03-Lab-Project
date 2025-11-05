@@ -46,7 +46,6 @@ export class SystemWarningHandler implements INotificationHandler {
       metadata: {
         action: data.action,
         reason: data.reason,
-        severity: data.severity,
       },
     };
   }
