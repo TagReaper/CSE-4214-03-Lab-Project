@@ -2,8 +2,7 @@
 
 import { useState } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
 import Link from "next/link"; //Allows navigation between pages
-import { useAuthState } from "react-firebase-hooks/auth"; //Checks if user is logged into Firebase
-import FireData from "../../../firebase/clientApp"; //Imports Firebase setup and connection
+import { getAuthUser } from "@/lib/auth";
 
 //Details of an Item
 interface Item {
@@ -17,9 +16,9 @@ interface Item {
 
 export default function SearchPage() {
   // Check if user is logged in and firebase load status
-  const [user] = useAuthState(FireData.auth);
+  const user = getAuthUser();
   const isLoggedIn = !!user; //turns the object into a boolean
-  
+
   // List of items for sale
   const[items] = useState<Item[]>([
     //Clothing
@@ -81,7 +80,7 @@ export default function SearchPage() {
     }
 
     const currentQuantity = cart[item.id] || 0; //Get how many of this item are already in cart
-    
+
     //Prevents adding more items in cart than are in stock
     if (currentQuantity >= item.stock) {
       alert(`Sorry, only ${item.stock} ${item.name}(s) in stock!`);
@@ -94,14 +93,14 @@ export default function SearchPage() {
         ...prev,
         [item.id]: currentQuantity + 1,
       };
-      
+
       localStorage.setItem("cart", JSON.stringify(newCart));
 
       localStorage.setItem("items", JSON.stringify(items));
 
       return newCart;
     });
-    
+
     console.log(`Added ${item.name} to cart`);
   };
 
@@ -142,7 +141,7 @@ export default function SearchPage() {
         {filteredItems.map((item) => {
           const quantity = getItemQuantity(item.id);
           const isOutOfStock = quantity >= item.stock;
-          
+
           return (
             <div
               key={item.id}
@@ -159,7 +158,7 @@ export default function SearchPage() {
               <p style={{ fontSize: "0.9rem", color: "#666" }}>
                 Stock: {item.stock - quantity} left
               </p>
-              
+
               {/*Shows # of item in cart*/}
               {quantity > 0 && (
                 <p style={{ 
@@ -172,9 +171,9 @@ export default function SearchPage() {
                   In Cart: {quantity}
                 </p>
               )}
-              
+
               {/*Add to cart button (disabled if out of stock)*/}
-              <button 
+              <button
                 onClick={() => handleAddToCart(item)}
                 disabled={isOutOfStock}
                 style={{

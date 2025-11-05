@@ -28,7 +28,7 @@ export default function CartPage() {
     if (storedCart && storedItems) {
       const cart = JSON.parse(storedCart) as { [key: number]: number };
       const items = JSON.parse(storedItems) as Item[];
-      
+
       //Combine quantities and item details
       const cartArray: CartItem[] = Object.entries(cart).map(([itemId, quantity]) => {
         const item = items.find(i => i.id === parseInt(itemId));
