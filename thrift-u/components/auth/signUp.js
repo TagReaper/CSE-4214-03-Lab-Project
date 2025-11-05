@@ -93,6 +93,14 @@ const SignUp = () => {
             Flags: 0,
             deletedAt: "",
           });
+
+          await notificationService.notifyAllAdmins(
+            NotificationType.NEW_SELLER_APPLICATION,
+            {
+              applicantId: user.uid,
+              applicantName: firstName + " " + lastName,
+            }
+          );
         } else {
           setSeller(false);
         }
