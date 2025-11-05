@@ -93,7 +93,7 @@ export class NotificationService {
   }
 
   public async sendNotification(
-    userId: number,
+    userId: string,
     type: NotificationType,
     data: any,
     userRole: UserRole = UserRole.BUYER
@@ -126,7 +126,7 @@ export class NotificationService {
   }
 
   public async getUserNotifications(
-    userId: number,
+    userId: string,
     limit: number = 50,
     userRole?: UserRole
   ): Promise<NotificationDocument[]> {
@@ -149,14 +149,14 @@ export class NotificationService {
     );
   }
 
-  public async markAsRead(notificationId: number): Promise<void> {
+  public async markAsRead(notificationId: string): Promise<void> {
     await adminDb
       .collection(this.collectionName)
       .doc(notificationId.toString())
       .update({ isRead: true });
   }
 
-  public async markAllAsRead(userId: number): Promise<void> {
+  public async markAllAsRead(userId: string): Promise<void> {
     const snapshot = await adminDb
       .collection(this.collectionName)
       .where("userId", "==", userId)
@@ -171,7 +171,7 @@ export class NotificationService {
     await batch.commit();
   }
 
-  public async deleteNotification(notificationId: number): Promise<void> {
+  public async deleteNotification(notificationId: string): Promise<void> {
     await adminDb
       .collection(this.collectionName)
       .doc(notificationId.toString())
@@ -191,7 +191,7 @@ export class NotificationService {
     );
   }
 
-  private async getAdminUserIds(): Promise<number[]> {
+  private async getAdminUserIds(): Promise<string[]> {
     //TODO: implement getting admin userids from db
     return [];
   }

@@ -6,7 +6,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const notificationId = parseInt(params.id);
+    const notificationId = params.id;
     const notificationService = NotificationService.getInstance();
 
     await notificationService.deleteNotification(notificationId);

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const notificationService = NotificationService.getInstance();
     const notifications = await notificationService.getUserNotifications(
-      parseInt(userId),
+      userId,
       50,
       userRole
     );
