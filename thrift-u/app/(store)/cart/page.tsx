@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from "react"; //Import react hooks (useState for state management, useEffect for side effects)
 import Link from "next/link";
+import FireData from "../../../firebase/clientApp";
+import { collection, getDocs, query, where, documentId } from "@firebase/firestore"
 
 //Item structure from store
 interface Item {
-  id: number;
+  id: string;
   name: string;
-  category: string;
   price: number;
   stock: number;
+  quantity: number;
+  tags: string[];
+  image?: string;
+  description?: string;
+  condition?: string;
+  sellerId: string;
+  approved: boolean;
 }
 
 //Cart item with quantity
@@ -23,25 +31,62 @@ export default function CartPage() {
 
   //Loads cart from localStorage
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart"); //Get cart object from localStorage
-    const storedItems = localStorage.getItem("items"); //Get item details from localStorage
-    if (storedCart && storedItems) {
-      const cart = JSON.parse(storedCart) as { [key: number]: number };
-      const items = JSON.parse(storedItems) as Item[];
+    const loadCart = async () => {
+      const storedCart = localStorage.getItem("cart");
 
-      //Combine quantities and item details
-      const cartArray: CartItem[] = Object.entries(cart).map(([itemId, quantity]) => {
-        const item = items.find(i => i.id === parseInt(itemId));
-        if (!item) throw new Error("Item not found in store data!");
-        return { item, quantity };
-      });
+      if (storedCart) {
+        const cart = JSON.parse(storedCart) as { [key: string]: number };
+        const itemIds = Object.keys(cart);
 
-      setCartItems(cartArray); //Set cart state
-    }
+        if (itemIds.length === 0) {
+          setCartItems([]);
+          return;
+        }
+
+        try {
+          //Fetch items from Firestore using IDs from cart
+          const itemsQuery = query(
+          collection(FireData.db, "Inventory"),
+          where(documentId(), "in", itemIds)
+        );
+
+        const querySnapshot = await getDocs(itemsQuery);
+
+        const items: Item[] = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          price: Number(doc.data().price),
+          quantity: doc.data().quantity,
+          stock: doc.data().quantity,
+          tags: doc.data().tags || [],
+          image: doc.data().image,
+          description: doc.data().description,
+          condition: doc.data().condition,
+          sellerId: doc.data().sellerId,
+          approved: doc.data().approved,
+        }));
+
+        //Combine cart quantities with fetched items
+        const cartArray: CartItem[] = itemIds.map((itemId) => {
+          const item = items.find(i => i.id === itemId);
+          if (!item) throw new Error("Item not found in Firestore");
+          return { item, quantity: cart[itemId] };
+        });
+
+        setCartItems(cartArray);
+        }
+        catch (error) {
+          console.error("Error loading cart: ", error);
+          alert("Failed to load cart items. Please try again.");
+        }
+      }
+    };
+
+    loadCart();
   }, []);
 
   //Update quantity of item in cart
-  const updateQuantity = (itemId: number, newQuantity: number) => {
+  const updateQuantity = (itemId: string, newQuantity: number) => {
     setCartItems(prev =>
       prev.map(ci => ci.item.id === itemId ? { ...ci, quantity: newQuantity } : ci)
     );
@@ -52,7 +97,7 @@ export default function CartPage() {
   };
 
   //Remove item from cart
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemId: string) => {
     setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
     const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
     delete storedCart[itemId]; //Update localStorage

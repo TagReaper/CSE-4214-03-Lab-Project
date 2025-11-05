@@ -5,6 +5,25 @@ import FireData from "@/firebase/clientApp";
 import { revalidatePath } from "next/cache";
 import { verifyRole } from '../../lib/auth'
 
+async function getProductName(productId) {
+  try {
+    const productRef = adminDb.collection("products").doc(productId);
+
+    const docSnap = await productRef.get();
+
+    if (!docSnap.exists) {
+      console.error(`Error: Product not found with ID: ${productId}`);
+      return "Product Not Found";
+    }
+
+    const data = docSnap.data();
+    return data?.name || "Unnamed Product";
+  } catch (error) {
+    console.error("Error fetching product name:", error);
+    return "Error: See Logs";
+  }
+}
+
 export async function approveProduct(productId) {
   if (!(await verifyRole("Admin"))){
     return { error: "Invalid Access." }
@@ -20,6 +39,14 @@ export async function approveProduct(productId) {
     await updateDoc(doc(FireData.db, "Inventory", productId), {
       approved: true,
     });
+
+    const productName = await getProductName(productId);
+
+    await notificationService.sendNotification(
+      sellerId,
+      NotificationType.ITEM_APPROVED,
+      { itemId: productId, itemName: productName }
+    );
   } catch (error) {
     console.error("Error approving product:", error);
     return { error: "Failed to update the product in the database." };
@@ -72,7 +99,7 @@ export async function approveSeller(sellerId) {
     const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId));
     console.log(":", sellerDoc.data());
 
-  if (!sellerDoc.exists) {
+    if (!sellerDoc.exists) {
       return { error: "Seller document not found." };
     }
 
@@ -86,6 +113,11 @@ export async function approveSeller(sellerId) {
     await updateDoc(doc(FireData.db, "Seller", sellerId), {
       validated: true,
     });
+
+    await notificationService.sendNotification(
+      sellerId,
+      NotificationType.SELLER_APPLICATION_APPROVED
+    );
   } catch (error) {
     console.error("Error approving seller:", error);
     if (error.code === "auth/user-not-found") {
@@ -181,6 +213,17 @@ export async function toggleBanStatus(id, access) {
     await updateDoc(doc(FireData.db, collectionName, id), {
       banned: newBannedStatus,
     });
+
+    if (newBannedStatus == "banned") {
+      await notificationService.sendNotification(
+        userId,
+        NotificationType.SYSTEM_WARNING,
+        {
+          action: "Ban",
+          reason: "Violation of guidelines",
+        }
+      );
+    }
 
     return {
       success: `User has been ${newBannedStatus ? "banned" : "unbanned"}.`,

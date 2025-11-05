@@ -1,76 +1,105 @@
 "use client"; //Makes this a client-side component (allows for user action)
 
-import { useState } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
+import { useState, useEffect } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
 import Link from "next/link"; //Allows navigation between pages
 import { getAuthUser } from "@/lib/auth";
+import FireData from "../../../firebase/clientApp"; //Imports Firebase setup and connection
+import { collection, getDocs, query, where } from "@firebase/firestore"; 
 
 //Details of an Item
 interface Item {
-  id: number;
+  id: string;
   name: string;
-  category: string;
   price: number;
   stock: number;
-  // image: string; // add later
+  quantity: number;
+  tags: string[];
+  image?: string; //? makes detail optional
+  description?: string;
+  condition?: string;
+  sellerId: string;
+  approved: boolean;
 }
 
 export default function SearchPage() {
   // Check if user is logged in and firebase load status
   const user = getAuthUser();
   const isLoggedIn = !!user; //turns the object into a boolean
-
-  // List of items for sale
-  const[items] = useState<Item[]>([
-    //Clothing
-    { id: 1, name: "Hoodie", category: "Clothing", price: 20.00, stock: 5 },
-    { id: 2, name: "Jeans", category: "Clothing", price: 15.00, stock: 3 },
-    { id: 3, name: "Red Shirt", category: "Clothing", price: 10.00, stock: 10 },
-    { id: 4, name: "Blue Shirt", category: "Clothing", price: 10.00, stock: 2 },
-    { id: 5, name: "Green Shirt", category: "Clothing", price: 20.00, stock: 5 },
-    { id: 6, name: "Purple Shirt", category: "Clothing", price: 15.00, stock: 3 },
-    { id: 7, name: "Shorts", category: "Clothing", price: 10.00, stock: 0 },
-    { id: 8, name: "Pants", category: "Clothing", price: 100.0, stock: 2 },
-
-    //Shoes
-    { id: 9, name: "Jordan 1", category: "Shoes", price: 120.00, stock: 5 },
-    { id: 10, name: "Jordan 2", category: "Shoes", price: 115.00, stock: 3 },
-    { id: 11, name: "Jordan 3", category: "Shoes", price: 110.00, stock: 10 },
-    { id: 12, name: "Jordan 4", category: "Shoes", price: 100.00, stock: 2 },
-    { id: 13, name: "Jordan 5", category: "Shoes", price: 120.00, stock: 5 },
-    { id: 14, name: "Jordan 6", category: "Shoes", price: 115.00, stock: 3 },
-    { id: 15, name: "Jordan 7", category: "Shoes", price: 110.00, stock: 10 },
-    { id: 16, name: "Jordan 8", category: "Shoes", price: 100.00, stock: 2 },
-
-    //Home
-    { id: 17, name: "Lamp", category: "Home", price: 20.00, stock: 5 },
-    { id: 18, name: "Couch", category: "Home", price: 15.00, stock: 3 },
-    { id: 19, name: "Framed Picture 1", category: "Home", price: 10.00, stock: 10 },
-    { id: 20, name: "Framed Picture 2", category: "Home", price: 100.00, stock: 2 },
-    { id: 21, name: "Framed Picture 3", category: "Home", price: 20.00, stock: 5 },
-    { id: 22, name: "Framed Picture 4", category: "Home", price: 15.00, stock: 3 },
-    { id: 23, name: "Framed Picture 5", category: "Home", price: 10.00, stock: 10 },
-    { id: 24, name: "Framed Picture 6", category: "Home", price: 100.00, stock: 2 },
-    { id: 25, name: "Framed Picture 7", category: "Home", price: 20.00, stock: 5 },
-    { id: 26, name: "Framed Picture 8", category: "Home", price: 15.00, stock: 3 },
-    { id: 27, name: "Framed Picture 9", category: "Home", price: 10.00, stock: 10 },
-    { id: 28, name: "Framed Picture 10", category: "Home", price: 100.00, stock: 2 },
-    { id: 29, name: "Framed Picture 11", category: "Home", price: 20.00, stock: 5 },
-    { id: 30, name: "Framed Picture 12", category: "Home", price: 15.00, stock: 3 },
-  ]);
+  
+  //List of items for sale
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); //if string = error message, if null = no error message
 
   //Stores search text entered by user
   const [search, setSearch] = useState("");
   //Stores category selected by user
   const [selectedCategory, setSelectedCategory] = useState("All");
   //Stores items in cart: itemId: quantity
-  const [cart, setCart] = useState<{[key: number]: number}>({}); // Keeps track of items added to the cart
+  const [cart, setCart] = useState<{[key: string]: number}>({}); // Keeps track of items added to the cart
 
-  //Filters items based on search text/category 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  //Fetch approved items from Firestore
+  useEffect(() => {
+    const fetchApprovedItems = async () => {
+      try {
+        setLoading(true);
+
+        //Query approved items only
+        const inventoryQuery = query(
+          collection(FireData.db, "Inventory"),
+          where("approved", "==", true)
+        );
+
+        const querySnapshot = await getDocs(inventoryQuery);
+
+        //Convert Firestore docs to items
+        const fetchedItems = querySnapshot.docs.map((doc) =>  ({
+          id: doc.id,
+          name: doc.data().name,
+          price: Number(doc.data().price),
+          quantity: doc.data().quantity,
+          stock: doc.data().quantity, //
+          tags: doc.data().tags || [],
+          image: doc.data().image,
+          description: doc.data().description,
+          condition: doc.data().condition,
+          sellerId: doc.data().sellerId,
+          approved: doc.data().approved,
+        }
+      )
+    );
+
+        setItems(fetchedItems);
+      }
+      
+      catch (err) {
+        console.error("Error fetching items: ", err);
+        setError("Failed to load items. Please try again.");
+      }
+
+      finally {
+        setLoading(false);
+      }
+
+    };
+
+    fetchApprovedItems();
+  }, []);
+
+  //Load cart from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+//Filters items based on search text/category
+const filteredItems = items.filter(item => {
+  const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+  const matchesCategory = selectedCategory === "All" || item.tags.includes(selectedCategory);
+  return matchesSearch && matchesCategory;
+})
 
   //Runs when user clicks "add to cart"
   const handleAddToCart = (item: Item) => {
@@ -96,8 +125,6 @@ export default function SearchPage() {
 
       localStorage.setItem("cart", JSON.stringify(newCart));
 
-      localStorage.setItem("items", JSON.stringify(items));
-
       return newCart;
     });
 
@@ -105,9 +132,27 @@ export default function SearchPage() {
   };
 
   //Returns # of an item are currently in cart
-  const getItemQuantity = (itemId: number) => cart[itemId] || 0;
+  const getItemQuantity = (itemId: string) => cart[itemId] || 0;
 
-  //
+  //Show loading state
+  if (loading) {
+    return (
+      <div style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}>
+        <h2>Loading products...</h2>
+      </div>
+    )
+  }
+
+  //Show error state
+  if (error) {
+    return (
+      <div style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}>
+        <h2>Error: {error}</h2>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
       <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
@@ -132,10 +177,22 @@ export default function SearchPage() {
         <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
           <option value="All">All</option>
           <option value="Clothing">Clothing</option>
-          <option value="Home">Home</option>
-          <option value="Shoes">Shoes</option>
+          <option value="Sports">Sports</option>
+          <option value="Kitchen">Kitchen</option>
+          <option value="Tech">Tech</option>
+          <option value="Living">Living</option>
+          <option value="Dining">Dining</option>
+          <option value="College">College</option>
+          <option value="Gym">Gym</option>
         </select>
       </div>
+
+      {/*No items found message*/}
+      {filteredItems.length === 0 && (
+        <p style={{ textAlign: "center", marginTop: "2rem" }}>
+          No items found. Try adjusting your search and/or filters.
+        </p>
+      )}
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
         {filteredItems.map((item) => {
@@ -153,12 +210,36 @@ export default function SearchPage() {
                 textAlign: "center",
               }}
             >
+              {/*Display image if available*/}
+              {item.image && (
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "4px", marginBottom: "0.5rem"}}
+              />
+              )}
+
               <h3>{item.name}</h3>
               <p>${item.price.toFixed(2)}</p>
+
+              {/*Show condition if available*/}
+              {item.condition && (
+                <p style={{ fontSize: "0.8rem", fontStyle: "italic" }}>
+                  {item.condition}
+                </p>
+              )}
+
               <p style={{ fontSize: "0.9rem", color: "#666" }}>
                 Stock: {item.stock - quantity} left
               </p>
 
+              {/*Show tags*/}
+              {item.tags.length > 0 && (
+                <div style={{ fontSize: "0.75rem", marginTop: "0.5rem" }}>
+                  {item.tags.slice(0, 3).join(", ")}
+                </div>
+              )}
+              
               {/*Shows # of item in cart*/}
               {quantity > 0 && (
                 <p style={{ 
