@@ -54,6 +54,7 @@ export const config = {
         "/login/:path*",
         "/signup/:path*",
         "/api/:path*",
-        "/adminpanel/:path*"
+        "/adminpanel/:path*",
+        "/search/:path*"
         ]
 }
