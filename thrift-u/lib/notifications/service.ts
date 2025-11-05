@@ -192,7 +192,17 @@ export class NotificationService {
   }
 
   private async getAdminUserIds(): Promise<string[]> {
-    //TODO: implement getting admin userids from db
-    return [];
+    const adminQuerySnapshot = await adminDb
+      .collection("users")
+      .where("accessLevel", "==", "Admin")
+      .get();
+
+    if (adminQuerySnapshot.empty) {
+      return [];
+    }
+
+    const adminIds = adminQuerySnapshot.docs.map((doc) => doc.id);
+
+    return adminIds;
   }
 }
