@@ -35,7 +35,7 @@ export enum UserRole {
 }
 
 export interface NotificationDocument {
-  notificationId: number;
+  notificationId: string;
   userId: string;
   userRole: UserRole;
   heading: string;
