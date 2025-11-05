@@ -17,7 +17,7 @@ export function useNotifications(userId?: string) {
       setLoading(true);
       const response = await fetch("/api/notifications", {
         headers: {
-          "x-user-id": userId.toString(),
+          "x-user-id": userId,
         },
       });
 
