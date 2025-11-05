@@ -69,7 +69,9 @@ export function middleware(request: NextRequest){
         }
     } else {
         console.log("User has no cookies");
-        return NextResponse.redirect(new URL('/login', request.url));
+        if (!authPaths.some(item => request.nextUrl.pathname.includes(item))){
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
     }
 }
 

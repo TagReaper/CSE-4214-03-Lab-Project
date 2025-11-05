@@ -17,7 +17,7 @@ const SellerListItems = () => {
         const fetchItems = async () => {
             const querySnapshot = await getDocs(collection(FireData.db, 'Inventory'))
             setItems(querySnapshot.docs.map((doc) => ({...doc.data(), id: doc.id})))
-            const token = getAuthUser()
+            const token = await getAuthUser()
             setSellerId(token.user_id)
         }
 

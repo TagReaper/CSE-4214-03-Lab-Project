@@ -1,8 +1,6 @@
 "use client"; //Makes this a client-side component (allows for user action)
 
 import { useState, useEffect } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
-import Link from "next/link"; //Allows navigation between pages
-import { getAuthUser } from "@/lib/auth";
 import FireData from "../../../firebase/clientApp"; //Imports Firebase setup and connection
 import { collection, getDocs, query, where } from "@firebase/firestore";
 
@@ -43,7 +41,9 @@ export default function SearchPage() {
         //Query approved items only
         const inventoryQuery = query(
           collection(FireData.db, "Inventory"),
-          where("approved", "==", true)
+          where("approved", "==", true),
+          where("quantity", ">", 0),
+          where("deletedAt", "==", "")
         );
 
         const querySnapshot = await getDocs(inventoryQuery);
@@ -52,7 +52,7 @@ export default function SearchPage() {
         const fetchedItems = querySnapshot.docs.map((doc) =>  ({
           id: doc.id,
           name: doc.data().name,
-          price: Number(doc.data().price),
+          price: doc.data().price,
           quantity: doc.data().quantity,
           stock: doc.data().quantity, //
           tags: doc.data().tags || [],
@@ -67,7 +67,7 @@ export default function SearchPage() {
 
         setItems(fetchedItems);
       }
-      
+
       catch (err) {
         console.error("Error fetching items: ", err);
         setError("Failed to load items. Please try again.");
@@ -98,7 +98,8 @@ const filteredItems = items.filter(item => {
 })
 
   //Runs when user clicks "add to cart"
-    const handleAddToCart = (item: Item) => {
+  const handleAddToCart = (item: Item) => {
+
     const currentQuantity = cart[item.id] || 0; //Get how many of this item are already in cart
 
     //Prevents adding more items in cart than are in stock
