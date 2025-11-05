@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"; //Import React's useState hook (all
 import Link from "next/link"; //Allows navigation between pages
 import { getAuthUser } from "@/lib/auth";
 import FireData from "../../../firebase/clientApp"; //Imports Firebase setup and connection
-import { collection, getDocs, query, where } from "@firebase/firestore"; 
+import { collection, getDocs, query, where } from "@firebase/firestore";
 
 //Details of an Item
 interface Item {
@@ -22,10 +22,6 @@ interface Item {
 }
 
 export default function SearchPage() {
-  // Check if user is logged in and firebase load status
-  const user = getAuthUser();
-  const isLoggedIn = !!user; //turns the object into a boolean
-  
   //List of items for sale
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,12 +98,7 @@ const filteredItems = items.filter(item => {
 })
 
   //Runs when user clicks "add to cart"
-  const handleAddToCart = (item: Item) => {
-    if (!isLoggedIn) {
-      alert("Please log in to add items to cart."); //displayed if a guest attempts to add item to cart
-      return;
-    }
-
+    const handleAddToCart = (item: Item) => {
     const currentQuantity = cart[item.id] || 0; //Get how many of this item are already in cart
 
     //Prevents adding more items in cart than are in stock
@@ -157,12 +148,6 @@ const filteredItems = items.filter(item => {
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
       <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
         <h1>Search</h1>
-        <div>
-          <span style={{ marginRight: "1rem", color: isLoggedIn ? "green" : "red" }}>{/*ternary operator, if/else statement for JavaScript/TypeScript. condition ? valueIfTrue : valueIfFalse*/}
-            {isLoggedIn ? "Logged In" : "Not Logged In"}
-          </span>
-          <Link href="/cart"><button>Cart</button></Link> {/*Use link for user interaction to next page, use useRouter/useEffect/router.push for an automatic redirect*/}
-        </div>
       </header>
 
       {/*Search bar and category dropdown*/}
