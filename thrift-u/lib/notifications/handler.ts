@@ -4,7 +4,6 @@ import {
   NotificationCategory,
   NotificationType,
   NotificationDocument,
-  UserRole,
 } from "./types";
 
 // GENERAL NOTIFICATION HANDLERS
@@ -30,12 +29,10 @@ export class SystemWarningHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: Record<string, any>,
-    userRole: UserRole
+    data: Record<string, any>
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(data as { action: string }),
       description: this.getDescription(
         data as { reason: string; action: string }
@@ -80,12 +77,11 @@ export class OrderConfirmationHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: Record<string, any>,
-    userRole: UserRole
+    data: Record<string, any>
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
+
       heading: this.getHeading(data as { orderId: string }),
       description: this.getDescription(
         data as { orderId: string; totalAmount: number; itemCount: number }
@@ -117,12 +113,11 @@ export class CartItemRemovedHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
+
       heading: this.getHeading(),
       description: this.getDescription(data),
       type: NotificationType.CART_ITEM_REMOVED,
@@ -154,12 +149,10 @@ export class ItemApprovedHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(data),
       description: this.getDescription(data),
       type: NotificationType.ITEM_APPROVED,
@@ -189,19 +182,16 @@ export class SellerApplicationApprovedHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(),
       description: this.getDescription(),
       type: NotificationType.SELLER_APPLICATION_APPROVED,
       category: this.getCategory(),
       actionUrl: this.getActionUrl(),
       metadata: {
-        storeName: data.storeName,
         approvedAt: new Date().toISOString(),
       },
     };
@@ -235,12 +225,11 @@ export class SellerModerationActionHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
+
       heading: this.getHeading(data),
       description: this.getDescription(data),
       type: NotificationType.SELLER_MODERATION_ACTION,
@@ -284,12 +273,10 @@ export class NewOrderHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(data),
       description: this.getDescription(data),
       type: NotificationType.NEW_ORDER,
@@ -323,12 +310,10 @@ export class ItemOutOfStockHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(data),
       description: this.getDescription(data),
       type: NotificationType.ITEM_OUT_OF_STOCK,
@@ -363,12 +348,10 @@ export class NewSellerApplicationHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(data),
       description: this.getDescription(data),
       type: NotificationType.NEW_SELLER_APPLICATION,
@@ -390,7 +373,6 @@ export class NewSellerProductHandler implements INotificationHandler {
 
   getDescription(data: {
     applicantName: string;
-    storeName: string;
     applicationId: string;
   }): string {
     return `${data.applicantName} has submitted a seller product. Review and approve/reject the application.`;
@@ -406,12 +388,10 @@ export class NewSellerProductHandler implements INotificationHandler {
 
   process(
     userId: string,
-    data: any,
-    userRole: UserRole
+    data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
-      userRole,
       heading: this.getHeading(data),
       description: this.getDescription(data),
       type: NotificationType.NEW_SELLER_PRODUCT,

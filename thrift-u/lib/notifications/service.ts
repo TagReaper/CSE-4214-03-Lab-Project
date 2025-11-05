@@ -4,7 +4,6 @@ import {
   NotificationDocument,
   NotificationType,
   INotificationHandler,
-  UserRole,
 } from "./types";
 import {
   SystemWarningHandler,
@@ -95,8 +94,7 @@ export class NotificationService {
   public async sendNotification(
     userId: string,
     type: NotificationType,
-    data: any,
-    userRole: UserRole = UserRole.BUYER
+    data: any
   ): Promise<NotificationDocument> {
     const handler = this.handlers.get(type);
 
@@ -104,7 +102,7 @@ export class NotificationService {
       throw new Error(`No handler registered for notification type: ${type}`);
     }
 
-    const notificationData = handler.process(userId, data, userRole);
+    const notificationData = handler.process(userId, data);
 
     const newNotificationRef = adminDb.collection(this.collectionName).doc();
 
@@ -127,16 +125,11 @@ export class NotificationService {
 
   public async getUserNotifications(
     userId: string,
-    limit: number = 50,
-    userRole?: UserRole
+    limit: number = 50
   ): Promise<NotificationDocument[]> {
-    let query = adminDb
+    const query = adminDb
       .collection(this.collectionName)
       .where("userId", "==", userId);
-
-    if (userRole) {
-      query = query.where("userRole", "==", userRole);
-    }
 
     const snapshot = await query.orderBy("date", "desc").limit(limit).get();
 
@@ -185,9 +178,7 @@ export class NotificationService {
     const adminIds = await this.getAdminUserIds();
 
     await Promise.all(
-      adminIds.map((adminId) =>
-        this.sendNotification(adminId, type, data, UserRole.ADMIN)
-      )
+      adminIds.map((adminId) => this.sendNotification(adminId, type, data))
     );
   }
 

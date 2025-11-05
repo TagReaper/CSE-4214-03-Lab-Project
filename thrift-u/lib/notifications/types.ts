@@ -28,16 +28,9 @@ export enum NotificationCategory {
   SUCCESS = "success",
 }
 
-export enum UserRole {
-  BUYER = "buyer",
-  SELLER = "seller",
-  ADMIN = "admin",
-}
-
 export interface NotificationDocument {
   notificationId: string;
   userId: string;
-  userRole: UserRole;
   heading: string;
   description: string;
   date: Date;
@@ -55,7 +48,6 @@ export interface INotificationHandler {
   getActionUrl?(data: Record<string, any>): string | undefined;
   process(
     userId: string,
-    data: Record<string, any>,
-    userRole: UserRole
+    data: Record<string, any>
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead">;
 }

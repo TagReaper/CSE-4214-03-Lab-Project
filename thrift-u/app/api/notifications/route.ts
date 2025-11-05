@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { NotificationService } from "@/lib/notifications/service";
-import { NotificationType, UserRole } from "@/lib/notifications/types";
+import { NotificationType } from "@/lib/notifications/types";
 
 export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get("x-user-id");
-    const userRole = request.headers.get("x-user-role") as UserRole;
-
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -14,8 +12,7 @@ export async function GET(request: NextRequest) {
     const notificationService = NotificationService.getInstance();
     const notifications = await notificationService.getUserNotifications(
       userId,
-      50,
-      userRole
+      50
     );
 
     return NextResponse.json({ notifications });
@@ -31,7 +28,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, type, data, userRole } = body;
+    const { userId, type, data } = body;
 
     if (!userId || !type || !data) {
       return NextResponse.json(
@@ -44,8 +41,7 @@ export async function POST(request: NextRequest) {
     const notification = await notificationService.sendNotification(
       userId,
       type as NotificationType,
-      data,
-      (userRole as UserRole) || UserRole.BUYER
+      data
     );
 
     return NextResponse.json({ notification }, { status: 201 });
