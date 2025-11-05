@@ -34,13 +34,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { addDoc, collection} from "@firebase/firestore"
 import FireData from "@/firebase/clientApp"
 import {ref, uploadBytes, getDownloadURL} from "firebase/storage"
+import { verifyRole } from "@/lib/auth"
 
 const RequestItem = ({sellerId}) => {
 
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
-    const [price, setPrice] = useState("");
-    const [qty, setQTY] = useState("");
+    const [price, setPrice] = useState(0);
+    const [qty, setQTY] = useState(0);
     const [condition, setCondition] = useState("");
     const [tags, setTags] = useState([]);
     const [image, setImage] = useState(null);
@@ -73,6 +74,9 @@ const RequestItem = ({sellerId}) => {
     const handleRequest = async (event) => {
         event.preventDefault();
         try{
+            if (!(await verifyRole("Seller"))){
+                throw new Error("Invalid access")
+            }
             const imageRef = ref(FireData.storage, `images/${image.name + Math.floor(Math.random()*10000)}`)
             await uploadBytes(imageRef, image)
             const u = await getDownloadURL(imageRef)
@@ -91,7 +95,8 @@ const RequestItem = ({sellerId}) => {
             })
             location.reload();
         } catch(error) {
-            console.log("Error requesting item creation: ", error)
+            console.error("Error requesting item creation: ", error)
+            alert("Error requesting item creation: ", error)
         }
     }
 
