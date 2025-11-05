@@ -2,7 +2,9 @@
 import { useState, useEffect } from "react";
 import FireData from "@/firebase/clientApp";
 import { collection, query, where, getDocs } from "@firebase/firestore";
-import { approveProduct } from "./actions";
+import { approveProduct, denyProduct } from "./actions";
+import {Button} from '../ui/button'
+import AdminAudit from './audit'
 
 const PendingProductList = () => {
   const [pendingProducts, setPendingProducts] = useState([]);
@@ -35,8 +37,8 @@ const PendingProductList = () => {
   }, []);
 
   // approve button functionality
-  const handleApprove = async (productId) => {
-    const result = await approveProduct(productId);
+  const handleDeny = async (productId) => {
+    const result = await denyProduct(productId);
     if (result.error) {
       alert(`Error: ${result.error}`);
     } else {
@@ -67,12 +69,13 @@ const PendingProductList = () => {
               <span>Price: ${product.price}</span>
               <span>Seller ID: {product.sellerId}</span>
               <span className="text-center">
-                <button
-                  onClick={() => handleApprove(product.id)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                <AdminAudit itemId={product.id}/>
+                <Button
+                  onClick={() => handleDeny(product.id)}
+                  className="border-2 bg-red-500 border-black hover:border-gray-400"
                 >
-                  Approve
-                </button>
+                  Deny
+                </Button>
               </span>
             </li>
           ))}

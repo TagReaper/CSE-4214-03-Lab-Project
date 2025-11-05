@@ -28,6 +28,14 @@ const Login = () => {
         doc(FireData.db, "User", credential.user.uid)
       );
 
+      if (userRef.data().banned || userRef.data().detetedAt != ""){
+        await FireData.auth.signOut();
+        await fetch("/api/auth", { //send empty token to api route to set cookie
+          method: "POST",
+        });
+        throw new Error("Your account was banned from, or was denied access to, ThriftU.\nContact us if you believe this to be a mistake.")
+      }
+
       var idToken = await credential.user.getIdToken();
       const parts = idToken.split(".");
       const access = userRef.data().accessLevel;
@@ -68,6 +76,7 @@ const Login = () => {
     } catch (error) {
       console.error("error during account login:", error);
       setError("Failed to log in. Please check your email and password.");
+      alert("Unable to login:", error)
     } finally {
       setLoading(false);
     }
