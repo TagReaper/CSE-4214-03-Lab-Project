@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import FireData from "../../firebase/clientApp";
 import { collection, doc, getDoc, getDocs } from "@firebase/firestore";
-import { approveSeller, toggleBanStatus } from "./actions";
+import { approveSeller, denySeller, toggleBanStatus } from "./actions";
+import {Button} from '../ui/button'
 
 const ListUsers = () => {
   const [buyerList, setBList] = useState([]);
@@ -43,10 +44,12 @@ const ListUsers = () => {
           banned: sellers[index].banned || false,
         };
 
-        if (sellers[index].validated == true) {
-          sellerListTemp.push(userData);
-        } else {
-          sellerPendListTemp.push(userData);
+        if(sellers[index].deletedAt != ""){
+          if (sellers[index].validated == true) {
+            sellerListTemp.push(userData);
+          } else {
+            sellerPendListTemp.push(userData);
+          }
         }
       }
       for (let index = 0; index < buyers.length; index++) {
@@ -55,11 +58,13 @@ const ListUsers = () => {
         );
         if (!docRef.exists()) continue;
 
-        buyerListTemp.push({
-          ...docRef.data(),
-          id: buyers[index].id,
-          banned: buyers[index].banned || false,
-        });
+        if(buyers[index].deletedAt != ""){
+          buyerListTemp.push({
+            ...docRef.data(),
+            id: buyers[index].id,
+            banned: buyers[index].banned || false,
+          });
+        }
       }
       setBList(buyerListTemp);
       setSList(sellerListTemp);
@@ -90,6 +95,30 @@ const ListUsers = () => {
           currentList.filter((user) => user.id !== sellerUid)
         );
         setSList((currentList) => [approvedUser, ...currentList]);
+      } else {
+        await fetchUsers(); //go back to fetching regularly if error
+      }
+    } else {
+      alert(`Error: ${result.message || "Failed to approve seller."}`);
+    }
+
+    setisApproving(null);
+  };
+
+  const handleDenySeller = async (sellerUid) => {
+    setisApproving(sellerUid);
+
+    const result = await denySeller(sellerUid);
+
+    if (result.success) {
+      //manually update lists instead of refreshing old data
+      alert(result.message || "Seller approved!");
+      const deniedUser = sellerPendList.find((user) => user.id === sellerUid);
+      if (deniedUser) {
+        //move seller from pending to approved list
+        setSPList((currentList) =>
+          currentList.filter((user) => user.id !== sellerUid)
+        );
       } else {
         await fetchUsers(); //go back to fetching regularly if error
       }
@@ -155,10 +184,10 @@ const ListUsers = () => {
             <span className="center"> {item.email} </span>
             <span></span>
             <span className="center">
-              <button
+              <Button
                 onClick={() => handleBan(item.id, 2)}
                 disabled={isBanning != null}
-                className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
+                className={`border-2 m-0.5 border-black hover:border-gray-400 disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
                 {isBanning === item.id
@@ -166,7 +195,7 @@ const ListUsers = () => {
                   : item.banned
                   ? "UN-BAN"
                   : "BAN"}
-              </button>
+              </Button>
             </span>
           </li>
         ))}
@@ -185,10 +214,10 @@ const ListUsers = () => {
             <span className="center"> {item.email} </span>
             <span></span>
             <span className="center">
-              <button
+              <Button
                 onClick={() => handleBan(item.id, 1)}
                 disabled={isBanning != null}
-                className={`w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% text-white disabled:opacity-50
+                className={`border-2 m-0.5 border-black hover:border-gray-400 disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
                 {isBanning === item.id
@@ -196,7 +225,7 @@ const ListUsers = () => {
                   : item.banned
                   ? "UN-BAN"
                   : "BAN"}
-              </button>
+              </Button>
             </span>
           </li>
         ))}
@@ -215,14 +244,21 @@ const ListUsers = () => {
             <span className="center"> {item.email} </span>
 
             <span></span>
-            <span className="center">
-              <button
+            <span className="flex justify-center">
+              <Button
                 onClick={() => handleApproveSeller(item.id)}
                 disabled={isApproving}
-                className="w-20 border-2 border-black rounded-2xl font-bold font-stretch-100% bg-blue-500 text-white disabled:opacity-50"
+                className="m-2 border-2 border-black bg-blue-500 hover:border-gray-400"
               >
                 {isApproving === item.id ? "APPROVING..." : "APPROVE"}
-              </button>
+              </Button>
+              <Button
+                onClick={() => handleDenySeller(item.id)}
+                disabled={isApproving}
+                className="border-2 m-2 border-black bg-red-500 hover:border-gray-400"
+              >
+                {isApproving === item.id ? "DENYING..." : "DENY"}
+              </Button>
             </span>
           </li>
         ))}
