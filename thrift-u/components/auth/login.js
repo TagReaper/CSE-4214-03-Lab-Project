@@ -90,7 +90,7 @@ const Login = () => {
         },
       });
 
-      router.push("/"); //redirect to home page again
+      location.reload(); //redirect to home page again
     } catch (error) {
       console.error("error during account login:", error);
       if(!banned){
