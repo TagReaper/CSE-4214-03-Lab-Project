@@ -1,8 +1,9 @@
-"use client"; //Makes this a client-side component (allows for user action)
+"use client";
 
-import { useState, useEffect } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
-import FireData from "../../../firebase/clientApp"; //Imports Firebase setup and connection
+import { useState, useEffect } from "react";
+import FireData from "@/firebase/clientApp";
 import { collection, getDocs, query, where } from "@firebase/firestore";
+import { useSearchParams } from "next/navigation";
 
 //Details of an Item
 interface Item {
@@ -12,7 +13,7 @@ interface Item {
   stock: number;
   quantity: number;
   tags: string[];
-  image?: string; //? makes detail optional
+  image?: string;
   description?: string;
   condition?: string;
   sellerId: string;
@@ -20,6 +21,7 @@ interface Item {
 }
 
 export default function SearchPage() {
+  const searchParams = useSearchParams();
   //List of items for sale
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,13 @@ export default function SearchPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   //Stores items in cart: itemId: quantity
   const [cart, setCart] = useState<{[key: string]: number}>({}); // Keeps track of items added to the cart
+
+  useEffect(() => {
+    const queryParam = searchParams.get('q');
+    if (queryParam) {
+      setSearch(queryParam);
+    }
+  }, [searchParams]);
 
   //Fetch approved items from Firestore
   useEffect(() => {
@@ -97,7 +106,6 @@ const filteredItems = items.filter(item => {
   return matchesSearch && matchesCategory;
 })
 
-  //Runs when user clicks "add to cart"
   const handleAddToCart = (item: Item) => {
 
     const currentQuantity = cart[item.id] || 0; //Get how many of this item are already in cart
@@ -228,9 +236,9 @@ const filteredItems = items.filter(item => {
               
               {/*Shows # of item in cart*/}
               {quantity > 0 && (
-                <p style={{ 
-                  backgroundColor: "#e7f3ff", 
-                  padding: "0.5rem", 
+                <p style={{
+                  backgroundColor: "#e7f3ff",
+                  padding: "0.5rem",
                   borderRadius: "4px",
                   margin: "0.5rem 0",
                   fontWeight: "bold"
