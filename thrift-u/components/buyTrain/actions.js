@@ -30,6 +30,7 @@ export async function checkout(Address, Payment) {
                 if (!item) {throw Error("ItemId not found")}
                 item.id = Cart[index].itemId
                 item.orderqty = Cart[index].qty
+                if (item.orderqty > item.qty){throw Error("Item is out of stock")}
                 item.sum = item.price * item.orderqty
                 orderSum += item.sum
                 Items.push(item)
@@ -55,6 +56,9 @@ export async function checkout(Address, Payment) {
                 await updateDoc(doc(FireData.db, "Seller", Items[index].sellerId), {
                     income: income,
                     unclaimedIncome: unclaimedIncome,
+                })
+                await updateDoc(doc(FireData.db, "Inventory", Items[index].id), {
+                    qty: Items[index].qty - Items[index].orderqty,
                 })
                 await addDoc(collection(FireData.db, "Orders"), {
                     orderId: orderRef.id,
