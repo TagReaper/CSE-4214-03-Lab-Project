@@ -3,13 +3,13 @@ import { NotificationService } from "@/lib/notifications/service";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const notificationId = params.id;
+    const { id } = await params;
     const notificationService = NotificationService.getInstance();
 
-    await notificationService.markAsRead(notificationId);
+    await notificationService.markAsRead(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

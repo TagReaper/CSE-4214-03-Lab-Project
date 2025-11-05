@@ -3,13 +3,13 @@ import { NotificationService } from "@/lib/notifications/service";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const notificationId = params.id;
+    const { id } = await params;
     const notificationService = NotificationService.getInstance();
 
-    await notificationService.deleteNotification(notificationId);
+    await notificationService.deleteNotification(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
