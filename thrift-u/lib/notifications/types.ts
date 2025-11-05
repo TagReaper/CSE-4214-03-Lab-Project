@@ -2,22 +2,22 @@
 
 export enum NotificationType {
   // General notifications
-  SYSTEM_WARNING = "system_warning",
+  SYSTEM_WARNING = "system_warning", //implemented for bans
 
   // Buyer notifications
   ORDER_CONFIRMATION = "order_confirmation",
   CART_ITEM_REMOVED = "cart_item_removed",
 
   // Seller notifications
-  ITEM_APPROVED = "item_approved",
-  SELLER_APPLICATION_APPROVED = "seller_application_approved",
+  ITEM_APPROVED = "item_approved", //implemented
+  SELLER_APPLICATION_APPROVED = "seller_application_approved", //implemented
   SELLER_MODERATION_ACTION = "seller_moderation_action",
   NEW_ORDER = "new_order",
   ITEM_OUT_OF_STOCK = "item_out_of_stock",
 
   // Admin notifications
-  NEW_SELLER_APPLICATION = "new_seller_application",
-  NEW_SELLER_PRODUCT = "new_seller_product",
+  NEW_SELLER_APPLICATION = "new_seller_application", //implemented
+  NEW_SELLER_PRODUCT = "new_seller_product", //implemented
 }
 
 export enum NotificationCategory {
