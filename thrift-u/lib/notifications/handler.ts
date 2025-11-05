@@ -367,15 +367,12 @@ export class NewSellerApplicationHandler implements INotificationHandler {
 }
 
 export class NewSellerProductHandler implements INotificationHandler {
-  getHeading(data: { applicantName: string }): string {
-    return `New Seller Product from ${data.applicantName}`;
+  getHeading(data: { sellerName: string }): string {
+    return `New Seller Product from ${data.sellerName}`;
   }
 
-  getDescription(data: {
-    applicantName: string;
-    applicationId: string;
-  }): string {
-    return `${data.applicantName} has submitted a seller product. Review and approve/reject the application.`;
+  getDescription(data: { sellerName: string; productId: string }): string {
+    return `${data.sellerName} has submitted a seller product. Review and approve/reject the application.`;
   }
 
   getCategory(): NotificationCategory {
@@ -398,8 +395,9 @@ export class NewSellerProductHandler implements INotificationHandler {
       category: this.getCategory(),
       actionUrl: this.getActionUrl(),
       metadata: {
-        applicationId: data.applicationId,
-        applicantId: data.applicantName,
+        productId: data.productId,
+        sellerId: data.sellerId,
+        sellerName: data.sellerName,
         submittedAt: new Date().toISOString(),
       },
     };
