@@ -10,7 +10,7 @@ function getDecodedToken(token: RequestCookie) {
         }
 
         const parts = token.value.split('.');
-        const payload = JSON.parse(atob(parts[1]));
+        const payload = JSON.parse(atob(parts[1].slice(0, -4)));
 
         console.log("getDecodedToken: Verifying token...");
         const decodedToken = payload;
