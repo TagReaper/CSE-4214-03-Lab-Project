@@ -29,7 +29,7 @@ export class SystemWarningHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: Record<string, any>,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -80,7 +80,7 @@ export class OrderConfirmationHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: Record<string, any>,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -117,7 +117,7 @@ export class CartItemRemovedHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -154,7 +154,7 @@ export class ItemApprovedHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -189,7 +189,7 @@ export class SellerApplicationApprovedHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -235,7 +235,7 @@ export class SellerModerationActionHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -284,7 +284,7 @@ export class NewOrderHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -323,7 +323,7 @@ export class ItemOutOfStockHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -363,7 +363,7 @@ export class NewSellerApplicationHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
@@ -406,7 +406,7 @@ export class NewSellerProductHandler implements INotificationHandler {
   }
 
   process(
-    userId: number,
+    userId: string,
     data: any,
     userRole: UserRole
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { NotificationDocument } from "./types";
 
-export function useNotifications(userId?: number) {
+export function useNotifications(userId?: string) {
   const [notifications, setNotifications] = useState<NotificationDocument[]>(
     []
   );
@@ -33,7 +33,7 @@ export function useNotifications(userId?: number) {
     }
   };
 
-  const markAsRead = async (notificationId: number) => {
+  const markAsRead = async (notificationId: string) => {
     try {
       const response = await fetch(
         `/api/notifications/${notificationId}/read`,
@@ -54,7 +54,7 @@ export function useNotifications(userId?: number) {
     }
   };
 
-  const deleteNotification = async (notificationId: number) => {
+  const deleteNotification = async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
         method: "DELETE",
