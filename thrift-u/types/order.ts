@@ -4,5 +4,5 @@ export interface Order {
   product: string
   qty: number
   total: number
-  status: "Pending" | "Shipped" | "Delivered" | "Cancelled"
+  status: "Pending" | "Shipped" | "Fulfilled" | "Cancelled"
 }
