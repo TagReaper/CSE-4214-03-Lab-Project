@@ -101,8 +101,6 @@ async function getSellerName(userId) {
             console.error("Error requesting item creation: ", error)
             alert("Error requesting item creation: ", error)
         }
-      );
-
       location.reload();
     } catch (error) {
       console.log("Error requesting item creation: ", error);
