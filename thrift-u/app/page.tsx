@@ -1,5 +1,6 @@
 'use client';
 
+import {useEffect} from 'react';
 import Image from "next/image";
 import {useAuthState} from "react-firebase-hooks/auth";
 import FireData from "../firebase/clientApp";
@@ -12,19 +13,21 @@ export default function Home() {
   // Check sign-in state
   const [user] = useAuthState(FireData.auth);
 
-  console.log('Current user:', user);
-
-  // Pushed to login if they aren't logged in
-  if (!user) {
-    router.push("/login");
-  }
+  useEffect(() => {
+    // Pushed to login if they aren't logged in
+    if (!user) {
+      router.push("/login");
+    }
+  }, [user, router]);
 
   return <div className="center">
       <Image style={{filter:'invert(100%)'}}src="/Graphics/ThriftULogoModern.png" alt="ThriftU Logo" width={400} height={400}/>
       Home Page
       <button className="loginbutton" onClick={async () => {
           await FireData.auth.signOut();
-          sessionStorage.removeItem('user');
+          await fetch("/api/auth", { //send token to api route to set cookie
+            method: "POST",
+        });
       }}>Sign Out</button>
       </div>
 }
