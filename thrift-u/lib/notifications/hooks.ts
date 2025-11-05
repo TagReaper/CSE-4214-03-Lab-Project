@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { NotificationDocument } from "./types";
+import { useCallback } from "react";
 
 export function useNotifications(userId?: string) {
   const [notifications, setNotifications] = useState<NotificationDocument[]>(
@@ -10,7 +11,7 @@ export function useNotifications(userId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -31,7 +32,7 @@ export function useNotifications(userId?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -72,7 +73,7 @@ export function useNotifications(userId?: string) {
 
   useEffect(() => {
     fetchNotifications();
-  }, [userId]);
+  }, [fetchNotifications]);
 
   return {
     notifications,
