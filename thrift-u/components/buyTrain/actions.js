@@ -78,7 +78,8 @@ export async function checkout(Address, Payment) {
             return true
         } catch(error) {
             console.error("Checkout failed:", error);
-            throw error
+            alert("Checkout failed:", error)
+            return false
         }
     } else {
         return false
