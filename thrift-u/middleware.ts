@@ -1,8 +1,8 @@
-import type { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextResponse } from "next/server";
 import type { NextRequest} from 'next/server.js';
 
-function getDecodedToken(token: RequestCookie) {
+function getDecodedToken(request: NextRequest) {
+    const token = request.cookies.get("idToken");
     console.log("getDecodedToken: Starting...");
     try {
         if (!token) {
@@ -37,7 +37,7 @@ export function middleware(request: NextRequest){
 
     if (token != undefined){
         if (token.value != "null"){
-            const decodedToken = getDecodedToken(token)
+            const decodedToken = getDecodedToken(request)
             console.log("User is logged in!")
             if (authPaths.some(item => request.nextUrl.pathname.includes(item))) {
                 return NextResponse.redirect(new URL('/', request.url));
