@@ -331,10 +331,7 @@ export class NewSellerApplicationHandler implements INotificationHandler {
     return `New Seller Application from ${data.applicantName}`;
   }
 
-  getDescription(data: {
-    applicantName: string;
-    applicationId: string;
-  }): string {
+  getDescription(data: { applicantName: string; applicantId: string }): string {
     return `${data.applicantName} has submitted a seller application. Review and approve/reject the application.`;
   }
 
@@ -358,7 +355,7 @@ export class NewSellerApplicationHandler implements INotificationHandler {
       category: this.getCategory(),
       actionUrl: this.getActionUrl(),
       metadata: {
-        applicationId: data.applicationId,
+        applicantId: data.applicantId,
         applicantName: data.applicantName,
         submittedAt: new Date().toISOString(),
       },

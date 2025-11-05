@@ -93,6 +93,14 @@ const SignUp = () => {
             validated: false,
             Flags: 0,
           });
+
+          await notificationService.notifyAllAdmins(
+            NotificationType.NEW_SELLER_APPLICATION,
+            {
+              applicantId: user.uid,
+              applicantName: firstName + " " + lastName,
+            }
+          );
         } else {
           setSeller(false);
         }
