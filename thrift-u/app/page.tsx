@@ -38,7 +38,7 @@ export default function Home() {
         });
       }}>Sign Out</button>
       <CarouselMain></CarouselMain>
-      <div className="flex flex-row justify-center items-start gap-6 flex-wrap">
+      <div className="flex flex-row justify-center items-start gap-4 flex-wrap">
         <Carousel1 />
         <Carousel2 />
         <Carousel3 />
