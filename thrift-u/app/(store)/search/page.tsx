@@ -128,7 +128,7 @@ const filteredItems = items.filter(item => {
       };
 
       localStorage.setItem("cart", JSON.stringify(newCart));
-
+      window.dispatchEvent(new Event('cartUpdated'));
       return newCart;
     });
 
