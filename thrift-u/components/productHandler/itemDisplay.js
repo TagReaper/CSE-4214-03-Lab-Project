@@ -3,14 +3,18 @@ import FireData from "@/firebase/clientApp"
 import { getDoc, doc } from "@firebase/firestore"
 import { useEffect, useState } from "react"
 import AddToCart from "../buyTrain/addToCart"
+import { verifyRole } from "@/lib/auth"
 
 const ItemDisplay = ({itemId}) => {
     const [itemData, setData] = useState(undefined)
     const [sellerName, setName] = useState("")
+    const [isBuyer, setisBuyer] = useState(false)
 
     useEffect(() => {
         const fetchItemData = async()=>{
             try{
+                const buyer = await verifyRole()
+                setisBuyer(buyer)
                 const itemRef = await getDoc(doc(FireData.db, "Inventory", itemId))
                 setData(itemRef.data())
                 const sellerRef = await getDoc(doc(FireData.db, "User", itemRef.data().sellerId))
@@ -23,7 +27,7 @@ const ItemDisplay = ({itemId}) => {
     }, [itemId]);
 
     if(itemData != undefined){
-        if ((itemData.deletedAt == "" && itemData.approved == true)){
+        if ((itemData.deletedAt == "" && itemData.approved == true) || !isBuyer){
             return(
                 <div className={'w-full m-10 grid grid-cols-3'}>
                     <div>
@@ -34,12 +38,13 @@ const ItemDisplay = ({itemId}) => {
                         <h3 className="text-2xl  font-bold text-gray-800 mb-2">
                             {itemData.name}
                         </h3>
-                        <p className="mb-5 text-sm text-gray-500">Sold by: <span className="font-medium text-gray-700">{sellerName}</span></p>
-                        <p className="text-2xl mb-3 mt-3">${itemData.price}</p>
-                        <p className="mb-4 mt-10">
+                        <p className={"mb-5 text-sm text-gray-500"}>Sold by: <span className="font-medium text-gray-700">{sellerName}</span></p>
+                        <p className={`text-2xl mb-3 mt-3 ${itemData.quantity > 0 ? "texbg-blue-500" : "text-red-500"}`}>${itemData.price}</p>
+                        <h3 className={"text-2xl font-semibold mb-2 mt-5"}>About this item.</h3>
+                        <p className="mb-4">
                             {itemData.description}
                         </p>
-                        <p className="text-sm text-gray-500">{itemData.quantity} in stock</p>
+                        <p className="text-sm text-gray-500">{itemData.quantity > 0 ? `${itemData.quantity} in stock` : `Out of Stock`}</p>
                         <p className="text-sm text-gray-500">Condition: {itemData.condition}</p>
                     </div>
                     <div className={"center"}>
