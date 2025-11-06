@@ -33,7 +33,7 @@ export const UserMenu = ({
         await fetch("/api/auth", { //send token to api route to set cookie
           method: "POST",
         });
-      router.push('/');
+      location.reload();
     } catch (error) {
       console.error('Error signing out:', error);
     }
