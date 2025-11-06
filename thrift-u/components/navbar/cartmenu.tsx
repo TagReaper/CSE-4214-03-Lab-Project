@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCartIcon, Trash2Icon } from 'lucide-react';
+import { ShoppingCartIcon, Trash2Icon, PlusIcon, MinusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,20 +13,73 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-
-// Item structure from store
+import FireData from '@/firebase/clientApp';
+import { doc, getDoc } from "firebase/firestore";
 interface Item {
-  id: number;
+  id: string;
+  image: string;
   name: string;
-  category: string;
   price: number;
   stock: number;
+  condition: string;
+  description: string;
+  approved: boolean;
+  sellerId: string;
+  tags: string[];
+  category: string;
 }
 
-// Cart item with quantity
+interface FirestoreItem {
+  name: string;
+  price: string;
+  quantity: string;
+  condition: string;
+  description: string;
+  image: string;
+  approved: boolean;
+  sellerId: string;
+  deletedAt: string;
+  tags: string[];
+}
+
 interface CartItem {
   item: Item;
   quantity: number;
+}
+
+async function getItemInfo(itemId: string): Promise<Item | null> {
+  const docRef = doc(FireData.db, "Inventory", itemId);
+
+  try {
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const firestoreData = docSnap.data() as FirestoreItem;
+
+      const actualItem: Item = {
+        id: docSnap.id,
+        name: firestoreData.name,
+        image: firestoreData.image,
+        price: parseFloat(firestoreData.price),
+        stock: parseInt(firestoreData.quantity, 10),
+        condition: firestoreData.condition,
+        description: firestoreData.description,
+        approved: firestoreData.approved,
+        sellerId: firestoreData.sellerId,
+        tags: firestoreData.tags,
+        category: firestoreData.tags[0] || "Uncategorized"
+      };
+
+      return actualItem;
+
+    } else {
+      console.warn(`No item found with ID: ${itemId}`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    return null;
+  }
 }
 
 export const CartMenu = () => {
@@ -34,33 +87,53 @@ export const CartMenu = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load cart from localStorage
   useEffect(() => {
-    const loadCart = () => {
+    // Load cart from localStorage
+    const loadCart = async () => {
+      setLoading(true);
       try {
         const storedCart = localStorage.getItem("cart");
-        const storedItems = localStorage.getItem("items");
 
-        if (storedCart && storedItems) {
-          const cart = JSON.parse(storedCart) as { [key: number]: number };
-          const items = JSON.parse(storedItems) as Item[];
-
-          // Combine quantities and item details
-          const cartArray: CartItem[] = Object.entries(cart)
-            .map(([itemId, quantity]) => {
-              const item = items.find(i => i.id === parseInt(itemId));
-              if (!item) return null;
-              return { item, quantity };
-            })
-            .filter((ci): ci is CartItem => ci !== null);
-
-          console.log('Final cartArray:', cartArray);
-          setCartItems(cartArray);
-        } else {
-          console.log('Cart or items not found in localStorage');
+        if (!storedCart) {
+          setCartItems([]);
+          return;
         }
+
+        const cart = JSON.parse(storedCart) as { [key: string]: number };
+        const itemEntries = Object.entries(cart);
+
+        if (itemEntries.length === 0) {
+          setCartItems([]);
+          return;
+        }
+
+        // Create an array of fetch promises
+        const fetchPromises = itemEntries.map(async ([itemId, quantity]) => {
+          const item = await getItemInfo(itemId);
+          if (item) {
+            return { item, quantity };
+          }
+
+          console.warn(`Item ${itemId} not found in DB. Removing from cart.`);
+          return null;
+        });
+
+        const results = await Promise.all(fetchPromises);
+
+        const finalCartItems = results.filter((ci): ci is CartItem => ci !== null);
+        setCartItems(finalCartItems);
+
+        if (finalCartItems.length < itemEntries.length) {
+          const newCart = finalCartItems.reduce((acc, ci) => {
+            acc[ci.item.id] = ci.quantity;
+            return acc;
+          }, {} as { [key: string]: number });
+          localStorage.setItem("cart", JSON.stringify(newCart));
+        }
+
       } catch (error) {
         console.error('Error loading cart:', error);
+        setCartItems([]);
       } finally {
         setLoading(false);
       }
@@ -84,19 +157,40 @@ export const CartMenu = () => {
     };
   }, []);
 
-  // Remove item from cart
-  const removeFromCart = (itemId: number) => {
+  const removeFromCart = (itemId: string) => {
     try {
       const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
       delete storedCart[itemId];
       localStorage.setItem("cart", JSON.stringify(storedCart));
 
-      // Update local state
       setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
 
       window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error removing from cart:', error);
+    }
+  };
+
+  const updateCartQuantity = (itemId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeFromCart(itemId);
+      return;
+    }
+
+    try {
+      const cartItem = cartItems.find(ci => ci.item.id === itemId);
+      if (!cartItem) return;
+
+      const finalQuantity = Math.min(newQuantity, cartItem.item.stock);
+
+      const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
+      storedCart[itemId] = finalQuantity;
+      localStorage.setItem("cart", JSON.stringify(storedCart));
+
+      window.dispatchEvent(new Event('cartUpdated'));
+
+    } catch (error) {
+      console.error('Error updating cart quantity:', error);
     }
   };
 
@@ -107,9 +201,10 @@ export const CartMenu = () => {
     router.push('/cart');
   };
 
-  return (
+return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* --- Header (UNCHANGED) --- */}
         <Button variant="ghost" size="icon" className="h-9 w-9 relative hover:bg-white/10 text-white">
           <ShoppingCartIcon className="h-4 w-4" />
           {cartCount > 0 && (
@@ -124,7 +219,11 @@ export const CartMenu = () => {
         <DropdownMenuLabel>Shopping Cart</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {cartItems.length === 0 ? (
+        {loading ? (
+           <div className="py-6 text-center text-sm text-muted-foreground">
+             Loading cart...
+           </div>
+        ) : cartItems.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Your cart is empty
           </div>
@@ -142,12 +241,41 @@ export const CartMenu = () => {
                     <p className="text-xs text-muted-foreground">
                       {item.category}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ${item.price.toFixed(2)} × {quantity}
-                    </p>
-                    <p className="text-sm font-medium mt-1">
-                      ${(item.price * quantity).toFixed(2)}
-                    </p>
+                    {/* Quantity Selector & Price */}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateCartQuantity(item.id, quantity - 1);
+                          }}
+                        >
+                          <MinusIcon className="h-3 w-3" />
+                        </Button>
+                        <span className="w-6 text-center text-sm font-medium">
+                          {quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          disabled={quantity >= item.stock}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateCartQuantity(item.id, quantity + 1);
+                          }}
+                        >
+                          <PlusIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+
+                      <p className="text-sm font-medium">
+                        ${(item.price * quantity).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"
