@@ -8,7 +8,11 @@ import RequestItem from '../seller/addItem'
 import { getAuthUser } from "@/lib/auth"
 
 const SellerDashboard = () => {
-    return 1
+    return (
+        <div>
+            Bacon
+        </div>
+    )
 }
 
 export default SellerDashboard
