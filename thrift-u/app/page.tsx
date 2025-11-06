@@ -37,7 +37,13 @@ export default function Home() {
             method: "POST",
         });
       }}>Sign Out</button>
+      <CarouselMain></CarouselMain>
+      <div className="flex flex-row justify-center items-start gap-6 flex-wrap">
+        <Carousel1 />
+        <Carousel2 />
+        <Carousel3 />
       </div>
+    </div>
 }
 
 export function CarouselMain() {
@@ -54,7 +60,7 @@ export function CarouselMain() {
         className="w-full max-w-sm"
       >
         <CarouselContent>
-          {Array.from({ length: 9 }).map((_, index) => (
+          {Array.from({ length: 12 }).map((_, index) => (
             <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
               <div className="p-1">
                 <Card>
@@ -84,7 +90,7 @@ export function Carousel1() {
       <h2 className="text-2xl font-bold mb-4 text-black">Sports</h2>
       <Carousel className="w-full">
         <CarouselContent>
-          {Array.from({ length: 7 }).map((_, index) => (
+          {Array.from({ length: 3 }).map((_, index) => (
             <CarouselItem key={index}>
               <div className="p-1">
                 <Card>
@@ -109,7 +115,7 @@ export function Carousel2() {
       <h2 className="text-2xl font-bold mb-4 text-black">Clothing</h2>
       <Carousel className="w-full">
         <CarouselContent>
-          {Array.from({ length: 7 }).map((_, index) => (
+          {Array.from({ length: 3 }).map((_, index) => (
             <CarouselItem key={index}>
               <div className="p-1">
                 <Card>
@@ -134,7 +140,7 @@ export function Carousel3() {
       <h2 className="text-2xl font-bold mb-4 text-black">College</h2>
       <Carousel className="w-full">
         <CarouselContent>
-          {Array.from({ length: 7 }).map((_, index) => (
+          {Array.from({ length: 3 }).map((_, index) => (
             <CarouselItem key={index}>
               <div className="p-1">
                 <Card>
