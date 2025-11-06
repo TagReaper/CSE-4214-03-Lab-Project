@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import FireData from "@/firebase/clientApp";
 import { collection, getDocs, query, where } from "@firebase/firestore";
@@ -20,7 +20,7 @@ interface Item {
   approved: boolean;
 }
 
-export default function SearchPage() {
+ function SearchPageContent() {
   const searchParams = useSearchParams();
   //List of items for sale
   const [items, setItems] = useState<Item[]>([]);
@@ -55,6 +55,8 @@ export default function SearchPage() {
           where("deletedAt", "==", "")
         );
 
+        console.log(inventoryQuery)
+
         const querySnapshot = await getDocs(inventoryQuery);
 
         //Convert Firestore docs to items
@@ -73,6 +75,8 @@ export default function SearchPage() {
         }
       )
     );
+
+    console.log(fetchedItems)
 
         setItems(fetchedItems);
       }
@@ -233,7 +237,7 @@ const filteredItems = items.filter(item => {
                   {item.tags.slice(0, 3).join(", ")}
                 </div>
               )}
-              
+
               {/*Shows # of item in cart*/}
               {quantity > 0 && (
                 <p style={{
@@ -262,5 +266,15 @@ const filteredItems = items.filter(item => {
         })}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}>
+      <h2>Loading search...</h2>
+    </div>}>
+      <SearchPageContent />
+    </Suspense>
   );
 }
