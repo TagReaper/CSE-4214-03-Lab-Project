@@ -2,14 +2,22 @@
 
 import * as React from 'react';
 import { useEffect, useState, useRef, useId } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { User, onAuthStateChanged } from 'firebase/auth';
+import { getAuthUser } from '@/lib/auth';
 import FireData from '@/firebase/clientApp';
 import Image from "next/image";
 import Link from "next/link";
 import { SearchIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from '@/components/ui/navigation-menu';
 
 import { cn } from '@/lib/utils';
 import { NotificationMenu } from './notifmenu';
@@ -48,6 +56,7 @@ function useAuth() {
 export interface NavItem {
   href: string;
   label: string;
+  active?: boolean;
 }
 
 // Navbar props
@@ -56,10 +65,24 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   searchPlaceholder?: string;
 }
 
+const sellerNavLinks: NavItem[] = [
+  { href: '/sellerhub', label: 'Seller Hub', active: true },
+  { href: '/sellerhub/products', label: 'My Products' },
+  { href: '/sellerhub/orders', label: 'Orders' },
+];
+
+const adminNavLinks: NavItem[] = [
+  { href: '/adminpanel', label: 'Dashboard', active: true },
+  { href: '/adminpanel', label: 'ABC' },
+  { href: '/adminpanel', label: 'DEF' },
+  { href: '/adminpanel', label: 'GHI' },
+];
+
 export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
   (
     {
       className,
+      navigationLinks,
       searchPlaceholder = 'Search products...',
       ...props
     },
