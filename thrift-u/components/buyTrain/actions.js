@@ -8,7 +8,9 @@ export async function checkout(Address, Payment) {
         const token = await getAuthUser()
         var Items = []
         var orderSum = 0
+        var pendingOrders = []
         const serverTime = new Date();
+        var quant = 0
         try{
             const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
             const Inventory = await getDocs(collection(FireData.db, "Inventory"))
@@ -30,6 +32,7 @@ export async function checkout(Address, Payment) {
                 if (!item) {throw Error("ItemId not found")}
                 item.id = Cart[index].itemId
                 item.orderqty = Cart[index].qty
+                quant += item.orderqty
                 if (item.orderqty > item.qty){throw Error("Item is out of stock")}
                 item.sum = item.price * item.orderqty
                 orderSum += item.sum
@@ -37,7 +40,7 @@ export async function checkout(Address, Payment) {
             }
 
             orderRef = await addDoc(collection(FireData.db, "Orders"), {
-                quantity : Cart.length,
+                quantity: quant,
                 cardUsed: Payment.cardNumber % 10000,
                 price: orderSum,
                 date: serverTime.toLocaleString(),
@@ -51,22 +54,23 @@ export async function checkout(Address, Payment) {
             for (let index = 0; index < Items.length; index++) {
                 const sellerRef = await getDoc(doc(FireData.db, "Seller", Items[index].sellerId))
                 const seller = sellerRef.data()
-                let income = Items[index] + seller.income
-                let unclaimedIncome = Items[index].sum + seller.unclaimedIncome
+                pendingOrders = seller.pendingOrders
+                pendingOrders.push(OrderItemRef.id)
+                const OrderItemRef = await addDoc(collection(FireData.db, "OrderItems"), {
+                    orderId: orderRef.id,
+                    itemId: Items[index].id,
+                    sellerId: Items[index].sellerId,
+                    quantity: Items[index].orderqty,
+                    status:"pending",
+                    price: Items[index].sum,
+                    trackingNumber: "",
+                    dateAccepted: ""
+                })
                 await updateDoc(doc(FireData.db, "Seller", Items[index].sellerId), {
-                    income: income,
-                    unclaimedIncome: unclaimedIncome,
+                    pendingOrders: pendingOrders
                 })
                 await updateDoc(doc(FireData.db, "Inventory", Items[index].id), {
                     qty: Items[index].qty - Items[index].orderqty,
-                })
-                await addDoc(collection(FireData.db, "Orders"), {
-                    orderId: orderRef.id,
-                    itemId: Items[index].id,
-                    quantity: Items[index].orderqty,
-                    status:"pending",
-                    trackingNumber: "",
-                    dateAccepted: ""
                 })
             }
 
@@ -78,7 +82,7 @@ export async function checkout(Address, Payment) {
             return true
         } catch(error) {
             console.error("Checkout failed:", error);
-            alert("Checkout failed:", error)
+            alert("Checkout failed: Something went wrong.")
             return false
         }
     } else {
@@ -119,6 +123,7 @@ export async function editCart(ItemId, qty) {
             return true
         } catch(error) {
             console.error("Failed to edit cart:", error);
+            alert("Cart modification failed: Something went wrong.")
             throw error
         }
     } else {
@@ -133,8 +138,60 @@ export async function clearCart() {
             await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
                 cart: [],
             })
+            return true
         } catch (error) {
             console.error("Failed to clear cart:", error);
+            alert("Clear cart failed: Something went wrong.")
+            throw error
+        }
+    } else {
+        return false
+    }
+}
+
+export async function acceptOrder(orderItemId, trackingNumber, income, unclaimedIncome, pendingOrders) {
+    if(verifyRole("Seller")){
+        try{
+            const token = await getAuthUser()
+            const date = new Date()
+            pendingOrders.splice(pendingOrders.indexOf(orderItemId), 1)
+            const orderItemRef = await getDoc(doc(FireData.db, ))
+            await updateDoc(doc(FireData.db, "Seller", token.user_id), {
+                pendingOrders: pendingOrders,
+                income: income + orderItemRef.data().price,
+                unclaimedIncome: unclaimedIncome + orderItemRef.data().price,
+            })
+            await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
+                trackingNumber: trackingNumber,
+                dateAccepted: date.toLocaleString(),
+                status: "shipped",
+            })
+            return true
+        }catch(error){
+            console.error("Failed to accept Order:", error);
+            alert("Accept order failed: Something went wrong.")
+            throw error
+        }
+    } else {
+        return false
+    }
+}
+
+export async function denyOrder(orderItemId, pendingOrders) {
+    if(verifyRole("Seller")){
+        try {
+            const token = await getAuthUser()
+            pendingOrders.splice(pendingOrders.indexOf(orderItemId), 1)
+            await updateDoc(doc(FireData.db, "Seller", token.user_id), {
+                pendingOrders: pendingOrders,
+            })
+            await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
+                status: "refused",
+            })
+            return true
+        } catch (error) {
+            console.error("Failed to refuse Order:", error);
+            alert("Refuse order failed: Something went wrong.")
             throw error
         }
     } else {
