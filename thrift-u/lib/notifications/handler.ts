@@ -72,7 +72,7 @@ export class OrderConfirmationHandler implements INotificationHandler {
   }
 
   getActionUrl(data: { orderId: string }): string | undefined {
-    return `/orders/${data.orderId}`;
+    return `/account/orders/${data.orderId}`;
   }
 
   process(

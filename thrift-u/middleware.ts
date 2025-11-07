@@ -29,9 +29,9 @@ export function middleware(request: NextRequest){
 
     const authPaths = ["login", "signup"]
     const publicPaths = ["listing", "search"]
-    const buyerPaths = ["cart", "checkout", "account/orders", "account"]
-    const sellerPaths = ["sellerhub", "account", "sellerhub/orders"]
-    const adminPaths = ["adminpanel", "adminpanel/orders", "adminpanel/products", "adminpanel/users"]
+    const buyerPaths = ["cart", "checkout", "account"]
+    const sellerPaths = ["sellerhub", "account/management", "sellerhub/products", "sellerhub/orders"]
+    const adminPaths = ["adminpanel", "account/management", "adminpanel/orders", "adminpanel/products", "adminpanel/users"]
 
     console.log(request.nextUrl.pathname)
 
@@ -44,17 +44,17 @@ export function middleware(request: NextRequest){
             }
             switch (decodedToken.role) {
                 case "Admin":
-                    if(request.nextUrl.pathname != "/" && (!adminPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
+                    if(request.nextUrl.pathname != "/" && request.nextUrl.pathname != "/account" && (!adminPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
                         return NextResponse.redirect(new URL('/invalidAccess', request.url));
                     }
                     break;
                 case "Buyer":
-                    if(request.nextUrl.pathname != "/" && (!buyerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
+                    if(request.nextUrl.pathname != "/" && request.nextUrl.pathname != "/account" && (!buyerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
                         return NextResponse.redirect(new URL('/invalidAccess', request.url));
                     }
                     break;
                 case "Seller":
-                    if (request.nextUrl.pathname != "/" && (decodedToken.status != "approved" && (!sellerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item))))){
+                    if (request.nextUrl.pathname != "/" && request.nextUrl.pathname != "/account" && (decodedToken.status != "approved" || (!sellerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item))))){
                         return NextResponse.redirect(new URL('/invalidAccess', request.url));
                     }
                     break;
@@ -82,6 +82,9 @@ export const config = {
         "/login/:path*",
         "/signup/:path*",
         "/adminpanel/:path*",
-        "/search/:path*"
+        "/search/:path*",
+        "/account/:path*",
+        "/listing/:path*",
+        "/cart/:path*"
         ]
 }

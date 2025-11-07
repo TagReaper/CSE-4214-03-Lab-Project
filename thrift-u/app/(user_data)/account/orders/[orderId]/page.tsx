@@ -1,16 +1,16 @@
 'use client'
 import { useState, useEffect } from "react";
-import ItemDisplay from "../../../../components/productHandler/itemDisplay"
+import OrderDisplay from "../../../../../components/account/orderDisplay"
 
 export default function ListingPage({params}: {
-    params: Promise<{id: string}>
+    params: Promise<{orderId: string}>
     }) {
 
     const [id, setId] = useState("")
 
     useEffect(() => {
         const fetchParams = async () => {
-            setId((await params).id)
+            setId((await params).orderId)
         }
         fetchParams()
     }, [params]);
@@ -18,7 +18,7 @@ export default function ListingPage({params}: {
     if(id != ""){
         return (
             <div>
-                <ItemDisplay itemId={id}/>
+                <OrderDisplay orderId={id}/>
             </div>
         )
     } else {
