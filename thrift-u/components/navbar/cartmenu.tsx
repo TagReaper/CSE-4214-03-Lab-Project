@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingCartIcon, Trash2Icon } from 'lucide-react';
+import { ShoppingCartIcon, Trash2Icon, PlusIcon, MinusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,20 +13,76 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import FireData from '@/firebase/clientApp';
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { editCart } from '@/components/buyTrain/actions';
 
-// Item structure from store
 interface Item {
-  id: number;
+  id: string;
+  image: string;
   name: string;
-  category: string;
   price: number;
   stock: number;
+  condition: string;
+  description: string;
+  approved: boolean;
+  sellerId: string;
+  tags: string[];
+  category: string;
 }
 
-// Cart item with quantity
+interface FirestoreItem {
+  name: string;
+  price: string;
+  quantity: string;
+  condition: string;
+  description: string;
+  image: string;
+  approved: boolean;
+  sellerId: string;
+  deletedAt: string;
+  tags: string[];
+}
+
 interface CartItem {
   item: Item;
   quantity: number;
+}
+
+async function getItemInfo(itemId: string): Promise<Item | null> {
+  const docRef = doc(FireData.db, "Inventory", itemId);
+
+  try {
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const firestoreData = docSnap.data() as FirestoreItem;
+
+      const actualItem: Item = {
+        id: docSnap.id,
+        name: firestoreData.name,
+        image: firestoreData.image,
+        price: parseFloat(firestoreData.price),
+        stock: parseInt(firestoreData.quantity, 10),
+        condition: firestoreData.condition,
+        description: firestoreData.description,
+        approved: firestoreData.approved,
+        sellerId: firestoreData.sellerId,
+        tags: firestoreData.tags,
+        category: firestoreData.tags[0] || "Uncategorized"
+      };
+
+      return actualItem;
+
+    } else {
+      console.warn(`No item found with ID: ${itemId}`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    return null;
+  }
 }
 
 export const CartMenu = () => {
@@ -34,69 +90,88 @@ export const CartMenu = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load cart from localStorage
   useEffect(() => {
-    const loadCart = () => {
-      try {
-        const storedCart = localStorage.getItem("cart");
-        const storedItems = localStorage.getItem("items");
+    setLoading(true);
 
-        if (storedCart && storedItems) {
-          const cart = JSON.parse(storedCart) as { [key: number]: number };
-          const items = JSON.parse(storedItems) as Item[];
-
-          // Combine quantities and item details
-          const cartArray: CartItem[] = Object.entries(cart)
-            .map(([itemId, quantity]) => {
-              const item = items.find(i => i.id === parseInt(itemId));
-              if (!item) return null;
-              return { item, quantity };
-            })
-            .filter((ci): ci is CartItem => ci !== null);
-
-          console.log('Final cartArray:', cartArray);
-          setCartItems(cartArray);
-        } else {
-          console.log('Cart or items not found in localStorage');
-        }
-      } catch (error) {
-        console.error('Error loading cart:', error);
-      } finally {
+    const authUnsubscribe = onAuthStateChanged(FireData.auth, (currentUser) => {
+      if (!currentUser) {
+        setCartItems([]);
         setLoading(false);
+        return;
       }
-    };
 
-    loadCart();
+      const docRef = doc(FireData.db, "Buyer", currentUser.uid);
+      const cartUnsubscribe = onSnapshot(docRef, async (docSnap) => {
+        if (!docSnap.exists() || !docSnap.data().cart) {
+          setCartItems([]);
+          setLoading(false);
+          return;
+        }
 
-    // Listener for Localstorage changes when cart is updated from other places
-    const handleStorageChange = () => {
-      loadCart();
-    };
+        const dbCart = docSnap.data().cart as { itemId: string, qty: number }[];
 
-    window.addEventListener('storage', handleStorageChange);
+        if (dbCart.length === 0) {
+          setCartItems([]);
+          setLoading(false);
+          return;
+        }
 
-    // Listener for same-tab cart updates
-    window.addEventListener('cartUpdated', handleStorageChange);
+        // Create an array of fetch promises
+        const fetchPromises = dbCart.map(async ({ itemId, qty }) => {
+          const item = await getItemInfo(itemId);
+          if (item) {
+            return { item, quantity: qty };
+          }
+          console.warn(`Item ${itemId} not found.`);
+          return null;
+        });
 
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('cartUpdated', handleStorageChange);
-    };
+        const results = await Promise.all(fetchPromises);
+        const finalCartItems = results.filter((ci): ci is CartItem => ci !== null);
+
+        setCartItems(finalCartItems);
+        setLoading(false);
+
+      }, (error) => {
+        console.error("Error listening to cart:", error);
+        setCartItems([]);
+        setLoading(false);
+      });
+      return () => cartUnsubscribe();
+    });
+    return () => authUnsubscribe();
   }, []);
 
-  // Remove item from cart
-  const removeFromCart = (itemId: number) => {
+  const removeFromCart = async (itemId: string) => {
     try {
-      const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
-      delete storedCart[itemId];
-      localStorage.setItem("cart", JSON.stringify(storedCart));
+      const cartItem = cartItems.find(ci => ci.item.id === itemId);
+      if (!cartItem) return;
 
-      // Update local state
-      setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
+      const delta = -cartItem.quantity;
+      await editCart(itemId, delta);
 
-      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error removing from cart:', error);
+    }
+  };
+
+  const updateCartQuantity = async (itemId: string, newQuantity: number) => {
+    const cartItem = cartItems.find(ci => ci.item.id === itemId);
+    if (!cartItem) return;
+
+    const finalNewQuantity = Math.min(newQuantity, cartItem.item.stock);
+
+    if (finalNewQuantity === cartItem.quantity) {
+        return;
+    }
+
+    const result = finalNewQuantity - cartItem.quantity;
+    if (result === 0)
+      return;
+    try {
+      await editCart(itemId, result);
+    } catch (error) {
+      console.error('Error updating cart quantity:', error);
     }
   };
 
@@ -107,7 +182,7 @@ export const CartMenu = () => {
     router.push('/cart');
   };
 
-  return (
+return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-9 w-9 relative hover:bg-white/10 text-white">
@@ -124,7 +199,11 @@ export const CartMenu = () => {
         <DropdownMenuLabel>Shopping Cart</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {cartItems.length === 0 ? (
+        {loading ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Loading cart...
+          </div>
+        ) : cartItems.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Your cart is empty
           </div>
@@ -135,19 +214,47 @@ export const CartMenu = () => {
                 <DropdownMenuItem
                   key={item.id}
                   className="flex items-start gap-3 p-3 cursor-pointer"
-                  onSelect={(e) => e.preventDefault()}
+                  onSelect={() => router.push(`/listing/${item.id}`)}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {item.category}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      ${item.price.toFixed(2)} × {quantity}
-                    </p>
-                    <p className="text-sm font-medium mt-1">
-                      ${(item.price * quantity).toFixed(2)}
-                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateCartQuantity(item.id, quantity - 1);
+                          }}
+                        >
+                          <MinusIcon className="h-3 w-3" />
+                        </Button>
+                        <span className="w-6 text-center text-sm font-medium">
+                          {quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-6 w-6"
+                          disabled={quantity >= item.stock}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateCartQuantity(item.id, quantity + 1);
+                          }}
+                        >
+                          <PlusIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+
+                      <p className="text-sm font-medium">
+                        ${(item.price * quantity).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"
