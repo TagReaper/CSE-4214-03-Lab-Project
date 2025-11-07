@@ -2,9 +2,9 @@
 Intro to Software Engineering Lab Project
 
 ### Contributors/Team Members:
-**Lucas Cox; coxlucas2022@gmail.com; Frontend-Dev**
+**Lucas Cox; coxlucas2022@gmail.com; Lead Frontend-Dev**
 
-**Moustapha Niang; mn979@msstate.edu; Backend-Dev**
+**Moustapha Niang; mn979@msstate.edu; Lead Backend-Dev**
 
 **Gunner Beck; gjb144@msstate.edu; Flex-Dev**
 
