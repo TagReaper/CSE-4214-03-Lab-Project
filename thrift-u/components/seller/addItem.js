@@ -66,7 +66,7 @@ const RequestItem = ({sellerId}) => {
         "Tennis",
         "Equipment",
         "Tech",
-        "Jewlery",
+        "Jewelry",
         "Living",
         "Dining"
     ]
