@@ -15,6 +15,7 @@ const settingsCards = [
     href: "/account/management",
     color: "bg-blue-100",
     iconColor: "text-blue-600",
+    requiresBuyer: false,
   },
   {
     title: "Your Address",
@@ -23,6 +24,7 @@ const settingsCards = [
     href: "/account/addresses",
     color: "bg-green-100",
     iconColor: "text-green-600",
+    requiresBuyer: true,
   },
   {
     title: "Your Orders",
@@ -31,6 +33,7 @@ const settingsCards = [
     href: "/account/orders",
     color: "bg-orange-100",
     iconColor: "text-orange-600",
+    requiresBuyer: true,
   },
 ];
 
@@ -38,6 +41,7 @@ export default function SettingsMain() {
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState("Buyer");
 
   useEffect(() => {
     console.log("SettingsMain: Starting auth listener...");
@@ -63,9 +67,13 @@ export default function SettingsMain() {
         if (!userDoc.exists()) {
           console.log("No user document found for this UserID");
           setUserData({ firstName: "", lastName: "", email: "" });
+          setUserRole("Buyer");
         } else {
           const data = userDoc.data();
           console.log("Found user document data:", data);
+
+          const role = data?.accessLevel || "Buyer";
+          setUserRole(role);
 
           const userData = {
             firstName: data?.firstName || "",
@@ -83,13 +91,21 @@ export default function SettingsMain() {
           console.error("Error stack:", e.stack);
         }
         setUserData({ firstName: "", lastName: "", email: "" });
+        setUserRole("Buyer");
       } finally {
         setLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, setUserRole]);
+
+  const accessibleCards = settingsCards.filter((card) => {
+    if (card.requiresBuyer && userRole !== "Buyer") {
+      return false;
+    }
+    return true;
+  });
 
   if (loading) {
     return (
@@ -111,7 +127,7 @@ export default function SettingsMain() {
         email={userData?.email}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {settingsCards.map((card) => (
+        {accessibleCards.map((card) => (
           <SettingsCard
             key={card.href}
             title={card.title}
