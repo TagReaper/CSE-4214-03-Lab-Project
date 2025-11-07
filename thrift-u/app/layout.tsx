@@ -5,6 +5,8 @@ import Image from "next/image";
 import "./globals.css";
 import { Navbar } from "@/components/navbar/navbar";
 
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
