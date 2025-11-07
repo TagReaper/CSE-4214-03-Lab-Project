@@ -43,6 +43,20 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* For Internet Explorer and older Edge */
+body {
+  -ms-overflow-style: none;
+}
+
+/* For Firefox */
+html {
+  scrollbar-width: none;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --background: #000000;
