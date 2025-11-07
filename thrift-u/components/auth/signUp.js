@@ -112,7 +112,7 @@ const SignUp = () => {
           state: "",
           zip: "",
           numOrders: 0,
-          cartQTY: 0,
+          cart: [],
           deletedAt: "",
         });
       }
