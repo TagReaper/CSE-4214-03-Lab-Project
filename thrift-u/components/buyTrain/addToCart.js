@@ -1,10 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {Button} from '../../components/ui/button.tsx'
 import {editCart} from './actions'
 import {getDoc, doc} from "@firebase/firestore"
 import {getAuthUser} from "../../lib/auth.js"
 import FireData from '../../firebase/clientApp'
+import { verifyRole } from '../../lib/auth.js'
 
 
 
@@ -12,6 +13,15 @@ const AddToCart = ({itemId, stock}) =>{
     const [qty, setQTY] = useState(0)
     const [adding, setAdding] = useState(false)
     const [cartQTY, setCartQTY] = useState(0)
+    const [isBuyer, setIsBuyer] = useState(false)
+
+    useEffect(() => {
+        async function fetch() {
+            const buyer = await verifyRole("Buyer")
+            setIsBuyer(buyer)
+        }
+        fetch()
+    }, []);
 
     const handleClick = async (event) => {
         event.preventDefault();
@@ -19,8 +29,10 @@ const AddToCart = ({itemId, stock}) =>{
         const token = await getAuthUser()
         const buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
         const item = buyer.data().cart.find(obj => obj.itemId == itemId)
-        const qty = item.qty
-        setCartQTY(qty)
+        if (item){
+            const qty = item.qty
+            setCartQTY(qty)
+        }
     }
 
     const handleConfirm = async () => {
@@ -77,7 +89,7 @@ const AddToCart = ({itemId, stock}) =>{
             )
         } else {
             return(
-                <Button onClick={handleClick} className={"bg-orange-500"}>
+                <Button disabled={!isBuyer} onClick={handleClick} className={"bg-orange-500 disabled:opacity-50 disabled:bg-gray-700"}>
                     Add to Cart
                 </Button>
             )

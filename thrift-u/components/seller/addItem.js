@@ -84,8 +84,8 @@ const RequestItem = ({sellerId}) => {
             await addDoc(collection(FireData.db, "Inventory"), {
                 sellerId: sellerId,
                 condition: condition,
-                quantity: qty,
-                price: price,
+                quantity: Number(qty),
+                price: Number(price),
                 name: title,
                 description: desc,
                 approved: false,
