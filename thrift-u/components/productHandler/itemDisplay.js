@@ -72,14 +72,8 @@ const ItemDisplay = ({itemId}) => {
         return(
             <div className="center">
                 <h1>
-                    Oops!!
+                    Loading...
                 </h1>
-                <h3 className="text-2xl mt-3 underline">
-                    Product Id is invalid or product has been removed!
-                </h3>
-                <p className="w-92">
-                    Please avoid manually trying in product routes.
-                </p>
             </div>
         )
     }
