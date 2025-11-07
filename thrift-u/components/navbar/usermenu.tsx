@@ -44,9 +44,6 @@ export const UserMenu = ({
       case 'account':
         router.push('/account');
         break;
-      case 'orders':
-        router.push('/orders');
-        break;
       case 'logout':
         handleLogout();
         break;
@@ -85,12 +82,6 @@ export const UserMenu = ({
           className="cursor-pointer"
         >
           Account
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleMenuItemClick('orders')}
-          className="cursor-pointer"
-        >
-          Orders
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

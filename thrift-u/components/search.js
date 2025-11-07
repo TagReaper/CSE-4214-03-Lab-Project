@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"; //Import React's useState hook (allows for the page to remember values between re-renders)
 import FireData from "../firebase/clientApp"; //Imports Firebase setup and connection
-import { collection, getDocs} from "@firebase/firestore";
+import { collection, getDocs } from "@firebase/firestore";
 import CompactItemListing from "./productHandler/itemListingCompact";
 import { Input } from "./ui/input";
 import { 
@@ -13,9 +13,11 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from "@/components/ui/multi-select"
+import { useSearchParams } from "next/navigation";
 
 
 const Search = () => {
+    const searchParams = useSearchParams();
     //List of items for sale
     const [items, setItems] = useState([]);
     const [itemsApproved, setApproved] = useState([])
@@ -54,75 +56,83 @@ const Search = () => {
         "Dining"
     ]
 
-    //Fetch approved items from Firestore
     useEffect(() => {
-        const fetchItems = async () => {
-            try {
-                setLoading(true);
-                const querySnapshot = await getDocs(collection(FireData.db, 'Inventory'))
-                setItems(querySnapshot.docs.map((doc) => ({...doc.data(), id: doc.id})))
-            }catch (err) {
-                console.error("Error fetching items: ", err);
-                setErr("Failed to load items. Please try again.");
-            }finally {
-                setLoading(false);
-            }
-        };
-
-        fetchItems();
-    }, []);
-
-    useEffect(() => {
-        const sortItems = async () => {
-            let temp = []
-            for (let index = 0; index < items.length; index++) {
-                if(items[index].approved && items[index].deletedAt == ""){
-                    temp.push(items[index])
-                }
-            }
-            setApproved(temp)
-        };
-        sortItems();
-    }, [items]);
-
-    //Filters items based on search text/category
-    const filteredItems = itemsApproved.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-
-        //no category selected = show all items
-        if (selectedCategories.length === 0) {
-            return matchesSearch;
+      const queryParam = searchParams.get("q");
+        if (queryParam) {
+          setSearch(queryParam);
         }
-
-        //Check if item has at least one of the selected categories
-        const matchesCategory = selectedCategories.some(category =>
-            item.tags && item.tags.includes(category)
+    }, [searchParams]); 
+    
+    
+  //Fetch approved items from Firestore
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const querySnapshot = await getDocs(
+          collection(FireData.db, "Inventory")
         );
-
-        return matchesSearch && matchesCategory;
-    });
-
-    //Show loading state
-    if (loading) {
-        return (
-        <div style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}>
-            <h2>Loading products...</h2>
-        </div>
-        )
-    }
-
-    //Show error state
-    if (error != "") {
-        return (
-        <div style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}>
-            <h2>Error: {error}</h2>
-            <button onClick={() => location.reload()}>Retry</button>
-        </div>
+        setItems(
+          querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
         );
-    }
+      } catch (err) {
+        console.error("Error fetching items: ", err);
+        setErr("Failed to load items. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchItems();
+  }, []);
+
+  useEffect(() => {
+    const sortItems = async () => {
+      let temp = [];
+      for (let index = 0; index < items.length; index++) {
+        if (items[index].approved && items[index].deletedAt == "") {
+          temp.push(items[index]);
+        }
+      }
+      setApproved(temp);
+    };
+    sortItems();
+  }, [items]);
+
+  //Filters items based on search text/category
+  const filteredItems = itemsApproved.filter((item) => {
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || item.tags.includes(selectedCategory);
+    return matchesSearch && matchesCategory;
+  });
+
+  //Show loading state
+  if (loading) {
+    return (<div
+        style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}
+      >
+        <h2>Loading products...</h2>
+      </div>
+    );
+  }
+        
+  //Show error state
+  if (error != "") {
     return (
-        <div style={{ padding: "2rem", fontFamily: "Arial" }}>
+      <div
+        style={{ padding: "2rem", fontFamily: "Arial", textAlign: "center" }}
+      >
+        <h2>Error: {error}</h2>
+        <button onClick={() => location.reload()}>Retry</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "2rem", fontFamily: "Arial" }}>
         <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
             <h1>Search</h1>
         </header>
@@ -203,4 +213,55 @@ const Search = () => {
 );
 }
 
-export default Search
+      {/*Search bar and category dropdown*/}
+      <div style={{ marginBottom: "1rem" }}>
+        <Input
+          type="text"
+          placeholder="Search items..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: "20dvw", padding: "0.5rem", marginRight: "1rem" }}
+        />
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="All">All</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Sports">Sports</option>
+          <option value="Kitchen">Kitchen</option>
+          <option value="Tech">Tech</option>
+          <option value="Living">Living</option>
+          <option value="Dining">Dining</option>
+          <option value="College">College</option>
+          <option value="Gym">Gym</option>
+        </select>
+      </div>
+
+      {/*No items found message*/}
+      {filteredItems.length === 0 && (
+        <p style={{ textAlign: "center", marginTop: "2rem" }}>
+          No items found. Try adjusting your search and/or filters.
+        </p>
+      )}
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+        {filteredItems.map((item) => {
+          return (
+            <div key={item.id}>
+              <CompactItemListing
+                itemId={item.id}
+                image={item.image}
+                price={item.price}
+                productName={item.name}
+                quantity={item.quantity}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default Search;
