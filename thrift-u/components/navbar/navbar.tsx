@@ -23,7 +23,6 @@ import { NotificationMenu } from './notifmenu';
 import { UserMenu } from './usermenu';
 import { CartMenu } from './cartmenu';
 
-// Logo component
 const Logo = () => {
   return (
     <Image
@@ -65,14 +64,12 @@ function useAuth() {
   return { user, loading, userRole };
 }
 
-// Navigation item type
 export interface NavItem {
   href: string;
   label: string;
   active?: boolean;
 }
 
-// Navbar props
 export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   searchPlaceholder?: string;
 }
@@ -144,9 +141,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       >
         <div className="container mx-auto max-w-screen-2xl">
           <div className="flex h-16 items-center justify-between gap-4">
-            {/* Left side */}
             <div className="flex flex-1 items-center gap-2">
-              {/* Logo */}
               <Link
                 href="/"
                 className="flex items-center space-x-2 text-white hover:text-[#a8a8a8] transition-colors no-underline"
@@ -207,12 +202,8 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 <>
                   {user ? (
                     <>
-                      {/* Cart Menu */}
-                      <CartMenu />
-                      {/* Notifications */}
-                      <NotificationMenu userId={user.uid}
-                      />
-                      {/* User menu */}
+                      {userRole === 'Buyer' && <CartMenu />}
+                      <NotificationMenu userId={user.uid} />
                       <UserMenu
                         userName={user.displayName || 'User'}
                         userEmail={user.email || ''}
@@ -221,7 +212,6 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                     </>
                   ) : (
                     <>
-                      {/* Login/Signup buttons */}
                       <Button
                         variant="ghost"
                         size="sm"
