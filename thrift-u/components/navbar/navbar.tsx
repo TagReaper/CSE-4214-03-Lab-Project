@@ -75,16 +75,13 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const sellerNavLinks: NavItem[] = [
-  { href: '/sellerhub', label: 'Seller Hub' },
+  { href: '/sellerhub', label: 'Seller Hub', active: true },
   { href: '/sellerhub/products', label: 'My Products' },
   { href: '/sellerhub/orders', label: 'Orders' },
 ];
 
 const adminNavLinks: NavItem[] = [
   { href: '/adminpanel', label: 'Dashboard', active: true },
-  { href: '/adminpanel', label: 'ABC' },
-  { href: '/adminpanel', label: 'DEF' },
-  { href: '/adminpanel', label: 'GHI' },
 ];
 
 export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
