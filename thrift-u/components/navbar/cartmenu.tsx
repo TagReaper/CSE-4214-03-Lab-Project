@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import FireData from '@/firebase/clientApp';
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { editCart } from '@/components/buyTrain/actions';
+
 interface Item {
   id: string;
   image: string;
@@ -88,107 +91,85 @@ export const CartMenu = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load cart from localStorage
-    const loadCart = async () => {
-      setLoading(true);
-      try {
-        const storedCart = localStorage.getItem("cart");
+    setLoading(true);
 
-        if (!storedCart) {
+    const authUnsubscribe = onAuthStateChanged(FireData.auth, (currentUser) => {
+      if (!currentUser) {
+        setCartItems([]);
+        setLoading(false);
+        return;
+      }
+
+      const docRef = doc(FireData.db, "Buyer", currentUser.uid);
+      const cartUnsubscribe = onSnapshot(docRef, async (docSnap) => {
+        if (!docSnap.exists() || !docSnap.data().cart) {
           setCartItems([]);
+          setLoading(false);
           return;
         }
 
-        const cart = JSON.parse(storedCart) as { [key: string]: number };
-        const itemEntries = Object.entries(cart);
+        const dbCart = docSnap.data().cart as { itemId: string, qty: number }[];
 
-        if (itemEntries.length === 0) {
+        if (dbCart.length === 0) {
           setCartItems([]);
+          setLoading(false);
           return;
         }
 
         // Create an array of fetch promises
-        const fetchPromises = itemEntries.map(async ([itemId, quantity]) => {
+        const fetchPromises = dbCart.map(async ({ itemId, qty }) => {
           const item = await getItemInfo(itemId);
           if (item) {
-            return { item, quantity };
+            return { item, quantity: qty };
           }
-
-          console.warn(`Item ${itemId} not found in DB. Removing from cart.`);
+          console.warn(`Item ${itemId} not found.`);
           return null;
         });
 
         const results = await Promise.all(fetchPromises);
-
         const finalCartItems = results.filter((ci): ci is CartItem => ci !== null);
+
         setCartItems(finalCartItems);
-
-        if (finalCartItems.length < itemEntries.length) {
-          const newCart = finalCartItems.reduce((acc, ci) => {
-            acc[ci.item.id] = ci.quantity;
-            return acc;
-          }, {} as { [key: string]: number });
-          localStorage.setItem("cart", JSON.stringify(newCart));
-        }
-
-      } catch (error) {
-        console.error('Error loading cart:', error);
-        setCartItems([]);
-      } finally {
         setLoading(false);
-      }
-    };
 
-    loadCart();
-
-    // Listener for Localstorage changes when cart is updated from other places
-    const handleStorageChange = () => {
-      loadCart();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Listener for same-tab cart updates
-    window.addEventListener('cartUpdated', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('cartUpdated', handleStorageChange);
-    };
+      }, (error) => {
+        console.error("Error listening to cart:", error);
+        setCartItems([]);
+        setLoading(false);
+      });
+      return () => cartUnsubscribe();
+    });
+    return () => authUnsubscribe();
   }, []);
 
-  const removeFromCart = (itemId: string) => {
+  const removeFromCart = async (itemId: string) => {
     try {
-      const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
-      delete storedCart[itemId];
-      localStorage.setItem("cart", JSON.stringify(storedCart));
+      const cartItem = cartItems.find(ci => ci.item.id === itemId);
+      if (!cartItem) return;
 
-      setCartItems(prev => prev.filter(ci => ci.item.id !== itemId));
+      const delta = -cartItem.quantity;
+      await editCart(itemId, delta);
 
-      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error removing from cart:', error);
     }
   };
 
-  const updateCartQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeFromCart(itemId);
-      return;
+  const updateCartQuantity = async (itemId: string, newQuantity: number) => {
+    const cartItem = cartItems.find(ci => ci.item.id === itemId);
+    if (!cartItem) return;
+
+    const finalNewQuantity = Math.min(newQuantity, cartItem.item.stock);
+
+    if (finalNewQuantity === cartItem.quantity) {
+        return;
     }
 
+    const result = finalNewQuantity - cartItem.quantity;
+    if (result === 0)
+      return;
     try {
-      const cartItem = cartItems.find(ci => ci.item.id === itemId);
-      if (!cartItem) return;
-
-      const finalQuantity = Math.min(newQuantity, cartItem.item.stock);
-
-      const storedCart = JSON.parse(localStorage.getItem("cart") || "{}");
-      storedCart[itemId] = finalQuantity;
-      localStorage.setItem("cart", JSON.stringify(storedCart));
-
-      window.dispatchEvent(new Event('cartUpdated'));
-
+      await editCart(itemId, result);
     } catch (error) {
       console.error('Error updating cart quantity:', error);
     }
@@ -204,7 +185,6 @@ export const CartMenu = () => {
 return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* --- Header (UNCHANGED) --- */}
         <Button variant="ghost" size="icon" className="h-9 w-9 relative hover:bg-white/10 text-white">
           <ShoppingCartIcon className="h-4 w-4" />
           {cartCount > 0 && (
@@ -220,9 +200,9 @@ return (
         <DropdownMenuSeparator />
 
         {loading ? (
-           <div className="py-6 text-center text-sm text-muted-foreground">
-             Loading cart...
-           </div>
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Loading cart...
+          </div>
         ) : cartItems.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Your cart is empty
@@ -234,14 +214,13 @@ return (
                 <DropdownMenuItem
                   key={item.id}
                   className="flex items-start gap-3 p-3 cursor-pointer"
-                  onSelect={(e) => e.preventDefault()}
+                  onSelect={() => router.push(`/listing/${item.id}`)}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {item.category}
                     </p>
-                    {/* Quantity Selector & Price */}
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-1">
                         <Button
