@@ -1,16 +1,9 @@
-import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/auth";
 import { SecurityDisplayManager } from "@/components/account/securityDisplay";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 export default async function SecurityPage() {
-  let user;
-  try {
-    user = await getAuthUser();
-  } catch (error) {
-    console.warn("User not authenticated", error);
-    redirect("/login");
-  }
+  const user = await getAuthUser();
 
   return (
     <div className="container mx-auto max-w-2xl p-4 space-y-6">

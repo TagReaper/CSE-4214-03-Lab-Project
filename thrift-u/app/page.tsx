@@ -23,11 +23,5 @@ export default function Home() {
   return <div className="center">
       <Image style={{filter:'invert(100%)'}}src="/Graphics/ThriftULogoModern.png" alt="ThriftU Logo" width={400} height={400}/>
       Home Page
-      <button className="loginbutton" onClick={async () => {
-          await FireData.auth.signOut();
-          await fetch("/api/auth", { //send token to api route to set cookie
-            method: "POST",
-        });
-      }}>Sign Out</button>
       </div>
 }

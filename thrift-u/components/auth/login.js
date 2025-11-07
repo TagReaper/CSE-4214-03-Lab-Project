@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import FireData from "../../firebase/clientApp";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { doc, getDoc } from "@firebase/firestore";
 
@@ -13,7 +12,6 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [banned, setBanned] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -90,7 +88,7 @@ const Login = () => {
         },
       });
 
-      router.push("/"); //redirect to home page again
+      location.reload(); //redirect to home page again
     } catch (error) {
       console.error("error during account login:", error);
       if(!banned){

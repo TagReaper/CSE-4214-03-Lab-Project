@@ -1,6 +1,5 @@
 'use client'
 
-import Image from "next/image";
 import { useRouter }  from 'next/navigation'
 
 
@@ -10,14 +9,14 @@ const CompactItemListing = ({itemId, image, price, productName, quantity}) => {
 
     const handleClick = async () => {
         //pushes to individual product page {itemId}
-        router.push('/')
+        router.push(`/listing/${itemId}`)
     }
 
     if (quantity > 0){
         return (
-        <button className="m-5 bg-white duration-200 flex flex-col w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
-            <div className='flex m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
-                <img style={{aspectRatio: '3/2', width: '100%', height: 'auto', objectFit: 'cover'}}src={image} alt="Product Image" width={300} height={300}/>
+        <button onClick={handleClick} className="m-5 bg-white duration-200 flex flex-col w-xs h-96 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
+            <div className='flex m-4 overflow-hidden border-2 rounded-2xl border-transparent'>
+                <img style={{aspectRatio: '1/1', width: '100%', height: 'auto', objectFit: 'cover'}}src={image} alt="Product Image" width={300} height={300}/>
             </div>
             <div className='flex flex-col px-4 space-y-1'>
                 <p className='font-medium tracking-wide w-max'>{productName}</p>
@@ -27,9 +26,9 @@ const CompactItemListing = ({itemId, image, price, productName, quantity}) => {
     )
     } else {
         return (
-        <button className="m-5 bg-white duration-200 flex flex-col w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
-            <div className='flex m-3 overflow-hidden border-2 rounded-2xl border-transparent'>
-                <img style={{aspectRatio: '3/2', width: '100%', height: 'auto', objectFit: 'cover', filter: 'grayscale(100%)'}} src={image} alt="Product Image" width={300} height={300}/>
+        <button onClick={handleClick} className="m-5 bg-white duration-200 flex flex-col w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400">
+            <div className='flex m-4 overflow-hidden border-2 rounded-2xl border-transparent'>
+                <img style={{aspectRatio: '1/1', width: '100%', height: 'auto', objectFit: 'cover', filter: 'grayscale(100%)'}} src={image} alt="Product Image" width={300} height={300}/>
             </div>
             <div className='flex flex-col px-4 space-y-1'>
                 <p className='font-medium tracking-wide w-max'>{productName}</p>

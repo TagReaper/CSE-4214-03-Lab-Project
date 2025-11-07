@@ -7,7 +7,6 @@ import {
 } from "firebase/auth";
 import FireData from "../../firebase/clientApp";
 import { doc, setDoc } from "@firebase/firestore";
-import { useRouter } from "next/navigation";
 
 const UIPasswordValidation = (password) => {
   return {
@@ -37,7 +36,6 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const serverTime = new Date();
-  const router = useRouter();
 
   useEffect(() => {
     setValidation(UIPasswordValidation(password));
@@ -93,6 +91,14 @@ const SignUp = () => {
             Flags: 0,
             deletedAt: "",
           });
+
+          await notificationService.notifyAllAdmins(
+            NotificationType.NEW_SELLER_APPLICATION,
+            {
+              applicantId: user.uid,
+              applicantName: firstName + " " + lastName,
+            }
+          );
         } else {
           setSeller(false);
         }
@@ -106,7 +112,7 @@ const SignUp = () => {
           state: "",
           zip: "",
           numOrders: 0,
-          cartQTY: 0,
+          cart: [],
           deletedAt: "",
         });
       }
@@ -123,7 +129,7 @@ const SignUp = () => {
       });
 
       alert("Account created successfully");
-      router.push("/");
+      location.reload()
     } catch (error) {
       console.error("error creating account:", error);
       switch (error.code) {
