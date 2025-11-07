@@ -13,7 +13,8 @@ export async function checkout(Address, Payment) {
         var quant = 0
         try{
             const Buyer = await getDoc(doc(FireData.db, "Buyer", token.user_id))
-            const Inventory = await getDocs(collection(FireData.db, "Inventory"))
+            const InventoryRef = await getDocs(collection(FireData.db, "Inventory"))
+            const Inventory = InventoryRef.docs.map((doc) => ({...doc.data(), id: doc.id}))
             const Cart = Buyer.data().cart
             if(!Payment) {throw Error("Payment Declined")}
             if (Payment.default){
@@ -21,14 +22,13 @@ export async function checkout(Address, Payment) {
                     cardNumber: Payment.cardNumber,
                     exp: Payment.exp,
                     cvc: Payment.cvc,
-                    firstName: Payment.firstName,
-                    lastName: Payment.lastName
+                    name: Payment.name,
                 })
             }
 
             for (let index = 0; index < Cart.length; index++) {
                 const itemRef = Inventory.find(obj => obj.id == Cart[index].itemId)
-                const item = itemRef.data()
+                const item = itemRef
                 if (!item) {throw Error("ItemId not found")}
                 item.id = Cart[index].itemId
                 item.orderqty = Cart[index].qty
@@ -39,7 +39,7 @@ export async function checkout(Address, Payment) {
                 Items.push(item)
             }
 
-            orderRef = await addDoc(collection(FireData.db, "Orders"), {
+            const orderRef = await addDoc(collection(FireData.db, "Orders"), {
                 buyerId: token.user_id,
                 quantity: Number(quant),
                 cardUsed: Number(Payment.cardNumber % 10000),
@@ -72,12 +72,12 @@ export async function checkout(Address, Payment) {
                     pendingOrders: pendingOrders
                 })
                 await updateDoc(doc(FireData.db, "Inventory", Items[index].id), {
-                    qty: Number(Items[index].qty - Items[index].orderqty),
+                    quantity: Number(Items[index].quantity - Items[index].orderqty),
                 })
             }
 
             await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
-                    numOrders: Number(Buyer.numOrders + 1),
+                    numOrders: Number(Buyer.data().numOrders + 1),
                     cart: [],
                 })
 
