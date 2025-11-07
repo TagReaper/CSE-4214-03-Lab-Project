@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"; //Import React's useState hook (all
 import FireData from "../firebase/clientApp"; //Imports Firebase setup and connection
 import { collection, getDocs} from "@firebase/firestore";
 import CompactItemListing from "./productHandler/itemListingCompact";
+import { Input } from "./ui/input";
 
 
 
@@ -84,12 +85,12 @@ const Search = () => {
 
         {/*Search bar and category dropdown*/}
         <div style={{ marginBottom: "1rem" }}>
-            <input
+            <Input
             type="text"
             placeholder="Search items..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: "0.5rem", marginRight: "1rem" }}
+            style={{ width: "20dvw", padding: "0.5rem", marginRight: "1rem" }}
             />
             <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
             <option value="All">All</option>
