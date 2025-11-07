@@ -5,7 +5,14 @@ import FireData from "../firebase/clientApp"; //Imports Firebase setup and conne
 import { collection, getDocs} from "@firebase/firestore";
 import CompactItemListing from "./productHandler/itemListingCompact";
 import { Input } from "./ui/input";
-
+import { 
+    MultiSelect,
+    MultiSelectContent,
+    MultiSelectGroup,
+    MultiSelectItem,
+    MultiSelectTrigger,
+    MultiSelectValue,
+} from "@/components/ui/multi-select"
 
 
 const Search = () => {
@@ -18,7 +25,34 @@ const Search = () => {
     //Stores search text entered by user
     const [search, setSearch] = useState("");
     //Stores category selected by user
-    const [selectedCategory, setSelectedCategory] = useState("All");
+    const [selectedCategories, setSelectedCategories] = useState([]);
+
+    //Categories
+    const categories = [
+        "Sports",
+        "Clothing",
+        "College",
+        "Kitchen",
+        "Hoodie",
+        "Shirt",
+        "Hat",
+        "Football",
+        "Baseball",
+        "Basketball",
+        "Soccer",
+        "Hockey",
+        "Crafts",
+        "Gym",
+        "Hand-Made",
+        "Decoration",
+        "Misc",
+        "Tennis",
+        "Equipment",
+        "Tech",
+        "Jewlery",
+        "Living",
+        "Dining"
+    ]
 
     //Fetch approved items from Firestore
     useEffect(() => {
@@ -53,10 +87,20 @@ const Search = () => {
 
     //Filters items based on search text/category
     const filteredItems = itemsApproved.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || item.tags.includes(selectedCategory);
-    return matchesSearch && matchesCategory;
-    })
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+
+        //no category selected = show all items
+        if (selectedCategories.length === 0) {
+            return matchesSearch;
+        }
+
+        //Check if item has at least one of the selected categories
+        const matchesCategory = selectedCategories.some(category =>
+            item.tags && item.tags.includes(category)
+        );
+
+        return matchesSearch && matchesCategory;
+    });
 
     //Show loading state
     if (loading) {
@@ -83,27 +127,61 @@ const Search = () => {
             <h1>Search</h1>
         </header>
 
-        {/*Search bar and category dropdown*/}
-        <div style={{ marginBottom: "1rem" }}>
+        {/*Search bar and category multi-select*/}
+        <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
             <Input
-            type="text"
-            placeholder="Search items..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ width: "20dvw", padding: "0.5rem", marginRight: "1rem" }}
-            />
-            <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-            <option value="All">All</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Sports">Sports</option>
-            <option value="Kitchen">Kitchen</option>
-            <option value="Tech">Tech</option>
-            <option value="Living">Living</option>
-            <option value="Dining">Dining</option>
-            <option value="College">College</option>
-            <option value="Gym">Gym</option>
-            </select>
+                type="text"
+                placeholder="Search items..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            style={{ width: "300px", padding: "0.5rem" }}
+        />
+
+        <div style={{ minWidth: "250px" }}>
+            <MultiSelect
+                onValuesChange={setSelectedCategories}
+                values={selectedCategories}
+            >
+                <MultiSelectTrigger className="w-full">
+                    <MultiSelectValue placeholder="Filter by categories" />
+                </MultiSelectTrigger>
+                <MultiSelectContent>
+                    <MultiSelectGroup>
+                        {categories.map((category) => (
+                            <MultiSelectItem key={category} value={category}>
+                                {category}
+                            </MultiSelectItem>
+                        ))}
+                    </MultiSelectGroup>
+                </MultiSelectContent>
+            </MultiSelect>
         </div>
+    </div>
+
+    {/*Selected Categories display*/}
+    {selectedCategories.length > 0 && (
+        <div style={{ marginBottom: "1rem", fontSize: "0.875rem", color: "#666" }}>
+            Filtering by: {selectedCategories.join(", ")}
+            <button
+                onClick={() => setSelectedCategories([])}
+                style={{
+                    marginLeft: "0.5rem",
+                    color: "#3b82f6",
+                    textDecoration: "underline",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer"
+                }}
+            >
+                Clear filters
+            </button>
+        </div>
+    )}
+
+    {/*Results COunt*/}
+    <div style={{ marginBottom: "1rem", fontSize: "0.875rem", color: "#666" }}>
+        {filteredItems.length} item{filteredItems.length !== 1 ? 'ies' : ''} found
+    </div>
 
         {/*No items found message*/}
         {filteredItems.length === 0 && (
@@ -114,15 +192,15 @@ const Search = () => {
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
             {filteredItems.map((item) => {
-            return (
-                <div key={item.id}>
-                    <CompactItemListing itemId={item.id} image={item.image} price={item.price} productName={item.name} quantity={item.quantity}/>
-                </div>
-            );
+                return (
+                    <div key={item.id}>
+                        <CompactItemListing itemId={item.id} image={item.image} price={item.price} productName={item.name} quantity={item.quantity}/>
+                    </div>
+                );
             })}
         </div>
-        </div>
-    );
+    </div>
+);
 }
 
 export default Search
