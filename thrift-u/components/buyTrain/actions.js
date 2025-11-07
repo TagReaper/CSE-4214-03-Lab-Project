@@ -40,9 +40,10 @@ export async function checkout(Address, Payment) {
             }
 
             orderRef = await addDoc(collection(FireData.db, "Orders"), {
-                quantity: quant,
-                cardUsed: Payment.cardNumber % 10000,
-                price: orderSum,
+                buyerId: token.user_id,
+                quantity: Number(quant),
+                cardUsed: Number(Payment.cardNumber % 10000),
+                price: Number(orderSum),
                 date: serverTime.toLocaleString(),
                 address: Address.address,
                 city: Address.city,
@@ -55,27 +56,28 @@ export async function checkout(Address, Payment) {
                 const sellerRef = await getDoc(doc(FireData.db, "Seller", Items[index].sellerId))
                 const seller = sellerRef.data()
                 pendingOrders = seller.pendingOrders
-                pendingOrders.push(OrderItemRef.id)
                 const OrderItemRef = await addDoc(collection(FireData.db, "OrderItems"), {
                     orderId: orderRef.id,
                     itemId: Items[index].id,
+                    buyerId: token.user_id,
                     sellerId: Items[index].sellerId,
-                    quantity: Items[index].orderqty,
+                    quantity: Number(Items[index].orderqty),
                     status:"pending",
-                    price: Items[index].sum,
+                    price: Number(Items[index].sum),
                     trackingNumber: "",
                     dateAccepted: ""
                 })
+                pendingOrders.push(OrderItemRef.id)
                 await updateDoc(doc(FireData.db, "Seller", Items[index].sellerId), {
                     pendingOrders: pendingOrders
                 })
                 await updateDoc(doc(FireData.db, "Inventory", Items[index].id), {
-                    qty: Items[index].qty - Items[index].orderqty,
+                    qty: Number(Items[index].qty - Items[index].orderqty),
                 })
             }
 
             await updateDoc(doc(FireData.db, "Buyer", token.user_id), {
-                    numOrders: Buyer.numOrders + 1,
+                    numOrders: Number(Buyer.numOrders + 1),
                     cart: [],
                 })
 
@@ -147,16 +149,15 @@ export async function clearCart() {
     }
 }
 
-export async function acceptOrder(orderItemId, trackingNumber, income, unclaimedIncome, pendingOrders) {
+export async function acceptOrder(orderItemId, trackingNumber, unclaimedIncome, pendingOrders) {
     if(verifyRole("Seller")){
         try{
             const token = await getAuthUser()
             const date = new Date()
             pendingOrders.splice(pendingOrders.indexOf(orderItemId), 1)
-            const orderItemRef = await getDoc(doc(FireData.db, ))
+            const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
             await updateDoc(doc(FireData.db, "Seller", token.user_id), {
                 pendingOrders: pendingOrders,
-                income: income + orderItemRef.data().price,
                 unclaimedIncome: unclaimedIncome + orderItemRef.data().price,
             })
             await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
