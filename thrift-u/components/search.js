@@ -51,7 +51,7 @@ const Search = () => {
       "Tennis",
       "Equipment",
       "Tech",
-      "Jewlery",
+      "Jewelry",
       "Living",
       "Dining"
   ]
@@ -137,7 +137,7 @@ const Search = () => {
       </header>
 
       {/*Search bar and category multi-select*/}
-      <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
+      <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
           <Input
               type="text"
               placeholder="Search items..."
@@ -189,7 +189,7 @@ const Search = () => {
 
     {/*Results COunt*/}
     <div style={{ marginBottom: "1rem", fontSize: "0.875rem", color: "#666" }}>
-        {filteredItems.length} item{filteredItems.length !== 1 ? 'ies' : ''} found
+        {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} found
     </div>
 
         {/*No items found message*/}
