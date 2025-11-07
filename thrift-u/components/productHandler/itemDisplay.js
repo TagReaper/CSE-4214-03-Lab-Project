@@ -39,7 +39,7 @@ const ItemDisplay = ({itemId}) => {
                             {itemData.name}
                         </h3>
                         <p className={"mb-5 text-sm text-gray-500"}>Sold by: <span className="font-medium text-gray-700">{sellerName}</span></p>
-                        <p className={`text-2xl mb-3 mt-3 ${itemData.quantity > 0 ? "texbg-blue-500" : "text-red-500"}`}>${itemData.price}</p>
+                        <p className={`text-2xl mb-3 mt-3 ${itemData.quantity > 0 ? "text-blue-500" : "text-red-500 line-through"}`}>${itemData.price}</p>
                         <h3 className={"text-2xl font-semibold mb-2 mt-5"}>About this item.</h3>
                         <p className="mb-4">
                             {itemData.description}
