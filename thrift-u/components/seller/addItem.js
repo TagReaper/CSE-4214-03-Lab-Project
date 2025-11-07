@@ -34,13 +34,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { addDoc, collection} from "@firebase/firestore"
 import FireData from "@/firebase/clientApp"
 import {ref, uploadBytes, getDownloadURL} from "firebase/storage"
+import { verifyRole } from "@/lib/auth"
 
 const RequestItem = ({sellerId}) => {
 
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
-    const [price, setPrice] = useState("");
-    const [qty, setQTY] = useState("");
+    const [price, setPrice] = useState(0);
+    const [qty, setQTY] = useState(0);
     const [condition, setCondition] = useState("");
     const [tags, setTags] = useState([]);
     const [image, setImage] = useState(null);
@@ -73,6 +74,9 @@ const RequestItem = ({sellerId}) => {
     const handleRequest = async (event) => {
         event.preventDefault();
         try{
+            if (!(await verifyRole("Seller"))){
+                throw new Error("Invalid access")
+            }
             const imageRef = ref(FireData.storage, `images/${image.name + Math.floor(Math.random()*10000)}`)
             await uploadBytes(imageRef, image)
             const u = await getDownloadURL(imageRef)
@@ -80,17 +84,19 @@ const RequestItem = ({sellerId}) => {
             await addDoc(collection(FireData.db, "Inventory"), {
                 sellerId: sellerId,
                 condition: condition,
-                quantity: qty,
-                price: price,
+                quantity: Number(qty),
+                price: Number(price),
                 name: title,
                 description: desc,
                 approved: false,
                 tags: tags,
-                image: u
+                image: u,
+                deletedAt: "",
             })
             location.reload();
         } catch(error) {
-            console.log("Error requesting item creation: ", error)
+            console.error("Error requesting item creation: ", error)
+            alert("Error requesting item creation: ", error)
         }
     }
 
@@ -99,7 +105,7 @@ const RequestItem = ({sellerId}) => {
             <Dialog>
                 <form onSubmit={handleRequest} id="prodReq">
                     <DialogTrigger asChild>
-                        <button className='m-5 center bg-white duration-200 w-xs h-72 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400'>
+                        <button className='m-5 center bg-white duration-200 w-xs h-96 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400'>
                             <Image src={'/Icons/roundPlus.svg'} alt="Product Image" width={200} height={200}/>
                             <p className='font-bold text-2xl'>Request New Listing</p>
                         </button>

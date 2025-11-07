@@ -219,3 +219,40 @@ h2 {
   }
 }
 
+/* Cart Quantity +/- Button */
+.number-control {
+  display: flex;
+  align-items: center;
+}
+
+.number-left,
+.number-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333333;
+  border: 1px solid black;
+  width: 24px;
+  height: 24px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  user-select: none;
+}
+
+.number-left:hover,
+.number-right:hover {
+  background-color: #666666;
+}
+
+.number-quantity {
+  width: 50px;
+  padding: 0 0.25rem;
+  text-align: center;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  background: transparent;
+  color: inherit;
+}
+

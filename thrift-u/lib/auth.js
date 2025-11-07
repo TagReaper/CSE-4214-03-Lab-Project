@@ -1,33 +1,70 @@
-import { getTokens } from "next-firebase-auth-edge";
-import { serverConfig } from "../config/config";
+"use server";
 import { cookies } from "next/headers";
 
-export const verifyUserAndCheckRole = async (requiredRole) => {
-  if (!requiredRole) {
-    throw new Error(
-      "A required role must be provided to the verification function."
-    );
-  }
+export const getDecodedToken = async () => {
+  console.log("getDecodedToken: Starting...");
+  try {
+    console.log("getDecodedToken: Awaiting cookies...");
+    const cookieStore = await cookies();
+    console.log("getDecodedToken: Got cookie store");
 
-  const tokens = await getTokens(cookies(), { ...serverConfig });
-  //no cookies returned
-  if (!tokens) {
-    throw new Error("Unauthorized: You must be logged in.");
-  }
-  //role doesn't match
-  if (tokens.decodedToken.role !== requiredRole) {
-    throw new Error(
-      `Forbidden: This action requires the "${requiredRole}" role.`
-    );
-  }
+    const sessionCookie = cookieStore.get("idToken");
+    console.log("getDecodedToken: Session cookie exists?", !!sessionCookie);
 
-  //seller status check
-  if (
-    requiredRole === "seller" &&
-    tokens.decodedToken.status !== "approved_seller"
-  ) {
-    throw new Error(`Forbidden: Seller account is not approved.`);
-  }
+    if (!sessionCookie) {
+      throw new Error("Unauthorized: You must be logged in.");
+    }
 
-  return tokens.decodedToken;
+    const token = sessionCookie.value;
+    const parts = token.split('.');
+    const payload = JSON.parse(atob(parts[1]));
+
+    console.log("getDecodedToken: Verifying token...");
+    const decodedToken = payload;
+    if (!(!!decodedToken.user_id)) {
+      throw new Error("Invalid Cookie: Logout, then Login.");
+    }
+    return decodedToken;
+  } catch (error) {
+    console.error("getDecodedToken: Error occurred:", error);
+    throw error;
+  }
+};
+
+export const verifyRole = async (requiredRole) => {
+  try{
+    if (!requiredRole) {
+      throw new Error(
+        "A required role must be provided to the verification function."
+      );
+    }
+
+    const decodedToken = await getDecodedToken();
+    // role doesn't match
+    if (decodedToken.role !== requiredRole) {
+      throw new Error(
+        `Forbidden: This action requires the "${requiredRole}" role.`
+      );
+    }
+
+    // seller status check
+    if (requiredRole === "Seller" && decodedToken.status !== "approved") {
+      throw new Error(`Forbidden: Seller account is not approved.`);
+    }
+    return true;
+  } catch(error){
+    console.error(error)
+    return false
+  }
+};
+
+export const getAuthUser = async () => {
+  console.log("getAuthUser: Called");
+  try{
+    const decodedToken = await getDecodedToken();
+    console.log("getAuthUser: Returning decoded token");
+    return decodedToken;
+  } catch(error){
+    throw(error)
+  }
 };

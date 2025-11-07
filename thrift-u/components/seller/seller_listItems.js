@@ -5,16 +5,20 @@ import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
 import CompactItemListing from '../productHandler/itemListingCompact'
 import RequestItem from '../seller/addItem'
+import { getAuthUser } from "@/lib/auth"
 
-const SellerListItems = ({sellerId}) => {
+const SellerListItems = () => {
     const [items, setItems] = useState([])
     const [sellerItems, setSellerItems] = useState([])
     const [sellerPendingItems, setSellerPendingItems] = useState([])
+    const [sellerId, setSellerId] = useState("")
 
     useEffect(() => {
         const fetchItems = async () => {
             const querySnapshot = await getDocs(collection(FireData.db, 'Inventory'))
             setItems(querySnapshot.docs.map((doc) => ({...doc.data(), id: doc.id})))
+            const token = await getAuthUser()
+            setSellerId(token.user_id)
         }
 
         fetchItems()

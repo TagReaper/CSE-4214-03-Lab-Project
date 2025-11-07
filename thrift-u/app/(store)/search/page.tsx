@@ -1,3 +1,10 @@
+'use client'
+
+import Search from "../../../components/search"
+
 export default function SearchPage() {
-    return <div> Search Page </div>;
+    return (
+      <div>
+        <Search/>
+      </div>)
 }

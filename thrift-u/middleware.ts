@@ -1,33 +1,77 @@
 import { NextResponse } from "next/server";
 import type { NextRequest} from 'next/server.js';
 
+function getDecodedToken(request: NextRequest) {
+    const token = request.cookies.get("idToken");
+    console.log("getDecodedToken: Starting...");
+    try {
+        if (!token) {
+        throw new Error("Unauthorized: You must be logged in.");
+        }
 
+        const parts = token.value.split('.');
+        const payload = JSON.parse(atob(parts[1]));
+
+        console.log("getDecodedToken: Verifying token...");
+        const decodedToken = payload;
+        if (!(!!decodedToken.user_id)) {
+        throw new Error("Invalid Cookie: Logout, then Login.");
+        }
+        return decodedToken;
+    } catch (error) {
+        console.error("getDecodedToken: Error occurred:", error);
+        throw error;
+    }
+};
 
 export function middleware(request: NextRequest){
-    const response = NextResponse.next();
     const token = request.cookies.get("idToken");
 
-    interface CustomClaims {
-        role?: ('admin' | 'seller' | 'buyer')[];
-        status?: 'pending_seller' | 'approved_seller';
-    }
+    const authPaths = ["login", "signup"]
+    const publicPaths = ["listing", "search"]
+    const buyerPaths = ["cart", "checkout", "account/orders", "account"]
+    const sellerPaths = ["sellerhub", "account", "sellerhub/orders"]
+    const adminPaths = ["adminpanel", "adminpanel/orders", "adminpanel/products", "adminpanel/users"]
 
     console.log(request.nextUrl.pathname)
 
     if (token != undefined){
         if (token.value != "null"){
-            const parts = token.value.split('.');
-            const header = JSON.parse(atob(parts[0]));
-            const payload = JSON.parse(atob(parts[1]));
+            const decodedToken = getDecodedToken(request)
             console.log("User is logged in!")
-            // console.log("Token:", token.value);
-            // console.log("Header:", header);
-            // console.log("Payload:", payload);
+            if (authPaths.some(item => request.nextUrl.pathname.includes(item))) {
+                return NextResponse.redirect(new URL('/', request.url));
+            }
+            switch (decodedToken.role) {
+                case "Admin":
+                    if(request.nextUrl.pathname != "/" && (!adminPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
+                        return NextResponse.redirect(new URL('/invalidAccess', request.url));
+                    }
+                    break;
+                case "Buyer":
+                    if(request.nextUrl.pathname != "/" && (!buyerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item)))){
+                        return NextResponse.redirect(new URL('/invalidAccess', request.url));
+                    }
+                    break;
+                case "Seller":
+                    if (request.nextUrl.pathname != "/" && (decodedToken.status != "approved" && (!sellerPaths.some(item => request.nextUrl.pathname.includes(item)) && !publicPaths.some(item => request.nextUrl.pathname.includes(item))))){
+                        return NextResponse.redirect(new URL('/invalidAccess', request.url));
+                    }
+                    break;
+                default:
+                    return NextResponse.redirect(new URL('/invalidAccess', request.url));
+            }
         } else {
+            if (!authPaths.some(item => request.nextUrl.pathname.includes(item))) {
+                return NextResponse.redirect(new URL('/login', request.url));
+            }
             console.log("User is logged out!");
         }
     } else {
         console.log("User has no cookies");
+        if (!authPaths.some(item => request.nextUrl.pathname.includes(item))){
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
     }
 }
 
@@ -37,7 +81,7 @@ export const config = {
         "/sellerhub/:path*",
         "/login/:path*",
         "/signup/:path*",
-        "/api/:path*",
-        "/adminpanel/:path*"
+        "/adminpanel/:path*",
+        "/search/:path*"
         ]
 }

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword, validatePassword  } from "firebase/auth";
-import FireData from '../../firebase/clientApp'
-import { doc, setDoc } from '@firebase/firestore';
-import { useRouter }  from 'next/navigation'
+import { useState, useEffect } from "react";
+import {
+  createUserWithEmailAndPassword,
+  validatePassword,
+} from "firebase/auth";
+import FireData from "../../firebase/clientApp";
+import { doc, setDoc } from "@firebase/firestore";
 
 const UIPasswordValidation = (password) => {
   return {
@@ -34,93 +36,112 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const serverTime = new Date();
-  const router = useRouter();
 
-    useEffect(() => {
-        setValidation(UIPasswordValidation(password));
-    }, [password]);
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        setError('');
+  useEffect(() => {
+    setValidation(UIPasswordValidation(password));
+  }, [password]);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
 
-        if (password !== confirmPassword) {
-            setError("Passwords do not match.");
-            return;
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    try {
+      setLoading(true);
+      const passwordValidationStatus = await validatePassword(
+        FireData.auth,
+        password
+      );
+      if (!passwordValidationStatus.isValid) {
+        setError("Password does not meet the security policy.");
+        setLoading(false);
+        return;
+      }
+      const userCredential = await createUserWithEmailAndPassword(
+        FireData.auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      var idToken = await user.getIdToken();
+      const parts = idToken.split(".");
+      var payload = JSON.parse(atob(parts[1]));
+
+      await setDoc(doc(FireData.db, "User", user.uid), {
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        accessLevel: sellerReq ? "Seller" : "Buyer",
+        dateCreated: serverTime.toLocaleString(),
+        deletedAt: "",
+      });
+
+      if (sellerReq) {
+        const confirmed = confirm(
+          "Are you sure you want to request a seller account?"
+        );
+        if (confirmed) {
+          payload.role = "Seller";
+          payload.status = "pending";
+          await setDoc(doc(FireData.db, "Seller", user.uid), {
+            banned: false,
+            validated: false,
+            Flags: 0,
+            deletedAt: "",
+          });
+
+          await notificationService.notifyAllAdmins(
+            NotificationType.NEW_SELLER_APPLICATION,
+            {
+              applicantId: user.uid,
+              applicantName: firstName + " " + lastName,
+            }
+          );
+        } else {
+          setSeller(false);
         }
-        try {
-            setLoading(true);
-            const passwordValidationStatus = await validatePassword(FireData.auth, password);
-            if (!passwordValidationStatus.isValid) {
-                setError("Password does not meet the security policy.");
-                setLoading(false);
-                return;
-            }
-            const userCredential = await createUserWithEmailAndPassword(FireData.auth, email, password);
-            const user = userCredential.user;
-            var idToken = await user.getIdToken();
-            const parts = idToken.split('.');
-            var payload = JSON.parse(atob(parts[1]));
+      } else {
+        payload.role = "Buyer";
+        payload.status = "null";
+        await setDoc(doc(FireData.db, "Buyer", user.uid), {
+          banned: false,
+          address: "",
+          city: "",
+          state: "",
+          zip: "",
+          numOrders: 0,
+          cart: [],
+          deletedAt: "",
+        });
+      }
 
-            await setDoc(doc(FireData.db, 'User', user.uid), {
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-                accessLevel: sellerReq ? "Seller" : "Buyer",
-                dateCreated: serverTime.toLocaleString(),
-                deletedAt: "",
-            });
+      payload = btoa(JSON.stringify(payload));
+      idToken = parts[0] + "." + payload + "." + parts[2];
 
-            if (sellerReq) {
-                const confirmed = await confirm("Are you sure you want to request a seller account?");
-                if (confirmed) {
-                    payload.role = "Seller"
-                    payload.status = "pending"
-                    await setDoc(doc(FireData.db, 'Seller', user.uid), {
-                    banned: false,
-                    validated: false,
-                    Flags: 0,
-                });
-                } else {
-                    setSeller(false);
-                }
-            } else {
-                payload.role = "Buyer"
-                payload.status = "null"
-                await setDoc(doc(FireData.db, 'Buyer', user.uid), {
-                banned: false,
-                address: "",
-                city: "",
-                state: "",
-                zip: "",
-                numOrders: 0,
-                });
-            }
+      await fetch("/api/auth", {
+        //send token to api route to set cookie
+        method: "POST",
+        headers: {
+          Authorization: `${idToken}`,
+        },
+      });
 
-            payload = btoa(JSON.stringify(payload))
-            idToken = parts[0]+"."+payload+"."+parts[2]
-
-            await fetch("/api/auth", { //send token to api route to set cookie
-            method: "POST",
-            headers: {
-                Authorization: `${idToken}`,
-            },
-            });
-
-            alert('Account created successfully');
-            router.push('/');
-
-        } catch (error) {
-        console.error('error creating account:', error);
-        switch (error.code) {
-        case 'auth/email-already-in-use':
-            setError("This email address is already registered to an account.");
-            break;
-        case 'auth/invalid-email':
-            setError("Email address is invalid.");
-            break;
-        case 'auth/weak-password':
-            setError("Password is too weak. Please choose a stronger password.");
-            break;
+      alert("Account created successfully");
+      location.reload()
+    } catch (error) {
+      console.error("error creating account:", error);
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          setError("This email address is already registered to an account.");
+          break;
+        case "auth/invalid-email":
+          setError("Email address is invalid.");
+          break;
+        case "auth/weak-password":
+          setError("Password is too weak. Please choose a stronger password.");
+          break;
         default:
           setError("Error creating account, please try again. " + error.code);
       }
