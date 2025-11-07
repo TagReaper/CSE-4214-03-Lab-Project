@@ -1,0 +1,13 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+import { Navbar } from '@/components/navbar/navbar';
+
+export function NavbarWrapper() {
+  const pathname = usePathname();
+  const hideNavbar = pathname === '/login' || pathname === '/signup';
+
+  if (hideNavbar) return null;
+
+  return <Navbar />;
+}
