@@ -82,11 +82,10 @@ export async function checkout(Address, Payment) {
             return true
         } catch(error) {
             console.error("Checkout failed:", error);
-            alert("Checkout failed: Something went wrong.")
-            return false
+            return("Checkout failed: Something went wrong.")
         }
     } else {
-        return false
+        return("Checkout failed: Invalid Access.")
     }
 }
 
@@ -123,11 +122,10 @@ export async function editCart(ItemId, qty) {
             return true
         } catch(error) {
             console.error("Failed to edit cart:", error);
-            alert("Cart modification failed: Something went wrong.")
-            throw error
+            return("Cart modification failed: Something went wrong.")
         }
     } else {
-        return false
+        return("Cart modification failed: Invalid Access.")
     }
 }
 
@@ -141,11 +139,11 @@ export async function clearCart() {
             return true
         } catch (error) {
             console.error("Failed to clear cart:", error);
-            alert("Clear cart failed: Something went wrong.")
-            throw error
+            return("Clear cart failed: Something went wrong.")
         }
     } else {
-        return false
+        return("Clear cart failed: Invalid Access.")
+
     }
 }
 
@@ -169,11 +167,10 @@ export async function acceptOrder(orderItemId, trackingNumber, income, unclaimed
             return true
         }catch(error){
             console.error("Failed to accept Order:", error);
-            alert("Accept order failed: Something went wrong.")
-            throw error
+            return("Accept order failed: Something went wrong.")
         }
     } else {
-        return false
+        return("Accept order failed: Invalid Access.")
     }
 }
 
@@ -191,10 +188,31 @@ export async function denyOrder(orderItemId, pendingOrders) {
             return true
         } catch (error) {
             console.error("Failed to refuse Order:", error);
-            alert("Refuse order failed: Something went wrong.")
-            throw error
+            return("Refuse order failed: Something went wrong.")
         }
     } else {
-        return false
+        return("Refuse order failed: Invalid Access.")
+    }
+}
+
+export async function cashOut(income, unclaimedIncome) {
+    if(unclaimedIncome > 0){
+        if(verifyRole("Seller")){
+            try {
+                const token = await getAuthUser()
+                await updateDoc(doc(FireData.db, "Seller", token.user_id), {
+                    income: income + unclaimedIncome,
+                    unclaimedIncome: 0
+                })
+                return("Cashout Successful: $" + unclaimedIncome + " transfered")
+            } catch (error) {
+                console.error("Failed to cashout:", error);
+                return("Cashout failed: Something went wrong.")
+            }
+        } else {
+            return("Invalid Access: Something went wrong.")
+        }
+    } else {
+        return("You have nothing to cashout.")
     }
 }
