@@ -3,18 +3,18 @@ import FireData from "@/firebase/clientApp"
 import { getDoc, doc } from "@firebase/firestore"
 import { useEffect, useState } from "react"
 import AddToCart from "../buyTrain/addToCart"
-import { verifyRole } from "@/lib/auth"
+import { getAuthUser } from "@/lib/auth"
 
 const ItemDisplay = ({itemId}) => {
     const [itemData, setData] = useState(undefined)
     const [sellerName, setName] = useState("")
-    const [isBuyer, setisBuyer] = useState(false)
+    const [Id, setId] = useState("")
 
     useEffect(() => {
         const fetchItemData = async()=>{
             try{
-                const buyer = await verifyRole()
-                setisBuyer(buyer)
+                const token = await getAuthUser()
+                setId(token.user_id)
                 const itemRef = await getDoc(doc(FireData.db, "Inventory", itemId))
                 setData(itemRef.data())
                 const sellerRef = await getDoc(doc(FireData.db, "User", itemRef.data().sellerId))
@@ -27,7 +27,7 @@ const ItemDisplay = ({itemId}) => {
     }, [itemId]);
 
     if(itemData != undefined){
-        if ((itemData.deletedAt == "" && itemData.approved == true) || !isBuyer){
+        if ((itemData.deletedAt == "" && itemData.approved == true) || (itemData.sellerId == Id)){
             return(
                 <div className={'w-full m-10 grid grid-cols-3'}>
                     <div>
