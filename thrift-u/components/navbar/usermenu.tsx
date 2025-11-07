@@ -45,7 +45,7 @@ export const UserMenu = ({
         router.push('/account');
         break;
       case 'orders':
-        router.push('/orders');
+        router.push('/account/orders');
         break;
       case 'logout':
         handleLogout();
