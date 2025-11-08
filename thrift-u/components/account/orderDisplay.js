@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import Refund from "../buyTrain/refund"
+import { Button } from "../ui/button"
 
 const OrderDisplay = ({orderId}) => {
     const [orderItems, setData] = useState([])
@@ -67,7 +68,7 @@ const OrderDisplay = ({orderId}) => {
                                     <TableCell>{order.status == "pending" ? ("Awaiting Shipment.") : (order.trackingNumber)}</TableCell>
                                     <TableCell>{order.quantity}</TableCell>
                                     <TableCell>${order.price}</TableCell>
-                                    <TableCell>{order.status == "pending" ? (<Refund orderItemId={order.id} sellerId={order.sellerId}/>) : ("Refund Unavailable.")}</TableCell>
+                                    <TableCell>{order.status == "pending" ? (<Refund orderItemId={order.id} sellerId={order.sellerId}/>) : (<Button disabled>Refund Order</Button>)}</TableCell>
                                 </TableRow>
                                 ))
                             }

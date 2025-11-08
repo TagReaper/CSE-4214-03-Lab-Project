@@ -187,7 +187,7 @@ export async function denyOrder(orderItemId, pendingOrders) {
             const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
             if(orderItemRef.data().status != "pending"){return("Accept refuse failed: Something went wrong.")}
             await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
-                status: "refused",
+                status: "canceled",
                 trackingNumber: "Order Canceled"
             })
             //Refund cost of order to buyer
@@ -235,8 +235,8 @@ export async function refund(orderItemId, sellerId){
                 pendingOrders: pendingOrders,
             })
             await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
-                status: "canceled",
-                trackingNumber: "Order Canceled"
+                status: "refunded",
+                trackingNumber: "Order Refunded"
             })
             //Refund cost of order to buyer
             return true
