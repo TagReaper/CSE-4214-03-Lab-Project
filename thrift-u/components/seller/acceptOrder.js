@@ -53,7 +53,10 @@ const AcceptOrder = ({orderItemId, orderId}) => {
             if (!(await verifyRole("Seller"))){
                 throw new Error("Invalid access")
             }
-            await acceptOrder(orderItemId, trackingNumber, unclaimedIncome, pendingOrders)
+            const response = await acceptOrder(orderItemId, trackingNumber, unclaimedIncome, pendingOrders)
+            if (response != true){
+                alert(response)
+            }
         } catch(error) {
             console.error("Error confirming order: ", error)
             alert("Error confirming order: Something went wrong.")
