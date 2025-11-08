@@ -90,6 +90,9 @@ const SignUp = () => {
             validated: false,
             Flags: 0,
             deletedAt: "",
+            unclaimedIncome: Number(0),
+            income: Number(0),
+            pendingOrders: []
           });
 
           await notificationService.notifyAllAdmins(
@@ -111,7 +114,7 @@ const SignUp = () => {
           city: "",
           state: "",
           zip: "",
-          numOrders: 0,
+          numOrders: Number(0),
           cart: [],
           deletedAt: "",
         });

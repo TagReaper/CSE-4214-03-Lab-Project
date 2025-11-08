@@ -156,6 +156,7 @@ export async function acceptOrder(orderItemId, trackingNumber, unclaimedIncome, 
             const date = new Date()
             pendingOrders.splice(pendingOrders.indexOf(orderItemId), 1)
             const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            if(orderItemRef.data().status != "pending"){return("Accept order failed: Something went wrong.")}
             await updateDoc(doc(FireData.db, "Seller", token.user_id), {
                 pendingOrders: pendingOrders,
                 unclaimedIncome: unclaimedIncome + orderItemRef.data().price,
@@ -183,9 +184,13 @@ export async function denyOrder(orderItemId, pendingOrders) {
             await updateDoc(doc(FireData.db, "Seller", token.user_id), {
                 pendingOrders: pendingOrders,
             })
+            const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            if(orderItemRef.data().status != "pending"){return("Accept refuse failed: Something went wrong.")}
             await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
                 status: "refused",
+                trackingNumber: "Order Canceled"
             })
+            //Refund cost of order to buyer
             return true
         } catch (error) {
             console.error("Failed to refuse Order:", error);
@@ -215,5 +220,31 @@ export async function cashOut(income, unclaimedIncome) {
         }
     } else {
         return("You have nothing to cashout.")
+    }
+}
+
+export async function refund(orderItemId, sellerId){
+    if(verifyRole("Buyer")){
+        try {
+            const sellerRef = await getDoc(doc(FireData.db, "Seller", sellerId))
+            let pendingOrders = sellerRef.data().pendingOrders
+            pendingOrders.splice(pendingOrders.indexOf(orderItemId), 1)
+            const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            if(orderItemRef.data().status != "pending"){return("Order Cancelation failed: Something went wrong.")}
+            await updateDoc(doc(FireData.db, "Seller", sellerId), {
+                pendingOrders: pendingOrders,
+            })
+            await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
+                status: "canceled",
+                trackingNumber: "Order Canceled"
+            })
+            //Refund cost of order to buyer
+            return true
+        } catch (error) {
+            console.error("Failed to refuse Order:", error);
+            return("Refuse order failed: Something went wrong.")
+        }
+    } else {
+        return("Refuse order failed: Invalid Access.")
     }
 }
