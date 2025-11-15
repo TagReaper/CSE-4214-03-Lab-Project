@@ -11,6 +11,7 @@ import { cashOut } from "../buyTrain/actions"
 const SellerDashboard = () => {
     const [userData, setUser] = useState(undefined)
     const [sellerData, setSeller] = useState(undefined)
+    const [rating, setRating] = useState(0)
 
     useEffect(() => {
         const fetchItemData = async()=>{
@@ -18,8 +19,16 @@ const SellerDashboard = () => {
                 const token = await getAuthUser()
                 const UserRef = await getDoc(doc(FireData.db, "User", token.user_id))
                 const SellerRef = await getDoc(doc(FireData.db, "Seller", token.user_id))
+                let rate = 0
+                if(SellerRef.data().reviews.length > 0){
+                    for (let index = 0; index < SellerRef.data().reviews.length; index++) {
+                        rate += SellerRef.data().reviews[index]
+                    }
+                    rate = rate/SellerRef.data().reviews.length
+                }
                 setUser(UserRef.data())
                 setSeller(SellerRef.data())
+                setRating(rate)
             }catch(error){
                 console.error("Failed to fetch data:", error);
                 throw error
@@ -45,6 +54,7 @@ const SellerDashboard = () => {
                 </h3>
                 <h3 className="ml-10 mt-5 text-xl text-gray-500">Welcome back, {userData.firstName + " " + userData.lastName}</h3>
                 <h3 className={`ml-10 mt-5 text-xl text-gray-500 ${sellerData.Flags > 0 ? "text-red-500" : "text-green-500"} ${sellerData.Flags > 2 ? "font-bold" : "font-normal"}`}>You have {sellerData.Flags} Flags!</h3>
+                <h3 className={`ml-10 mt-5 text-xl text-gray-500 ${rating < 3 ? "text-red-500" : "text-green-500"} ${rating < 2 ? "font-bold" : "font-normal"}`}>Your average rating is {rating} stars</h3>
             </div>
             <div className={"grid grid-cols-2 gap-20"}>
                 <div className="center">
