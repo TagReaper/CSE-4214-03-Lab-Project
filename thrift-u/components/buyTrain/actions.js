@@ -65,7 +65,8 @@ export async function checkout(Address, Payment) {
                     status:"pending",
                     price: Number(Items[index].sum),
                     trackingNumber: "",
-                    dateAccepted: ""
+                    dateAccepted: "",
+                    reviewed: false
                 })
                 pendingOrders.push(OrderItemRef.id)
                 await updateDoc(doc(FireData.db, "Seller", Items[index].sellerId), {
@@ -185,10 +186,14 @@ export async function denyOrder(orderItemId, pendingOrders) {
                 pendingOrders: pendingOrders,
             })
             const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            const itemRef = await getDoc(doc(FireData.db, "Inventory", orderItemRef.data().itemId))
             if(orderItemRef.data().status != "pending"){return("Accept refuse failed: Something went wrong.")}
             await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
                 status: "canceled",
                 trackingNumber: "Order Canceled"
+            })
+            await updateDoc(doc(FireData.db, "Inventory", orderItemRef.data().itemId), {
+                quantity: itemRef.data().quantity + orderItemRef.data().quantity
             })
             //Refund cost of order to buyer
             return true
@@ -230,6 +235,7 @@ export async function refund(orderItemId, sellerId){
             let pendingOrders = sellerRef.data().pendingOrders
             pendingOrders.splice(pendingOrders.indexOf(orderItemId), 1)
             const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            const itemRef = await getDoc(doc(FireData.db, "Inventory", orderItemRef.data().itemId))
             if(orderItemRef.data().status != "pending"){return("Order Cancelation failed: Something went wrong.")}
             await updateDoc(doc(FireData.db, "Seller", sellerId), {
                 pendingOrders: pendingOrders,
@@ -238,13 +244,40 @@ export async function refund(orderItemId, sellerId){
                 status: "refunded",
                 trackingNumber: "Order Refunded"
             })
+            await updateDoc(doc(FireData.db, "Inventory", orderItemRef.data().itemId), {
+                quantity: itemRef.data().quantity + orderItemRef.data().quantity
+            })
             //Refund cost of order to buyer
             return true
         } catch (error) {
             console.error("Failed to refuse Order:", error);
-            return("Refuse order failed: Something went wrong.")
+            return("Refund order failed: Something went wrong.")
         }
     } else {
-        return("Refuse order failed: Invalid Access.")
+        return("Refund order failed: Invalid Access.")
+    }
+}
+
+export async function review(orderItemId, sellerId, rating){
+    if(verifyRole("Buyer")){
+        try {
+            const sellerRef = await getDoc(doc(FireData.db, "Seller", sellerId))
+            let reviews = sellerRef.data().reviews
+            reviews.push(rating)
+            const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            if(orderItemRef.data().status == "pending"){return("Rate Seller failed: Item is still pending, cancel order or wait until it is shipped to rate this seller.")}
+            await updateDoc(doc(FireData.db, "Seller", sellerId), {
+                reviews: reviews,
+            })
+            await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
+                reviewed: true
+            })
+            return true
+        } catch (error) {
+            console.error("Failed to review seller:", error);
+            return("Rate Seller failed: Something went wrong.")
+        }
+    } else {
+        return("Rate Seller failed: Invalid Access.")
     }
 }
