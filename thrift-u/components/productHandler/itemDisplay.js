@@ -9,6 +9,7 @@ const ItemDisplay = ({itemId}) => {
     const [itemData, setData] = useState(undefined)
     const [sellerName, setName] = useState("")
     const [Id, setId] = useState("")
+    const [rating, setRating] = useState("N/A")
 
     useEffect(() => {
         const fetchItemData = async()=>{
@@ -17,8 +18,18 @@ const ItemDisplay = ({itemId}) => {
                 setId(token.user_id)
                 const itemRef = await getDoc(doc(FireData.db, "Inventory", itemId))
                 setData(itemRef.data())
-                const sellerRef = await getDoc(doc(FireData.db, "User", itemRef.data().sellerId))
-                setName(sellerRef.data().firstName + " " + sellerRef.data().lastName)
+                const userRef = await getDoc(doc(FireData.db, "User", itemRef.data().sellerId))
+                setName(userRef.data().firstName + " " + userRef.data().lastName)
+                const sellerRef = await getDoc(doc(FireData.db, "Seller", itemRef.data().sellerId))
+                let rate = 0
+                if(sellerRef.data().reviews.length > 0){
+                    for (let index = 0; index < sellerRef.data().reviews.length; index++) {
+                        rate += sellerRef.data().reviews[index]
+                    }
+                    rate = rate/sellerRef.data().reviews.length
+                    rate = rate.toFixed(1)
+                }
+                setRating(rate)
             } catch {
                 return false
             }
@@ -38,7 +49,7 @@ const ItemDisplay = ({itemId}) => {
                         <h3 className="text-2xl  font-bold text-gray-800 mb-2">
                             {itemData.name}
                         </h3>
-                        <p className={"mb-5 text-sm text-gray-500"}>Sold by: <span className="font-medium text-gray-700">{sellerName}</span></p>
+                        <p className={"mb-5 text-sm text-gray-500"}>Sold by: <span className="font-medium text-gray-700">{sellerName}</span> {rating} stars</p>
                         <p className={`text-2xl mb-3 mt-3 ${itemData.quantity > 0 ? "text-blue-500" : "text-red-500 line-through"}`}>${itemData.price}</p>
                         <h3 className={"text-2xl font-semibold mb-2 mt-5"}>About this item.</h3>
                         <p className="mb-4">

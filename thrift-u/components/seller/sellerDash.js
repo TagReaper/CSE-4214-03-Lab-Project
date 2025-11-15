@@ -25,6 +25,7 @@ const SellerDashboard = () => {
                         rate += SellerRef.data().reviews[index]
                     }
                     rate = rate/SellerRef.data().reviews.length
+                    rate = rate.toFixed(1)
                 }
                 setUser(UserRef.data())
                 setSeller(SellerRef.data())
