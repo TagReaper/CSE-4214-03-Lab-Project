@@ -65,7 +65,8 @@ export async function checkout(Address, Payment) {
                     status:"pending",
                     price: Number(Items[index].sum),
                     trackingNumber: "",
-                    dateAccepted: ""
+                    dateAccepted: "",
+                    reviewed: false
                 })
                 pendingOrders.push(OrderItemRef.id)
                 await updateDoc(doc(FireData.db, "Seller", Items[index].sellerId), {
@@ -245,6 +246,30 @@ export async function refund(orderItemId, sellerId){
             return("Refuse order failed: Something went wrong.")
         }
     } else {
-        return("Refuse order failed: Invalid Access.")
+        return("Refund order failed: Invalid Access.")
+    }
+}
+
+export async function review(orderItemId, sellerId, rating){
+    if(verifyRole("Buyer")){
+        try {
+            const sellerRef = await getDoc(doc(FireData.db, "Seller", sellerId))
+            let reviews = sellerRef.data().reviews
+            reviews.push(rating)
+            const orderItemRef = await getDoc(doc(FireData.db, "OrderItems", orderItemId))
+            if(orderItemRef.data().status == "pending"){return("Rate Seller failed: Something went wrong.")}
+            await updateDoc(doc(FireData.db, "Seller", sellerId), {
+                reviews: reviews,
+            })
+            await updateDoc(doc(FireData.db, "OrderItems", orderItemId), {
+                reviewed: true
+            })
+            return true
+        } catch (error) {
+            console.error("Failed to review seller:", error);
+            return("Rate Seller failed: Something went wrong.")
+        }
+    } else {
+        return("Rate Seller failed: Invalid Access.")
     }
 }
