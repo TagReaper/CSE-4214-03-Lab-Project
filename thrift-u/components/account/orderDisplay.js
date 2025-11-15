@@ -1,4 +1,5 @@
 'use client'
+
 import FireData from "@/firebase/clientApp"
 import { getDocs, collection} from "@firebase/firestore"
 import { useEffect, useState } from "react"
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import Refund from "../buyTrain/refund"
+import Review from "../buyTrain/review"
 import { Button } from "../ui/button"
 
 const OrderDisplay = ({orderId}) => {
@@ -58,6 +60,7 @@ const OrderDisplay = ({orderId}) => {
                                 <TableHead>Quantity</TableHead>
                                 <TableHead>Total</TableHead>
                                 <TableHead>Refund/Cancel</TableHead>
+                                <TableHead>Rating</TableHead>
                             </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -69,6 +72,7 @@ const OrderDisplay = ({orderId}) => {
                                     <TableCell>{order.quantity}</TableCell>
                                     <TableCell>${order.price}</TableCell>
                                     <TableCell>{order.status == "pending" ? (<Refund orderItemId={order.id} sellerId={order.sellerId}/>) : (<Button disabled>Refund Order</Button>)}</TableCell>
+                                    <TableCell>{order.reviewed == false ? (<Review orderItemId={order.id} sellerId={order.sellerId}/>) : (<Button disabled>Rate Seller</Button>)}</TableCell>
                                 </TableRow>
                                 ))
                             }
