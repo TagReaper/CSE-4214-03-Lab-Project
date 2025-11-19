@@ -2,11 +2,8 @@
 import { cookies } from "next/headers";
 
 export const getDecodedToken = async () => {
-  console.log("getDecodedToken: Starting...");
   try {
-    console.log("getDecodedToken: Awaiting cookies...");
     const cookieStore = await cookies();
-    console.log("getDecodedToken: Got cookie store");
 
     const sessionCookie = cookieStore.get("idToken");
     console.log("getDecodedToken: Session cookie exists?", !!sessionCookie);
@@ -16,12 +13,11 @@ export const getDecodedToken = async () => {
     }
 
     const token = sessionCookie.value;
-    const parts = token.split('.');
+    const parts = token.split(".");
     const payload = JSON.parse(atob(parts[1]));
 
-    console.log("getDecodedToken: Verifying token...");
     const decodedToken = payload;
-    if (!(!!decodedToken.user_id)) {
+    if (!!!decodedToken.user_id) {
       throw new Error("Invalid Cookie: Logout, then Login.");
     }
     return decodedToken;
@@ -32,7 +28,7 @@ export const getDecodedToken = async () => {
 };
 
 export const verifyRole = async (requiredRole) => {
-  try{
+  try {
     if (!requiredRole) {
       throw new Error(
         "A required role must be provided to the verification function."
@@ -52,19 +48,19 @@ export const verifyRole = async (requiredRole) => {
       throw new Error(`Forbidden: Seller account is not approved.`);
     }
     return true;
-  } catch(error){
-    console.error(error)
-    return false
+  } catch (error) {
+    console.error(error);
+    return false;
   }
 };
 
 export const getAuthUser = async () => {
   console.log("getAuthUser: Called");
-  try{
+  try {
     const decodedToken = await getDecodedToken();
     console.log("getAuthUser: Returning decoded token");
     return decodedToken;
-  } catch(error){
-    throw(error)
+  } catch (error) {
+    throw error;
   }
 };
