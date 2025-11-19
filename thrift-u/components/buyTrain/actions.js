@@ -10,10 +10,10 @@ import {
 } from "@firebase/firestore";
 import FireData from "@/firebase/clientApp";
 import { getAuthUser, verifyRole } from "@/lib/auth";
-import notificationService from "@/lib/notifications/service";
+import { NotificationService } from "@/lib/notifications/service";
 import { NotificationType } from "@/lib/notifications/types";
 
-const notifService = notificationService.getInstance();
+const notifService = NotificationService.getInstance();
 
 export async function checkout(Address, Payment) {
   if (verifyRole("Buyer")) {

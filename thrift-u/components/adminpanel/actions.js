@@ -4,10 +4,10 @@ import FireData from "@/firebase/clientApp";
 //import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { verifyRole } from "../../lib/auth";
-import notificationService from "@/lib/notifications/service";
+import { NotificationService } from "@/lib/notifications/service";
 import { NotificationType } from "@/lib/notifications/types";
 
-const notifService = notificationService.getInstance();
+const notifService = NotificationService.getInstance();
 
 async function getProductName(productId) {
   try {

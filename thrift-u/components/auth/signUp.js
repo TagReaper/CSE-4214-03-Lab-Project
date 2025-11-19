@@ -7,10 +7,10 @@ import {
 } from "firebase/auth";
 import FireData from "../../firebase/clientApp";
 import { doc, setDoc } from "@firebase/firestore";
-import notificationService from "@/lib/notifications/service";
+import { NotificationService } from "@/lib/notifications/service";
 import { NotificationType } from "@/lib/notifications/types";
 
-const notifService = notificationService.getInstance();
+const notifService = NotificationService.getInstance();
 
 const UIPasswordValidation = (password) => {
   return {
