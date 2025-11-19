@@ -71,8 +71,8 @@ export class OrderConfirmationHandler implements INotificationHandler {
     return NotificationCategory.SUCCESS;
   }
 
-  getActionUrl(): string | undefined {
-    return `/account/orders/`;
+  getActionUrl(data: { orderId: string }): string | undefined {
+    return `/account/orders/${data.orderId}`;
   }
 
   process(
@@ -88,7 +88,7 @@ export class OrderConfirmationHandler implements INotificationHandler {
       ),
       type: NotificationType.ORDER_CONFIRMATION,
       category: this.getCategory(),
-      actionUrl: this.getActionUrl(),
+      actionUrl: this.getActionUrl(data as { orderId: string }),
       metadata: { orderId: data.orderId, totalAmount: data.totalAmount },
     };
   }
@@ -107,8 +107,8 @@ export class OrderShippedHandler implements INotificationHandler {
     return NotificationCategory.SUCCESS;
   }
 
-  getActionUrl(): string | undefined {
-    return `/account/orders/`;
+  getActionUrl(data: { orderId: string }): string | undefined {
+    return `/account/orders/${data.orderId}`;
   }
 
   process(
@@ -124,7 +124,7 @@ export class OrderShippedHandler implements INotificationHandler {
       ),
       type: NotificationType.ORDER_SHIPPED,
       category: this.getCategory(),
-      actionUrl: this.getActionUrl(),
+      actionUrl: this.getActionUrl(data as { orderId: string }),
       metadata: { orderId: data.orderId, trackingNumber: data.trackingNumber },
     };
   }
