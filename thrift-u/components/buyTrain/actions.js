@@ -111,28 +111,29 @@ export async function checkout(Address, Payment) {
         await updateDoc(doc(FireData.db, "Inventory", Items[index].id), {
           quantity: Number(Items[index].quantity - Items[index].orderqty),
         });
-      }
-      // notification to seller for each item
-      await notifService.sendNotification(
-        Items[index].sellerId,
-        NotificationType.NEW_ORDER,
-        {
-          orderId: orderRef.id,
-          itemCount: Items[index].orderqty,
-          totalAmount: Items[index].sum,
-        }
-      );
 
-      // check if item out of stock, send notif to seller
-      if (Items[index].quantity - Items[index].orderqty === 0) {
+        // notification to seller for each item
         await notifService.sendNotification(
           Items[index].sellerId,
-          NotificationType.ITEM_OUT_OF_STOCK,
+          NotificationType.NEW_ORDER,
           {
-            itemId: Items[index].id,
-            itemName: Items[index].name,
+            orderId: orderRef.id,
+            itemCount: Items[index].orderqty,
+            totalAmount: Items[index].sum,
           }
         );
+
+        // check if item out of stock, send notif to seller
+        if (Items[index].quantity - Items[index].orderqty === 0) {
+          await notifService.sendNotification(
+            Items[index].sellerId,
+            NotificationType.ITEM_OUT_OF_STOCK,
+            {
+              itemId: Items[index].id,
+              itemName: Items[index].name,
+            }
+          );
+        }
       }
 
       await updateDoc(doc(FireData.db, "Buyer", token.user_id), {

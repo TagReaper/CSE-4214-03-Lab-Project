@@ -52,7 +52,7 @@ export class SystemWarningHandler implements INotificationHandler {
 
 export class OrderConfirmationHandler implements INotificationHandler {
   getHeading(data: { orderId: string }): string {
-    return `Order Confirmed #${data.orderId}`;
+    return `Order Confirmed ${data.orderId}`;
   }
 
   getDescription(data: {
@@ -96,7 +96,7 @@ export class OrderConfirmationHandler implements INotificationHandler {
 
 export class OrderShippedHandler implements INotificationHandler {
   getHeading(data: { orderId: string }): string {
-    return `Order shipped #${data.orderId}`;
+    return `Order shipped ${data.orderId}`;
   }
 
   getDescription(data: { orderId: string; trackingNumber: string }): string {
@@ -320,7 +320,7 @@ export class OrderRefundedHandler implements INotificationHandler {
 
 export class NewOrderHandler implements INotificationHandler {
   getHeading(data: { orderId: string }): string {
-    return `New Order Received #${data.orderId}`;
+    return `New Order Received ${data.orderId}`;
   }
 
   getDescription(data: {
