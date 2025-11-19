@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use server";
 import { adminDb } from "@/firebase/adminApp";
 import {
   NotificationDocument,
@@ -191,7 +190,7 @@ export class NotificationService {
     data: any
   ): Promise<void> {
     const adminIds = await this.getAdminUserIds();
-
+    console.warn(`notifying ids: ${adminIds.join(", ")}`);
     await Promise.all(
       adminIds.map((adminId) => this.sendNotification(adminId, type, data))
     );
@@ -208,6 +207,7 @@ export class NotificationService {
     }
 
     const adminIds = adminQuerySnapshot.docs.map((doc) => doc.id);
+    console.warn(`got admin ids: ${adminIds.join(", ")}`);
 
     return adminIds;
   }
