@@ -5,8 +5,8 @@ export enum NotificationType {
   SYSTEM_WARNING = "system_warning", //implemented for bans
 
   // Buyer notifications
-  ORDER_CONFIRMATION = "order_confirmation",
-  ORDER_SHIPPED = "order_shipped",
+  ORDER_CONFIRMATION = "order_confirmation", //implemented
+  ORDER_SHIPPED = "order_shipped", //implemented
   CART_ITEM_REMOVED = "cart_item_removed",
 
   // Seller notifications

@@ -73,7 +73,7 @@ export async function checkout(Address, Payment) {
         fulfilledAt: "",
       });
 
-      await notificationService.sendNotification(
+      await notifService.sendNotification(
         token.user_id,
         NotificationType.ORDER_CONFIRMATION,
         {
@@ -234,7 +234,7 @@ export async function acceptOrder(
         status: "shipped",
       });
 
-      await notificationService.sendNotification(
+      await notifService.sendNotification(
         buyerId,
         NotificationType.ORDER_SHIPPED,
         {
@@ -353,7 +353,7 @@ export async function refund(orderItemId, sellerId) {
         }
       );
 
-      await notificationService.sendNotification(
+      await notifService.sendNotification(
         sellerId,
         NotificationType.ORDER_REFUNDED,
         {
