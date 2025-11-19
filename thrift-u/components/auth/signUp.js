@@ -10,6 +10,8 @@ import { doc, setDoc } from "@firebase/firestore";
 import notificationService from "@/lib/notifications/service";
 import { NotificationType } from "@/lib/notifications/types";
 
+const notifService = notificationService.getInstance();
+
 const UIPasswordValidation = (password) => {
   return {
     minLength: password.length >= 10,
@@ -97,7 +99,7 @@ const SignUp = () => {
             pendingOrders: [],
           });
 
-          await notificationService.notifyAllAdmins(
+          await notifService.notifyAllAdmins(
             NotificationType.NEW_SELLER_APPLICATION,
             {
               applicantId: user.uid,
