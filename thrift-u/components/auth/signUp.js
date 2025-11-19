@@ -92,7 +92,8 @@ const SignUp = () => {
             deletedAt: "",
             unclaimedIncome: Number(0),
             income: Number(0),
-            pendingOrders: []
+            pendingOrders: [],
+            ratings: [],
           });
 
           await notificationService.notifyAllAdmins(
