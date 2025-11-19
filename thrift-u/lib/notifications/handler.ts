@@ -52,7 +52,7 @@ export class SystemWarningHandler implements INotificationHandler {
 
 export class OrderConfirmationHandler implements INotificationHandler {
   getHeading(data: { orderId: string }): string {
-    return `Order Confirmed #${data.orderId}`;
+    return `Order Confirmed ${data.orderId}`;
   }
 
   getDescription(data: {
@@ -90,6 +90,42 @@ export class OrderConfirmationHandler implements INotificationHandler {
       category: this.getCategory(),
       actionUrl: this.getActionUrl(data as { orderId: string }),
       metadata: { orderId: data.orderId, totalAmount: data.totalAmount },
+    };
+  }
+}
+
+export class OrderShippedHandler implements INotificationHandler {
+  getHeading(data: { orderId: string }): string {
+    return `Order shipped ${data.orderId}`;
+  }
+
+  getDescription(data: { orderId: string; trackingNumber: string }): string {
+    return `Your order: ${data.orderId} has been shipped with tracking number ${data.trackingNumber} and is on the way to you.`;
+  }
+
+  getCategory(): NotificationCategory {
+    return NotificationCategory.SUCCESS;
+  }
+
+  getActionUrl(data: { orderId: string }): string | undefined {
+    return `/account/orders/${data.orderId}`;
+  }
+
+  process(
+    userId: string,
+    data: Record<string, any>
+  ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
+    return {
+      userId,
+
+      heading: this.getHeading(data as { orderId: string }),
+      description: this.getDescription(
+        data as { orderId: string; trackingNumber: string }
+      ),
+      type: NotificationType.ORDER_SHIPPED,
+      category: this.getCategory(),
+      actionUrl: this.getActionUrl(data as { orderId: string }),
+      metadata: { orderId: data.orderId, trackingNumber: data.trackingNumber },
     };
   }
 }
@@ -244,9 +280,47 @@ export class SellerModerationActionHandler implements INotificationHandler {
   }
 }
 
+export class OrderRefundedHandler implements INotificationHandler {
+  getHeading(data: { orderId: string }): string {
+    return `Order refunded: ${data.orderId}`;
+  }
+
+  getDescription(data: { message: string; orderId: string }): string {
+    return `Order ${data.orderId} has been refunded. ${data.message}`;
+  }
+
+  getCategory(): NotificationCategory {
+    return NotificationCategory.WARNING;
+  }
+
+  getActionUrl(): string | undefined {
+    return "/sellerhub/orders";
+  }
+
+  process(
+    userId: string,
+    data: Record<string, any>
+  ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
+    return {
+      userId,
+      heading: this.getHeading(data as { orderId: string }),
+      description: this.getDescription(
+        data as { message: string; orderId: string }
+      ),
+      type: NotificationType.ORDER_REFUNDED,
+      category: this.getCategory(),
+      actionUrl: this.getActionUrl(),
+      metadata: {
+        action: data.action,
+        reason: data.reason,
+      },
+    };
+  }
+}
+
 export class NewOrderHandler implements INotificationHandler {
   getHeading(data: { orderId: string }): string {
-    return `New Order Received #${data.orderId}`;
+    return `New Order Received ${data.orderId}`;
   }
 
   getDescription(data: {

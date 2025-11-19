@@ -16,6 +16,8 @@ import {
   NewSellerProductHandler,
   ItemOutOfStockHandler,
   CartItemRemovedHandler,
+  OrderShippedHandler,
+  OrderRefundedHandler,
 } from "./handler";
 
 export class NotificationService {
@@ -51,21 +53,33 @@ export class NotificationService {
       NotificationType.CART_ITEM_REMOVED,
       new CartItemRemovedHandler()
     );
+    this.registerHandler(
+      NotificationType.ORDER_SHIPPED,
+      new OrderShippedHandler()
+    );
 
     // Seller handlers
     this.registerHandler(
       NotificationType.ITEM_APPROVED,
       new ItemApprovedHandler()
     );
+
     this.registerHandler(
       NotificationType.SELLER_APPLICATION_APPROVED,
       new SellerApplicationApprovedHandler()
     );
+
     this.registerHandler(
       NotificationType.SELLER_MODERATION_ACTION,
       new SellerModerationActionHandler()
     );
+
     this.registerHandler(NotificationType.NEW_ORDER, new NewOrderHandler());
+
+    this.registerHandler(
+      NotificationType.ORDER_REFUNDED,
+      new OrderRefundedHandler()
+    );
 
     this.registerHandler(
       NotificationType.ITEM_OUT_OF_STOCK,
