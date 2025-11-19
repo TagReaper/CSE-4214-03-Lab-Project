@@ -198,7 +198,7 @@ export class NotificationService {
 
   private async getAdminUserIds(): Promise<string[]> {
     const adminQuerySnapshot = await adminDb
-      .collection("users")
+      .collection("User")
       .where("accessLevel", "==", "Admin")
       .get();
 
