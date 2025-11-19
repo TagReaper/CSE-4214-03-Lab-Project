@@ -7,10 +7,7 @@ import {
 } from "firebase/auth";
 import FireData from "../../firebase/clientApp";
 import { doc, setDoc } from "@firebase/firestore";
-import { NotificationService } from "@/lib/notifications/service";
-import { NotificationType } from "@/lib/notifications/types";
-
-const notifService = NotificationService.getInstance();
+import { notifyAdminsNewSeller } from "./actions";
 
 const UIPasswordValidation = (password) => {
   return {
@@ -99,13 +96,7 @@ const SignUp = () => {
             pendingOrders: [],
           });
 
-          await notifService.notifyAllAdmins(
-            NotificationType.NEW_SELLER_APPLICATION,
-            {
-              applicantId: user.uid,
-              applicantName: firstName + " " + lastName,
-            }
-          );
+          await notifyAdminsNewSeller(user.uid, firstName + " " + lastName);
         } else {
           setSeller(false);
         }
