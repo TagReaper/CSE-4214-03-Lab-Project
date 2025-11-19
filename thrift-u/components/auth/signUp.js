@@ -7,6 +7,8 @@ import {
 } from "firebase/auth";
 import FireData from "../../firebase/clientApp";
 import { doc, setDoc } from "@firebase/firestore";
+import notificationService from "@/lib/notifications/service";
+import { NotificationType } from "@/lib/notifications/types";
 
 const UIPasswordValidation = (password) => {
   return {
@@ -92,7 +94,7 @@ const SignUp = () => {
             deletedAt: "",
             unclaimedIncome: Number(0),
             income: Number(0),
-            pendingOrders: []
+            pendingOrders: [],
           });
 
           await notificationService.notifyAllAdmins(
@@ -132,7 +134,7 @@ const SignUp = () => {
       });
 
       alert("Account created successfully");
-      location.reload()
+      location.reload();
     } catch (error) {
       console.error("error creating account:", error);
       switch (error.code) {
