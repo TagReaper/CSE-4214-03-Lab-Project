@@ -217,8 +217,8 @@ export class SellerApplicationApprovedHandler implements INotificationHandler {
   }
 
   process(
-    userId: string,
-    data: any
+    userId: string
+    // data: any
   ): Omit<NotificationDocument, "notificationId" | "date" | "isRead"> {
     return {
       userId,
