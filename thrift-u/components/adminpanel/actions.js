@@ -3,7 +3,11 @@ import { getDoc, doc, updateDoc } from "@firebase/firestore";
 import FireData from "@/firebase/clientApp";
 //import { verifyUserAndCheckRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { verifyRole } from '../../lib/auth'
+import { verifyRole } from "../../lib/auth";
+import { NotificationService } from "@/lib/notifications/service";
+import { NotificationType } from "@/lib/notifications/types";
+
+const notifService = NotificationService.getInstance();
 
 async function getProductName(productId) {
   try {
@@ -25,8 +29,8 @@ async function getProductName(productId) {
 }
 
 export async function approveProduct(productId) {
-  if (!(await verifyRole("Admin"))){
-    return { error: "Invalid Access." }
+  if (!(await verifyRole("Admin"))) {
+    return { error: "Invalid Access." };
   }
 
   if (!productId) {
@@ -42,7 +46,7 @@ export async function approveProduct(productId) {
 
     const productName = await getProductName(productId);
 
-    await notificationService.sendNotification(
+    await notifService.sendNotification(
       sellerId,
       NotificationType.ITEM_APPROVED,
       { itemId: productId, itemName: productName }
@@ -59,8 +63,8 @@ export async function approveProduct(productId) {
 }
 
 export async function denyProduct(productId) {
-  if (!(await verifyRole("Admin"))){
-    return { error: "Invalid Access." }
+  if (!(await verifyRole("Admin"))) {
+    return { error: "Invalid Access." };
   }
 
   if (!productId) {
@@ -70,7 +74,7 @@ export async function denyProduct(productId) {
   // pull product from db
   try {
     // update db entry
-    const date = new Date()
+    const date = new Date();
     await updateDoc(doc(FireData.db, "Inventory", productId), {
       deletedAt: date.toLocaleString(),
     });
@@ -86,8 +90,8 @@ export async function denyProduct(productId) {
 }
 
 export async function approveSeller(sellerId) {
-  if (!(await verifyRole("Admin"))){
-    return { error: "Invalid Access." }
+  if (!(await verifyRole("Admin"))) {
+    return { error: "Invalid Access." };
   }
 
   if (!sellerId) {
@@ -114,7 +118,7 @@ export async function approveSeller(sellerId) {
       validated: true,
     });
 
-    await notificationService.sendNotification(
+    await notifService.sendNotification(
       sellerId,
       NotificationType.SELLER_APPLICATION_APPROVED
     );
@@ -131,8 +135,8 @@ export async function approveSeller(sellerId) {
 }
 
 export async function denySeller(sellerId) {
-  if (!(await verifyRole("Admin"))){
-    return { error: "Invalid Access." }
+  if (!(await verifyRole("Admin"))) {
+    return { error: "Invalid Access." };
   }
 
   if (!sellerId) {
@@ -144,7 +148,7 @@ export async function denySeller(sellerId) {
     const sellerDoc = await getDoc(doc(FireData.db, "Seller", sellerId));
     console.log(":", sellerDoc.data());
 
-  if (!sellerDoc.exists) {
+    if (!sellerDoc.exists) {
       return { error: "Seller document not found." };
     }
 
@@ -155,7 +159,7 @@ export async function denySeller(sellerId) {
     }
 
     // update db entry
-    const date = new Date()
+    const date = new Date();
     await updateDoc(doc(FireData.db, "Seller", sellerId), {
       deletedAt: date.toLocaleString(),
     });
@@ -169,8 +173,8 @@ export async function denySeller(sellerId) {
 }
 
 export async function toggleBanStatus(id, access) {
-  if (!(await verifyRole("Admin"))){
-    return { error: "Invalid Access." }
+  if (!(await verifyRole("Admin"))) {
+    return { error: "Invalid Access." };
   }
 
   if (!id) {
@@ -215,7 +219,7 @@ export async function toggleBanStatus(id, access) {
     });
 
     if (newBannedStatus == "banned") {
-      await notificationService.sendNotification(
+      await notifService.sendNotification(
         userId,
         NotificationType.SYSTEM_WARNING,
         {

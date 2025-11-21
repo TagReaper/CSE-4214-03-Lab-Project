@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import FireData from "../../firebase/clientApp";
 import { doc, setDoc } from "@firebase/firestore";
+import { notifyAdminsNewSeller } from "./actions";
 
 const UIPasswordValidation = (password) => {
   return {
@@ -96,13 +97,7 @@ const SignUp = () => {
             ratings: [],
           });
 
-          await notificationService.notifyAllAdmins(
-            NotificationType.NEW_SELLER_APPLICATION,
-            {
-              applicantId: user.uid,
-              applicantName: firstName + " " + lastName,
-            }
-          );
+          await notifyAdminsNewSeller(user.uid, firstName + " " + lastName);
         } else {
           setSeller(false);
         }
@@ -133,7 +128,7 @@ const SignUp = () => {
       });
 
       alert("Account created successfully");
-      location.reload()
+      location.reload();
     } catch (error) {
       console.error("error creating account:", error);
       switch (error.code) {

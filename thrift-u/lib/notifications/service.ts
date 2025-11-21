@@ -16,6 +16,8 @@ import {
   NewSellerProductHandler,
   ItemOutOfStockHandler,
   CartItemRemovedHandler,
+  OrderShippedHandler,
+  OrderRefundedHandler,
 } from "./handler";
 
 export class NotificationService {
@@ -51,21 +53,33 @@ export class NotificationService {
       NotificationType.CART_ITEM_REMOVED,
       new CartItemRemovedHandler()
     );
+    this.registerHandler(
+      NotificationType.ORDER_SHIPPED,
+      new OrderShippedHandler()
+    );
 
     // Seller handlers
     this.registerHandler(
       NotificationType.ITEM_APPROVED,
       new ItemApprovedHandler()
     );
+
     this.registerHandler(
       NotificationType.SELLER_APPLICATION_APPROVED,
       new SellerApplicationApprovedHandler()
     );
+
     this.registerHandler(
       NotificationType.SELLER_MODERATION_ACTION,
       new SellerModerationActionHandler()
     );
+
     this.registerHandler(NotificationType.NEW_ORDER, new NewOrderHandler());
+
+    this.registerHandler(
+      NotificationType.ORDER_REFUNDED,
+      new OrderRefundedHandler()
+    );
 
     this.registerHandler(
       NotificationType.ITEM_OUT_OF_STOCK,
@@ -176,7 +190,7 @@ export class NotificationService {
     data: any
   ): Promise<void> {
     const adminIds = await this.getAdminUserIds();
-
+    console.warn(`notifying ids: ${adminIds.join(", ")}`);
     await Promise.all(
       adminIds.map((adminId) => this.sendNotification(adminId, type, data))
     );
@@ -184,7 +198,7 @@ export class NotificationService {
 
   private async getAdminUserIds(): Promise<string[]> {
     const adminQuerySnapshot = await adminDb
-      .collection("users")
+      .collection("User")
       .where("accessLevel", "==", "Admin")
       .get();
 
@@ -193,6 +207,7 @@ export class NotificationService {
     }
 
     const adminIds = adminQuerySnapshot.docs.map((doc) => doc.id);
+    console.warn(`got admin ids: ${adminIds.join(", ")}`);
 
     return adminIds;
   }

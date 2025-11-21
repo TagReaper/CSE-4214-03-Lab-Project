@@ -5,15 +5,17 @@ export enum NotificationType {
   SYSTEM_WARNING = "system_warning", //implemented for bans
 
   // Buyer notifications
-  ORDER_CONFIRMATION = "order_confirmation",
+  ORDER_CONFIRMATION = "order_confirmation", //implemented
+  ORDER_SHIPPED = "order_shipped", //implemented
   CART_ITEM_REMOVED = "cart_item_removed",
 
   // Seller notifications
   ITEM_APPROVED = "item_approved", //implemented
   SELLER_APPLICATION_APPROVED = "seller_application_approved", //implemented
   SELLER_MODERATION_ACTION = "seller_moderation_action",
-  NEW_ORDER = "new_order",
-  ITEM_OUT_OF_STOCK = "item_out_of_stock",
+  ORDER_REFUNDED = "order_refunded", //implemented
+  NEW_ORDER = "new_order", //implemented
+  ITEM_OUT_OF_STOCK = "item_out_of_stock", //implemented
 
   // Admin notifications
   NEW_SELLER_APPLICATION = "new_seller_application", //implemented
