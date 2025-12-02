@@ -57,7 +57,8 @@ export async function approveProduct(productId) {
   }
 
   // refresh data on page
-  revalidatePath("/adminpanel");
+  location.reload();
+  // revalidatePath("/adminpanel");
 
   return { success: `Product ${productId} has been approved.` };
 }
@@ -84,7 +85,7 @@ export async function denyProduct(productId) {
   }
 
   // refresh data on page
-  revalidatePath("/adminpanel");
+  location.reload();
 
   return { success: `Product ${productId} has been denied.` };
 }
@@ -130,7 +131,7 @@ export async function approveSeller(sellerId) {
     return { error: "Failed to update the seller in the database." };
   }
 
-  revalidatePath("/adminpanel");
+  location.reload();
   return { success: `UserID: ${sellerId} has been approved to be a seller.` };
 }
 
@@ -168,7 +169,7 @@ export async function denySeller(sellerId) {
     return { error: "Failed to update the seller in the database." };
   }
 
-  revalidatePath("/adminpanel");
+  location.reload();
   return { success: `UserID: ${sellerId} has been denied seller access.` };
 }
 
