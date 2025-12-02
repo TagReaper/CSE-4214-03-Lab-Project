@@ -94,7 +94,7 @@ const AdminAudit = ({ itemId }) => {
         description: desc,
         tags: tags,
       });
-      approveProduct(itemId);
+      await approveProduct(itemId);
       location.reload();
     } catch (error) {
       console.log("Error granting item approval: ", error);
