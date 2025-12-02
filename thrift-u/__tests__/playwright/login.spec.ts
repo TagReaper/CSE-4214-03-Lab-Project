@@ -8,8 +8,14 @@ test.describe("Login Feature Tests", () => {
   });
 
   test("should successfully login with valid credentials", async ({ page }) => {
-    await page.getByLabel("Email").fill("validbuyer@example.com");
-    await page.getByLabel("Password").fill("ValidPassword123");
+    if (!process.env.BUYER_EMAIL || !process.env.BUYER_PASSWORD) {
+      throw new Error(
+        "BUYER_EMAIL and BUYER_PASSWORD must be set in .env.test"
+      );
+    }
+
+    await page.fill('input[type="email"]', process.env.BUYER_EMAIL);
+    await page.fill('input[type="password"]', process.env.BUYER_PASSWORD);
 
     await page.getByRole("button", { name: "Sign In" }).click();
 
@@ -36,8 +42,9 @@ test.describe("Login Feature Tests", () => {
     page,
   }) => {
     await page.getByLabel("Email").fill("banneduser@example.com");
-    await page.getByLabel("Password").fill("ValidPassword123");
+    await page.getByLabel("Password").fill("ValidPassword123#");
 
+    await page.getByRole("button", { name: "Sign In" }).click();
     await page.getByRole("button", { name: "Sign In" }).click();
 
     const errorMessage = page.locator(".bg-red-50.text-\\[\\#8B1538\\]");
