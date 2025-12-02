@@ -14,8 +14,7 @@ setup("authenticate as buyer", async ({ page }) => {
 
   await page.fill('input[type="email"]', process.env.BUYER_EMAIL);
   await page.fill('input[type="password"]', process.env.BUYER_PASSWORD);
-  await page.click('input[type="submit"]');
-
+  await page.getByRole("button", { name: "Sign In" }).click();
   await page.waitForURL("/");
 
   await page.context().storageState({ path: buyerAuthFile });
@@ -33,8 +32,7 @@ setup("authenticate as seller", async ({ page }) => {
 
   await page.fill('input[type="email"]', process.env.SELLER_EMAIL);
   await page.fill('input[type="password"]', process.env.SELLER_PASSWORD);
-  await page.click('input[type="submit"]');
-
+  await page.getByRole("button", { name: "Sign In" }).click();
   await page.waitForURL("/");
 
   await page.context().storageState({ path: sellerAuthFile });
@@ -50,8 +48,7 @@ setup("authenticate as admin", async ({ page }) => {
 
   await page.fill('input[type="email"]', process.env.ADMIN_EMAIL);
   await page.fill('input[type="password"]', process.env.ADMIN_PASSWORD);
-  await page.click('input[type="submit"]');
-
+  await page.getByRole("button", { name: "Sign In" }).click();
   await page.waitForURL("/");
 
   await page.context().storageState({ path: adminAuthFile });
