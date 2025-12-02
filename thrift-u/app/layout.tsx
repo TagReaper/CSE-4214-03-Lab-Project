@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavbarWrapper } from '@/components/navbar/navbarwrapper';
-
-
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,17 +31,17 @@ export default function RootLayout({
         </style>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            classNames: {
+              success: 'bg-green-50 text-green-900 border-green-200',
+              error: 'bg-red-50 text-red-900 border-red-200',
+            },
+          }}
+        />
         <div className="relative w-full">
           <NavbarWrapper />
-          {/* <ul style={{color: 'white', backgroundColor: "black", outlineStyle: 'solid', outlineWidth: '3px', outlineColor: 'white', listStyleType: "none", overflow: 'hidden'}}>
-            <li style={{float: "left"}}><span style={{display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-              <Link href = {"/"}> <Image className="dark" src="/Graphics/ThriftULogoModern.png" alt="Home logo" width={65} height={42} /> </Link>
-            </span></li>
-            <li style={{float: "right"}}><span style={{direction: 'rtl', display: 'inline-flex', padding: '5px', gap:'5px', alignItems:'center'}}>
-              <Image className="dark:invert" src="/Icons/buyer.svg" alt="Home logo" width={30} height={30} />
-              <Link href = {"/login"}> Login </Link>
-            </span></li>
-          </ul> */}
         </div>
         <div>
           {""}
