@@ -142,7 +142,7 @@ const SignUp = () => {
           unclaimedIncome: Number(0),
           income: Number(0),
           pendingOrders: [],
-          ratings: [],
+          reviews: [],
         });
 
         await notifyAdminsNewSeller(
