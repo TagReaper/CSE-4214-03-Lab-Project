@@ -189,12 +189,6 @@ const Login = () => {
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel className="text-gray-700">Password</FormLabel>
-                  <a
-                    className="text-[#8B1538] text-sm hover:underline"
-                    href="#"
-                  >
-                    Forgot password?
-                  </a>
                 </div>
                 <FormControl>
                   <Input
