@@ -14,24 +14,19 @@ test.describe("Signup Feature Tests", () => {
   test("should successfully create a buyer account with valid information", async ({
     page,
   }) => {
-    await page.fill('input[placeholder="First name"]', "John");
-    await page.fill('input[placeholder="Last name"]', "Doe");
-    await page.fill('input[placeholder="Email"]', generateEmail());
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      "ValidPass123!"
-    );
-    await page.fill('input[placeholder="Confirm password"]', "ValidPass123!");
+    await page.getByLabel("First Name").fill("John");
+    await page.getByLabel("Last Name").fill("Doe");
+    await page.getByLabel("Email").fill(generateEmail());
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass123!");
+    await page.getByLabel("Confirm Password").fill("ValidPass123!");
 
-    const sellerCheckbox = page.locator('input[type="checkbox"]');
+    const sellerCheckbox = page.getByRole("checkbox");
     await expect(sellerCheckbox).not.toBeChecked();
 
-    await page.click('button[type="submit"]');
+    await page.getByRole("button", { name: "Create Account" }).click();
 
-    page.once("dialog", async (dialog) => {
-      expect(dialog.message()).toContain("Account created successfully");
-      await dialog.accept();
-    });
+    const successToast = page.locator("text=Account created successfully!");
+    await expect(successToast).toBeVisible();
 
     await page.waitForURL("/");
   });
@@ -39,55 +34,43 @@ test.describe("Signup Feature Tests", () => {
   test("should successfully create a seller account when seller checkbox is checked", async ({
     page,
   }) => {
-    await page.fill('input[placeholder="First name"]', "Jane");
-    await page.fill('input[placeholder="Last name"]', "Smith");
-    await page.fill('input[placeholder="Email"]', generateEmail());
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      "ValidPass456!"
-    );
-    await page.fill('input[placeholder="Confirm password"]', "ValidPass456!");
+    await page.getByLabel("First Name").fill("Jane");
+    await page.getByLabel("Last Name").fill("Smith");
+    await page.getByLabel("Email").fill(generateEmail());
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass456!");
+    await page.getByLabel("Confirm Password").fill("ValidPass456!");
 
-    await page.check('input[type="checkbox"]');
-    await expect(page.locator('input[type="checkbox"]')).toBeChecked();
+    await page.getByRole("checkbox").check();
+    await expect(page.getByRole("checkbox")).toBeChecked();
 
-    await page.click('button[type="submit"]');
+    await page.getByRole("button", { name: "Create Account" }).click();
 
-    page.once("dialog", async (dialog) => {
-      expect(dialog.message()).toContain(
-        "Are you sure you want to request a seller account?"
-      );
-      await dialog.accept();
-    });
+    // confirmation step for seller account
+    await expect(
+      page.getByRole("button", { name: "Confirm Seller Account Request" })
+    ).toBeVisible();
 
-    page.once("dialog", async (dialog) => {
-      expect(dialog.message()).toContain("Account created successfully");
-      await dialog.accept();
-    });
+    await page
+      .getByRole("button", { name: "Confirm Seller Account Request" })
+      .click();
+
+    const successToast = page.locator("text=Account created successfully!");
+    await expect(successToast).toBeVisible();
 
     await page.waitForURL("/");
   });
 
   test("should display error when passwords do not match", async ({ page }) => {
-    await page.fill('input[placeholder="First name"]', "Test");
-    await page.fill('input[placeholder="Last name"]', "User");
-    await page.fill('input[placeholder="Email"]', generateEmail());
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      "ValidPass123!"
-    );
-    await page.fill(
-      'input[placeholder="Confirm password"]',
-      "DifferentPass123!"
-    );
+    await page.getByLabel("First Name").fill("Test");
+    await page.getByLabel("Last Name").fill("User");
+    await page.getByLabel("Email").fill(generateEmail());
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass123!");
+    await page.getByLabel("Confirm Password").fill("DifferentPass123!");
 
-    await page.click('button[type="submit"]');
+    await page.getByRole("button", { name: "Create Account" }).click();
 
-    await expect(page.locator("p.text-red-500")).toBeVisible();
-    await expect(page.locator("p.text-red-500")).toContainText(
-      "Passwords do not match"
-    );
-    await expect(page).toHaveURL(SIGNUP_URL);
+    const errorMessage = page.locator("text=Passwords do not match");
+    await expect(errorMessage).toBeVisible();
   });
 
   test("should display error when email is already registered", async ({
@@ -95,104 +78,82 @@ test.describe("Signup Feature Tests", () => {
   }) => {
     const duplicateEmail = generateEmail();
 
-    // first account creation
-    await page.fill('input[placeholder="First name"]', "First");
-    await page.fill('input[placeholder="Last name"]', "User");
-    await page.fill('input[placeholder="Email"]', duplicateEmail);
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      "ValidPass123!"
-    );
-    await page.fill('input[placeholder="Confirm password"]', "ValidPass123!");
+    await page.getByLabel("First Name").fill("First");
+    await page.getByLabel("Last Name").fill("User");
+    await page.getByLabel("Email").fill(duplicateEmail);
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass123!");
+    await page.getByLabel("Confirm Password").fill("ValidPass123!");
 
-    await page.click('button[type="submit"]');
-
-    page.once("dialog", async (dialog) => {
-      await dialog.accept();
-    });
+    await page.getByRole("button", { name: "Create Account" }).click();
 
     await page.waitForURL("/");
 
-    // navigate back to signup
     await page.goto(SIGNUP_URL);
 
-    // try to create account with same email
-    await page.fill('input[placeholder="First name"]', "Second");
-    await page.fill('input[placeholder="Last name"]', "User");
-    await page.fill('input[placeholder="Email"]', duplicateEmail);
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      "ValidPass456!"
-    );
-    await page.fill('input[placeholder="Confirm password"]', "ValidPass456!");
+    await page.getByLabel("First Name").fill("Second");
+    await page.getByLabel("Last Name").fill("User");
+    await page.getByLabel("Email").fill(duplicateEmail);
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass456!");
+    await page.getByLabel("Confirm Password").fill("ValidPass456!");
 
-    await page.click('button[type="submit"]');
+    await page.getByRole("button", { name: "Create Account" }).click();
 
-    await page.waitForSelector("p.text-red-500", { timeout: 5000 });
-
-    const errorMessage = await page.textContent("p.text-red-500");
-    expect(errorMessage).toContain("already registered");
-    await expect(page).toHaveURL(SIGNUP_URL);
+    const errorMessage = page.locator(".bg-red-50");
+    await expect(errorMessage).toBeVisible();
+    await expect(errorMessage).toContainText("already registered");
   });
 
-  test("should not submit form with empty required fields", async ({
+  test("show validation error for empty first name", async ({ page }) => {
+    await page.getByLabel("Last Name").fill("Doe");
+    await page.getByLabel("Email").fill(generateEmail());
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass123!");
+    await page.getByLabel("Confirm Password").fill("ValidPass123!");
+
+    await page.getByRole("button", { name: "Create Account" }).click();
+
+    const errorMessage = page.locator(
+      "text=First name must be at least 2 characters"
+    );
+    await expect(errorMessage).toBeVisible();
+  });
+
+  test("show validation error for invalid email format", async ({ page }) => {
+    await page.getByLabel("First Name").fill("Invalid");
+    await page.getByLabel("Last Name").fill("Email");
+    await page.getByLabel("Email").fill("not-an-email");
+    await page.getByLabel("Password", { exact: true }).fill("ValidPass123!");
+    await page.getByLabel("Confirm Password").fill("ValidPass123!");
+
+    await page.getByRole("button", { name: "Create Account" }).click();
+
+    const errorMessage = page.locator(
+      "text=Please enter a valid email address"
+    );
+    await expect(errorMessage).toBeVisible();
+  });
+
+  test("should show password validation requirements changing", async ({
     page,
   }) => {
-    await page.click('button[type="submit"]');
+    const passwordInput = page.getByLabel("Password", { exact: true });
 
-    const firstNameInput = page.locator('input[placeholder="First name"]');
-    const isInvalid = await firstNameInput.evaluate(
-      (el: HTMLInputElement) => !el.validity.valid
-    );
+    await passwordInput.focus();
 
-    expect(isInvalid).toBeTruthy();
-    await expect(page).toHaveURL(SIGNUP_URL);
-  });
+    // initially all requirements should be red/unchecked
+    await expect(page.locator("text=✗ At least 10 characters")).toBeVisible();
 
-  test("should show error for invalid email format", async ({ page }) => {
-    await page.fill('input[placeholder="First name"]', "Invalid");
-    await page.fill('input[placeholder="Last name"]', "Email");
-    await page.fill('input[placeholder="Email"]', "not-an-email");
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      "ValidPass123!"
-    );
-    await page.fill('input[placeholder="Confirm password"]', "ValidPass123!");
+    await passwordInput.fill("short");
+    await expect(page.locator("text=✗ At least 10 characters")).toBeVisible();
 
-    await page.click('button[type="submit"]');
+    await passwordInput.fill("ValidPass123!");
 
-    const emailInput = page.locator('input[placeholder="Email"]');
-    const validationMessage = await emailInput.evaluate(
-      (el: HTMLInputElement) => el.validationMessage
-    );
-
-    expect(validationMessage).toBeTruthy();
-  });
-
-  test("should show error for password that does not meet security policy", async ({
-    page,
-  }) => {
-    await page.fill('input[placeholder="First name"]', "Weak");
-    await page.fill('input[placeholder="Last name"]', "Password");
-    await page.fill('input[placeholder="Email"]', generateEmail());
-
-    const weakPassword = "Weak1234!a";
-    await page.fill(
-      'input[placeholder="Password (10+ characters)"]',
-      weakPassword
-    );
-    await page.fill('input[placeholder="Confirm password"]', weakPassword);
-
-    await page.click('button[type="submit"]');
-
-    const errorLocator = page.locator("p.text-red-500");
-
-    try {
-      await errorLocator.waitFor({ timeout: 3000 });
-      const errorText = await errorLocator.textContent();
-      expect(errorText).toBeTruthy();
-    } catch {
-      console.log("Password was accepted by server validation");
-    }
+    // all requirements should turn green/checked
+    await expect(page.locator("text=✓ At least 10 characters")).toBeVisible();
+    await expect(page.locator("text=✓ A lowercase letter")).toBeVisible();
+    await expect(page.locator("text=✓ An uppercase letter")).toBeVisible();
+    await expect(page.locator("text=✓ A number")).toBeVisible();
+    await expect(
+      page.locator("text=✓ A special character (!@#$%^&*)")
+    ).toBeVisible();
   });
 });
