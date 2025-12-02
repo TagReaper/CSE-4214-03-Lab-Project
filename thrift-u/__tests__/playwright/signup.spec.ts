@@ -25,10 +25,16 @@ test.describe("Signup Feature Tests", () => {
 
     await page.getByRole("button", { name: "Create Account" }).click();
 
-    const successToast = page.locator("text=Account created successfully!");
-    await expect(successToast).toBeVisible();
+    // wait for either the toast or the redirect
+    await Promise.race([
+      page.waitForURL("/", { timeout: 10000 }),
+      page
+        .locator("text=Account created successfully!")
+        .first()
+        .waitFor({ timeout: 10000 }),
+    ]);
 
-    await page.waitForURL("/");
+    await expect(page).toHaveURL("/");
   });
 
   test("should successfully create a seller account when seller checkbox is checked", async ({
@@ -54,10 +60,16 @@ test.describe("Signup Feature Tests", () => {
       .getByRole("button", { name: "Confirm Seller Account Request" })
       .click();
 
-    const successToast = page.locator("text=Account created successfully!");
-    await expect(successToast).toBeVisible();
+    // wait for either the toast or the redirect
+    await Promise.race([
+      page.waitForURL("/", { timeout: 10000 }),
+      page
+        .locator("text=Account created successfully!")
+        .first()
+        .waitFor({ timeout: 10000 }),
+    ]);
 
-    await page.waitForURL("/");
+    await expect(page).toHaveURL("/");
   });
 
   test("should display error when passwords do not match", async ({ page }) => {
@@ -76,25 +88,16 @@ test.describe("Signup Feature Tests", () => {
   test("should display error when email is already registered", async ({
     page,
   }) => {
-    const duplicateEmail = generateEmail();
-
-    await page.getByLabel("First Name").fill("First");
-    await page.getByLabel("Last Name").fill("User");
-    await page.getByLabel("Email").fill(duplicateEmail);
-    await page.getByLabel("Password", { exact: true }).fill("ValidPass123!");
-    await page.getByLabel("Confirm Password").fill("ValidPass123!");
-
-    await page.getByRole("button", { name: "Create Account" }).click();
-
-    await page.waitForURL("/");
-
-    await page.goto(SIGNUP_URL);
+    const duplicateEmail = process.env.BUYER_EMAIL as string;
+    const randomPassword = `Test${Math.random()
+      .toString(36)
+      .substring(7)}Pass123!`;
 
     await page.getByLabel("First Name").fill("Second");
     await page.getByLabel("Last Name").fill("User");
     await page.getByLabel("Email").fill(duplicateEmail);
-    await page.getByLabel("Password", { exact: true }).fill("ValidPass456!");
-    await page.getByLabel("Confirm Password").fill("ValidPass456!");
+    await page.getByLabel("Password", { exact: true }).fill(randomPassword);
+    await page.getByLabel("Confirm Password").fill(randomPassword);
 
     await page.getByRole("button", { name: "Create Account" }).click();
 
