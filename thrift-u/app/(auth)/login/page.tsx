@@ -18,7 +18,6 @@ export default function LoginPage() {
     }, [user, router]);
 
     return <div className="center">
-        <h1>Login</h1>
         <Login />
     </div>
 }

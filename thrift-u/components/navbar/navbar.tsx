@@ -25,12 +25,7 @@ import { CartMenu } from './cartmenu';
 
 const Logo = () => {
   return (
-    <Image
-      src="/Graphics/ThriftULogoModern.png"
-      alt="Thrift-U logo"
-      width={30}
-      height={30}
-    />
+    ""
   );
 };
 

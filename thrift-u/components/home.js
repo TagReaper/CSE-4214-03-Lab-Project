@@ -23,7 +23,7 @@ const HomePage = () => {
         const fetchItems = async () => {
             const querySnapshot = await getDocs(collection(FireData.db, 'Inventory'))
             const itemUnchecked = querySnapshot.docs.map((doc) => ({...doc.data(), id: doc.id}))
-            const itemData = itemUnchecked.filter(item => (item.approved && item.deletedAt == ""))
+            const itemData = itemUnchecked.filter(item => (item.approved && item.deletedAt == "" && item.quantity > 0))
             setItems(selectRandomItems(itemData, 15))
             const college = itemData.filter(item => item.tags.includes("College"))
             setCollege(selectRandomItems(college, 9))

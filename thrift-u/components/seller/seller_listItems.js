@@ -5,6 +5,7 @@ import FireData from '../../firebase/clientApp'
 import {collection, getDocs } from '@firebase/firestore'
 import CompactItemListing from '../productHandler/itemListingCompact'
 import RequestItem from '../seller/addItem'
+import EditItem from '../seller/editItem'
 import { getAuthUser } from "@/lib/auth"
 
 const SellerListItems = () => {
@@ -29,7 +30,7 @@ const SellerListItems = () => {
             var sellerItemsTemp = []
             var sellerPendingTemp = []
             for (let index = 0; index < items.length; index++) {
-                if (items[index].sellerId == sellerId)
+                if (items[index].sellerId == sellerId && items[index].deletedAt == "")
                     if (items[index].approved == true){
                         sellerItemsTemp.push(items[index])
                     } else {
@@ -51,6 +52,7 @@ const SellerListItems = () => {
                     {sellerItems.map((item) => (
                         <div key={item.id}>
                             <CompactItemListing itemId={item.id} image={item.image} price={item.price} productName={item.name} quantity={item.quantity}/>
+                            <EditItem sellerId={sellerId} itemId={item.id}></EditItem>
                         </div>
                     ))}
                 </div>
@@ -59,6 +61,7 @@ const SellerListItems = () => {
                     {sellerPendingItems.map((item) => (
                         <div key={item.id}>
                             <CompactItemListing itemId={item.id} image={item.image} price={item.price} productName={item.name} quantity={item.quantity}/>
+                            <EditItem sellerId={sellerId} itemId={item.id}></EditItem>
                         </div>
                     ))}
                     <RequestItem sellerId={sellerId}/>
@@ -79,6 +82,7 @@ const SellerListItems = () => {
                     {sellerPendingItems.map((item) => (
                         <div key={item.id}>
                             <CompactItemListing itemId={item.id} image={item.image} price={item.price} productName={item.name} quantity={item.quantity}/>
+                            <EditItem sellerId={sellerId} itemId={item.id}></EditItem>
                         </div>
                     ))}
                     <RequestItem sellerId={sellerId}/>

@@ -1,106 +1,154 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   createUserWithEmailAndPassword,
   validatePassword,
 } from "firebase/auth";
-import FireData from "../../firebase/clientApp";
 import { doc, setDoc } from "@firebase/firestore";
+import Link from "next/link";
+import FireData from "../../firebase/clientApp";
 import { notifyAdminsNewSeller } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast, Toaster } from "sonner";
 
-const UIPasswordValidation = (password) => {
-  return {
+const formSchema = z
+  .object({
+    firstName: z.string().min(2, {
+      message: "First name must be at least 2 characters.",
+    }),
+    lastName: z.string().min(2, {
+      message: "Last name must be at least 2 characters.",
+    }),
+    email: z.string().email({
+      message: "Please enter a valid email address.",
+    }),
+    password: z
+      .string()
+      .min(10, {
+        message: "Password must be at least 10 characters.",
+      })
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number")
+      .regex(
+        /[!@#$%^&*]/,
+        "Password must contain a special character (!@#$%^&*)"
+      ),
+    confirmPassword: z.string().min(1, {
+      message: "Please confirm your password.",
+    }),
+    sellerAccount: z.boolean().default(false),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+const SignUp = () => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [showConfirmSeller, setShowConfirmSeller] = useState(false);
+  const serverTime = new Date();
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      sellerAccount: false,
+    },
+  });
+
+  const password = form.watch("password");
+
+  const passwordValidation = {
     minLength: password.length >= 10,
     hasLowercase: /[a-z]/.test(password),
     hasUppercase: /[A-Z]/.test(password),
     hasNumber: /[0-9]/.test(password),
     hasSpecialChar: /[!@#$%^&*]/.test(password),
   };
-};
 
-const SignUp = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPass] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [validation, setValidation] = useState({
-    minLength: false,
-    hasLowercase: false,
-    hasUppercase: false,
-    hasNumber: false,
-    hasSpecialChar: false,
-    isValid: false,
-  });
-  const [firstName, setFirst] = useState("");
-  const [lastName, setLast] = useState("");
-  const [sellerReq, setSeller] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const serverTime = new Date();
-
-  useEffect(() => {
-    setValidation(UIPasswordValidation(password));
-  }, [password]);
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (values) => {
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    // If seller account is requested and not yet confirmed, show confirmation
+    if (values.sellerAccount && !showConfirmSeller) {
+      setShowConfirmSeller(true);
       return;
     }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
       const passwordValidationStatus = await validatePassword(
         FireData.auth,
-        password
+        values.password
       );
+
       if (!passwordValidationStatus.isValid) {
         setError("Password does not meet the security policy.");
         setLoading(false);
         return;
       }
+
       const userCredential = await createUserWithEmailAndPassword(
         FireData.auth,
-        email,
-        password
+        values.email,
+        values.password
       );
+
       const user = userCredential.user;
       var idToken = await user.getIdToken();
       const parts = idToken.split(".");
       var payload = JSON.parse(atob(parts[1]));
 
       await setDoc(doc(FireData.db, "User", user.uid), {
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        accessLevel: sellerReq ? "Seller" : "Buyer",
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        accessLevel: values.sellerAccount ? "Seller" : "Buyer",
         dateCreated: serverTime.toLocaleString(),
         deletedAt: "",
       });
 
-      if (sellerReq) {
-        const confirmed = confirm(
-          "Are you sure you want to request a seller account?"
-        );
-        if (confirmed) {
-          payload.role = "Seller";
-          payload.status = "pending";
-          await setDoc(doc(FireData.db, "Seller", user.uid), {
-            banned: false,
-            validated: false,
-            Flags: 0,
-            deletedAt: "",
-            unclaimedIncome: Number(0),
-            income: Number(0),
-            pendingOrders: [],
-            ratings: [],
-          });
+      if (values.sellerAccount) {
+        payload.role = "Seller";
+        payload.status = "pending";
+        await setDoc(doc(FireData.db, "Seller", user.uid), {
+          banned: false,
+          validated: false,
+          Flags: 0,
+          deletedAt: "",
+          unclaimedIncome: Number(0),
+          income: Number(0),
+          pendingOrders: [],
+          ratings: [],
+        });
 
-          await notifyAdminsNewSeller(user.uid, firstName + " " + lastName);
-        } else {
-          setSeller(false);
-        }
+        await notifyAdminsNewSeller(
+          user.uid,
+          values.firstName + " " + values.lastName
+        );
       } else {
         payload.role = "Buyer";
         payload.status = "null";
@@ -120,15 +168,20 @@ const SignUp = () => {
       idToken = parts[0] + "." + payload + "." + parts[2];
 
       await fetch("/api/auth", {
-        //send token to api route to set cookie
         method: "POST",
         headers: {
           Authorization: `${idToken}`,
         },
       });
 
-      alert("Account created successfully");
-      location.reload();
+      toast.success("Account created successfully!", {
+        description: "Redirecting to your dashboard...",
+        duration: 2000,
+      });
+
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
     } catch (error) {
       console.error("error creating account:", error);
       switch (error.code) {
@@ -148,88 +201,260 @@ const SignUp = () => {
       setLoading(false);
     }
   };
+
   return (
-    <form className="m-5 flex flex-col" onSubmit={handleSubmit}>
-      <input
-        className="m-1 text-black border-1 rounded border-black"
-        required
-        type="text"
-        value={firstName}
-        onChange={(e) => setFirst(e.target.value)}
-        placeholder="First name"
+    <>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          classNames: {
+            success: "bg-green-50 text-green-900 border-green-200",
+            error: "bg-red-50 text-red-900 border-red-200",
+          },
+        }}
       />
-      <input
-        className="m-1 text-black border-1 rounded border-black"
-        required
-        type="text"
-        value={lastName}
-        onChange={(e) => setLast(e.target.value)}
-        placeholder="Last name"
-      />
-      <input
-        className="m-1 text-black border-1 rounded border-black"
-        required
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        className="m-1 text-black border-1 rounded border-black"
-        required
-        type="password"
-        value={password}
-        onChange={(e) => setPass(e.target.value)}
-        placeholder="Password (10+ characters)"
-      />
-      <div className="m-1 p-2 text-sm">
-        <ul>
-          <li style={{ color: validation.minLength ? "green" : "red" }}>
-            {" "}
-            At least 10 characters
-          </li>
-          <li style={{ color: validation.hasLowercase ? "green" : "red" }}>
-            {" "}
-            A lowercase letter
-          </li>
-          <li style={{ color: validation.hasUppercase ? "green" : "red" }}>
-            An uppercase letter
-          </li>
-          <li style={{ color: validation.hasNumber ? "green" : "red" }}>
-            {" "}
-            A number
-          </li>
-          <li style={{ color: validation.hasSpecialChar ? "green" : "red" }}>
-            A special character (!@#$...)
-          </li>
-        </ul>
-      </div>
-      <input
-        className="m-1 text-black border-1 rounded border-black"
-        required
-        type="password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="Confirm password"
-      />
-      <span className="m-1 text-black border-1 rounded border-black">
-        Request Seller Account?&nbsp;
-        <input
-          type="checkbox"
-          checked={sellerReq}
-          onChange={(e) => setSeller(e.target.checked)}
-        />
-      </span>
-      {error && <p className="m-1 text-red-500">{error}</p>}
-      &nbsp;&nbsp;
-      <button
-        className="m-1 text-black border-2 rounded border-black disabled:opacity-50"
-        type="submit"
-        disabled={loading}
+      <div
+        className="w-full max-w-md bg-white rounded-lg border border-gray-200 p-8"
+        style={{ boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)" }}
       >
-        {loading ? "Creating Account..." : "Confirm"}
-      </button>
-    </form>
+        <Form {...form}>
+          <div className="space-y-4">
+            <div className="space-y-2 text-center">
+              <h1 className="text-shadow-lg text-[#8B1538]">
+                Create an Account
+              </h1>
+              <p className="text-gray-600 text-sm">
+                Sign up to get started with ThriftU
+              </p>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 text-[#8B1538] border border-[#8B1538]/30 px-4 py-3 rounded text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">First Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="bg-white border-gray-300 focus-visible:border-[#8B1538] focus-visible:ring-[#8B1538]/50"
+                        placeholder="John"
+                        disabled={loading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Last Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="bg-white border-gray-300 focus-visible:border-[#8B1538] focus-visible:ring-[#8B1538]/50"
+                        placeholder="Doe"
+                        disabled={loading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="bg-white border-gray-300 focus:border-[#8B1538] focus:ring-[#8B1538]"
+                      placeholder="you@example.com"
+                      type="email"
+                      disabled={loading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="bg-white border-gray-300 focus:border-[#8B1538] focus:ring-[#8B1538]"
+                      placeholder="Create a strong password"
+                      type="password"
+                      disabled={loading}
+                      onFocus={() => setPasswordFocused(true)}
+                      {...field}
+                    />
+                  </FormControl>
+                  {passwordFocused && (
+                    <div className="mt-2 text-xs space-y-1">
+                      <div
+                        className={
+                          passwordValidation.minLength
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {passwordValidation.minLength ? "✓" : "✗"} At least 10
+                        characters
+                      </div>
+                      <div
+                        className={
+                          passwordValidation.hasLowercase
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {passwordValidation.hasLowercase ? "✓" : "✗"} A
+                        lowercase letter
+                      </div>
+                      <div
+                        className={
+                          passwordValidation.hasUppercase
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {passwordValidation.hasUppercase ? "✓" : "✗"} An
+                        uppercase letter
+                      </div>
+                      <div
+                        className={
+                          passwordValidation.hasNumber
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {passwordValidation.hasNumber ? "✓" : "✗"} A number
+                      </div>
+                      <div
+                        className={
+                          passwordValidation.hasSpecialChar
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }
+                      >
+                        {passwordValidation.hasSpecialChar ? "✓" : "✗"} A
+                        special character (!@#$%^&*)
+                      </div>
+                    </div>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">
+                    Confirm Password
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      className="bg-white border-gray-300 focus:border-[#8B1538] focus:ring-[#8B1538]"
+                      placeholder="Re-enter your password"
+                      type="password"
+                      disabled={loading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="sellerAccount"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loading}
+                      className="data-[state=checked]:bg-[#8B1538] data-[state=checked]:border-[#8B1538]"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="font-normal text-sm text-gray-700">
+                      Request seller account
+                    </FormLabel>
+                    <FormDescription className="text-xs text-gray-500">
+                      Check this if you want to sell items on ThriftU
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <Button
+              className="w-full bg-[#8B1538] hover:bg-[#6B0F2A] text-white"
+              type="button"
+              disabled={loading}
+              onClick={form.handleSubmit(handleSubmit)}
+            >
+              {loading
+                ? "Creating Account..."
+                : showConfirmSeller
+                ? "Confirm Seller Account Request"
+                : "Create Account"}
+            </Button>
+
+            {showConfirmSeller && (
+              <Button
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700"
+                type="button"
+                disabled={loading}
+                onClick={() => {
+                  setShowConfirmSeller(false);
+                  form.setValue("sellerAccount", false);
+                }}
+              >
+                Cancel - Create Buyer Account Instead
+              </Button>
+            )}
+
+            <p className="text-center text-gray-600 text-sm">
+              Already have an account?{" "}
+              <Link
+                className="text-[#8B1538] hover:underline font-medium"
+                href="/login"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </Form>
+      </div>
+    </>
   );
 };
 
