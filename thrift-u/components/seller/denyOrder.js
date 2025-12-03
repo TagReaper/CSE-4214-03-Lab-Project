@@ -21,6 +21,7 @@ const DenyOrder = ({orderItemId}) => {
 
     const [pendingOrders, setPending] = useState([]);
     const [loading, setLoading] = useState(true)
+    const formName = Math.floor(Math.random()*10000);
 
     useEffect(() => {
         async function fetchSeller() {
@@ -59,7 +60,7 @@ const DenyOrder = ({orderItemId}) => {
         return (
             <div>
                 <Dialog>
-                    <form onSubmit={handleRequest} id="prodReq">
+                    <form onSubmit={handleRequest} id={formName}>
                         <DialogTrigger asChild>
                             <Button className={"border-white border-2 m-1 hover:invert"}>Deny</Button>
                         </DialogTrigger>
@@ -76,7 +77,7 @@ const DenyOrder = ({orderItemId}) => {
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" form="prodReq">Confirm Refusal</Button>
+                            <Button type="submit" form={formName}>Confirm Refusal</Button>
                         </DialogFooter>
                         </DialogContent>
                     </form>

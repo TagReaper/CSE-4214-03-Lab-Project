@@ -31,6 +31,7 @@ const Checkout = ({}) => {
     const [name, setName] = useState("")
     const [loading, setLoading] = useState(true)
     const [cart, setCart] = useState([])
+    const formName = Math.floor(Math.random()*10000);
 
     useEffect(() => {
         async function fetchBuyer() {
@@ -73,7 +74,7 @@ const Checkout = ({}) => {
         return (
             <div>
                 <Dialog>
-                    <form onSubmit={handleRequest} id="prodReq">
+                    <form onSubmit={handleRequest} id={formName}>
                         <DialogTrigger asChild>
                             <Button disabled={cart.length == 0} className={"border-white border-2 m-1 hover:invert"}>Checkout</Button>
                         </DialogTrigger>
@@ -87,42 +88,42 @@ const Checkout = ({}) => {
                         <div className="grid gap-4">
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">Address</Label>
-                                <Input id="Address" value={address} onChange={(e) => setAddress(e.target.value)} type="text" placeholder="Address" form="prodReq" required />
+                                <Input id="Address" value={address} onChange={(e) => setAddress(e.target.value)} type="text" placeholder="Address" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">City</Label>
-                                <Input id="City" value={city} onChange={(e) => setCity(e.target.value)} type="text" placeholder="City" form="prodReq" required />
+                                <Input id="City" value={city} onChange={(e) => setCity(e.target.value)} type="text" placeholder="City" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">State</Label>
-                                <Input id="State" value={state} onChange={(e) => setState(e.target.value)} type="text" placeholder="State" form="prodReq" required />
+                                <Input id="State" value={state} onChange={(e) => setState(e.target.value)} type="text" placeholder="State" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">Zip</Label>
-                                <Input id="Zip" value={zip} onChange={(e) => setZip(e.target.value)} type="text" placeholder="Zip" form="prodReq" required />
+                                <Input id="Zip" value={zip} onChange={(e) => setZip(e.target.value)} type="text" placeholder="Zip" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">CardNumber</Label>
-                                <Input id="CardNumber" value={cardNumber} onChange={(e) => setCard(e.target.value)} type="number" placeholder="1234123412341234" form="prodReq" required />
+                                <Input id="CardNumber" value={cardNumber} onChange={(e) => setCard(e.target.value)} type="number" placeholder="1234123412341234" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">EXP</Label>
-                                <Input id="EXP" value={exp} onChange={(e) => setEXP(e.target.value)} type="text" placeholder="00/00" form="prodReq" required />
+                                <Input id="EXP" value={exp} onChange={(e) => setEXP(e.target.value)} type="text" placeholder="00/00" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">CVC</Label>
-                                <Input id="CVC" value={cvc} onChange={(e) => setCVC(e.target.value)} type="number" placeholder="CVC" form="prodReq" required />
+                                <Input id="CVC" value={cvc} onChange={(e) => setCVC(e.target.value)} type="number" placeholder="CVC" form={formName} required />
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">Name on Card</Label>
-                                <Input id="Name" value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder="John Smith" form="prodReq" required />
+                                <Input id="Name" value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder="John Smith" form={formName} required />
                             </div>
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" form="prodReq">Confirm Checkout</Button>
+                            <Button type="submit" form={formName}>Confirm Checkout</Button>
                         </DialogFooter>
                         </DialogContent>
                     </form>
