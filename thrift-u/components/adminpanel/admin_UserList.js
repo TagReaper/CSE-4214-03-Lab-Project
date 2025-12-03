@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import FireData from "../../firebase/clientApp";
 import { collection, doc, getDoc, getDocs } from "@firebase/firestore";
 import { approveSeller, denySeller, toggleBanStatus } from "./actions";
-import {Button} from '../ui/button'
+import { Button } from "../ui/button";
 
 const ListUsers = () => {
   const [buyerList, setBList] = useState([]);
@@ -28,15 +28,14 @@ const ListUsers = () => {
         id: doc.id,
       }));
 
-      var sellerListTemp = []
-      var sellerPendListTemp = []
-      var buyerListTemp = []
+      var sellerListTemp = [];
+      var sellerPendListTemp = [];
+      var buyerListTemp = [];
 
       for (let index = 0; index < sellers.length; index++) {
         const docRef = await getDoc(
           doc(FireData.db, "User", sellers[index].id)
         );
-        if (!docRef.exists()) continue;
 
         const userData = {
           ...docRef.data(),
@@ -44,7 +43,7 @@ const ListUsers = () => {
           banned: sellers[index].banned || false,
         };
 
-        if(sellers[index].deletedAt != ""){
+        if (sellers[index].deletedAt == "") {
           if (sellers[index].validated == true) {
             sellerListTemp.push(userData);
           } else {
@@ -53,12 +52,8 @@ const ListUsers = () => {
         }
       }
       for (let index = 0; index < buyers.length; index++) {
-        const docRef = await getDoc(
-          doc(FireData.db, "User", buyers[index].id)
-        );
-        if (!docRef.exists()) continue;
-
-        if(buyers[index].deletedAt != ""){
+        const docRef = await getDoc(doc(FireData.db, "User", buyers[index].id));
+        if (buyers[index].deletedAt == "") {
           buyerListTemp.push({
             ...docRef.data(),
             id: buyers[index].id,
@@ -139,18 +134,14 @@ const ListUsers = () => {
         // Seller
         setSList((currentList) =>
           currentList.map((user) =>
-            user.id
-              ? { ...user, banned: result.newBannedStatus }
-              : user
+            user.id ? { ...user, banned: result.newBannedStatus } : user
           )
         );
       } else {
         // Buyer
         setBList((currentList) =>
           currentList.map((user) =>
-            user.id === id
-              ? { ...user, banned: result.newBannedStatus }
-              : user
+            user.id === id ? { ...user, banned: result.newBannedStatus } : user
           )
         );
       }
@@ -190,11 +181,7 @@ const ListUsers = () => {
                 className={`border-2 m-0.5 border-black hover:border-gray-400 disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
-                {isBanning === item.id
-                  ? "..."
-                  : item.banned
-                  ? "UN-BAN"
-                  : "BAN"}
+                {isBanning === item.id ? "..." : item.banned ? "UN-BAN" : "BAN"}
               </Button>
             </span>
           </li>
@@ -220,11 +207,7 @@ const ListUsers = () => {
                 className={`border-2 m-0.5 border-black hover:border-gray-400 disabled:opacity-50
                   ${item.banned ? "bg-blue-500" : "bg-red-500"}`}
               >
-                {isBanning === item.id
-                  ? "..."
-                  : item.banned
-                  ? "UN-BAN"
-                  : "BAN"}
+                {isBanning === item.id ? "..." : item.banned ? "UN-BAN" : "BAN"}
               </Button>
             </span>
           </li>

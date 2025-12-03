@@ -1,108 +1,106 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
-    MultiSelect,
-    MultiSelectContent,
-    MultiSelectGroup,
-    MultiSelectItem,
-    MultiSelectTrigger,
-    MultiSelectValue,
-} from "@/components/ui/multi-select"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useState } from "react"
-import { Textarea } from "@/components/ui/textarea"
-import { getDoc, updateDoc, doc} from "@firebase/firestore"
-import FireData from "@/firebase/clientApp"
-import {approveProduct} from "./actions"
-import { useEffect } from "react"
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { getDoc, updateDoc, doc } from "@firebase/firestore";
+import FireData from "@/firebase/clientApp";
+import { approveProduct } from "./actions";
+import { useEffect } from "react";
 
-const AdminAudit = ({itemId}) => {
+const AdminAudit = ({ itemId }) => {
+  const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
+  const [price, setPrice] = useState(0);
+  const [qty, setQTY] = useState(0);
+  const [condition, setCondition] = useState("");
+  const [tags, setTags] = useState([]);
+  const [imageURL, setImage] = useState("");
 
-    const [title, setTitle] = useState("");
-    const [desc, setDesc] = useState("");
-    const [price, setPrice] = useState(0);
-    const [qty, setQTY] = useState(0);
-    const [condition, setCondition] = useState("");
-    const [tags, setTags] = useState([]);
-    const [imageURL, setImage] = useState("")
-
-    const tagOptions = [
-        "Sports",
-        "Clothing",
-        "College",
-        "Kitchen",
-        "Hoodie",
-        "Shirt",
-        "Hat",
-        "Football",
-        "Baseball",
-        "Basketball",
-        "Soccer",
-        "Hockey",
-        "Crafts",
-        "Gym",
-        "Hand-Made",
-        "Decoration",
-        "Misc",
-        "Tennis",
-        "Equipment",
-        "Tech",
-        "Jewlery",
-        "Living",
-        "Dining"
-    ]
+  const tagOptions = [
+    "Sports",
+    "Clothing",
+    "College",
+    "Kitchen",
+    "Hoodie",
+    "Shirt",
+    "Hat",
+    "Football",
+    "Baseball",
+    "Basketball",
+    "Soccer",
+    "Hockey",
+    "Crafts",
+    "Gym",
+    "Hand-Made",
+    "Decoration",
+    "Misc",
+    "Tennis",
+    "Equipment",
+    "Tech",
+    "Jewlery",
+    "Living",
+    "Dining",
+  ];
     const formName = Math.floor(Math.random()*10000);
+  
+  useEffect(() => {
+    const fetchItem = async () => {
+      const itemRef = await getDoc(doc(FireData.db, "Inventory", itemId));
+      const item = itemRef.data();
+      setTitle(item.name);
+      setDesc(item.description);
+      setPrice(item.price);
+      setQTY(item.quantity);
+      setCondition(item.condition);
+      setTags(item.tags);
+      setImage(item.image);
+    };
+    fetchItem();
+  }, [itemId]);
 
-    useEffect(() => {
-        const fetchItem = async () => {
-            const itemRef = await getDoc(doc(FireData.db, "Inventory", itemId))
-            const item = itemRef.data()
-            console.log(item)
-            setTitle(item.name)
-            setDesc(item.description)
-            setPrice(item.price)
-            setQTY(item.quantity)
-            setCondition(item.condition)
-            setTags(item.tags)
-            setImage(item.image)
-        }
-        fetchItem()
-    }, [itemId]);
-
-    const handleRequest = async (event) => {
-        event.preventDefault();
-        try{
-            await updateDoc(doc(FireData.db, "Inventory", itemId), {
-                condition: condition,
-                name: title,
-                description: desc,
-                tags: tags,
-            })
-            approveProduct(itemId)
-            location.reload();
-        } catch(error) {
-            console.log("Error granting item approval: ", error)
-        }
+  const handleRequest = async (event) => {
+    event.preventDefault();
+    try {
+      await updateDoc(doc(FireData.db, "Inventory", itemId), {
+        condition: condition,
+        name: title,
+        description: desc,
+        tags: tags,
+      });
+      await approveProduct(itemId);
+      location.reload();
+    } catch (error) {
+      console.log("Error granting item approval: ", error);
     }
+  };
 
     return (
         <div>
@@ -180,4 +178,4 @@ const AdminAudit = ({itemId}) => {
     )
 }
 
-export default AdminAudit
+export default AdminAudit;

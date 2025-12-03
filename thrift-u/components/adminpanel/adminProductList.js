@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import FireData from "@/firebase/clientApp";
 import { collection, query, where, getDocs } from "@firebase/firestore";
 import { approveProduct, denyProduct } from "./actions";
-import {Button} from '../ui/button'
-import AdminAudit from './audit'
+import { Button } from "../ui/button";
+import AdminAudit from "./audit";
 
 const PendingProductList = () => {
   const [pendingProducts, setPendingProducts] = useState([]);
@@ -16,7 +16,8 @@ const PendingProductList = () => {
     // create query for unapproved products
     const q = query(
       collection(FireData.db, "Inventory"),
-      where("approved", "==", false)
+      where("approved", "==", false),
+      where("deletedAt", "==", "")
     );
 
     // execute the query
@@ -69,7 +70,7 @@ const PendingProductList = () => {
               <span>Price: ${product.price}</span>
               <span>Seller ID: {product.sellerId}</span>
               <span className="text-center">
-                <AdminAudit itemId={product.id}/>
+                <AdminAudit itemId={product.id} />
                 <Button
                   onClick={() => handleDeny(product.id)}
                   className="border-2 bg-red-500 border-black hover:border-gray-400"
