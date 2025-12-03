@@ -26,6 +26,7 @@ const AcceptOrder = ({orderItemId, orderId}) => {
     const [pendingOrders, setPending] = useState([]);
     const [loading, setLoading] = useState(true)
     const [order, setOrder] = useState(undefined)
+    const formName = Math.floor(Math.random()*10000);
 
     useEffect(() => {
         async function fetchSeller() {
@@ -68,7 +69,7 @@ const AcceptOrder = ({orderItemId, orderId}) => {
         return (
             <div>
                 <Dialog>
-                    <form onSubmit={handleRequest} id="prodReq">
+                    <form onSubmit={handleRequest} id={formName}>
                         <DialogTrigger asChild>
                             <Button className={"border-white border-2 m-1 hover:invert"}>Review</Button>
                         </DialogTrigger>
@@ -117,14 +118,14 @@ const AcceptOrder = ({orderItemId, orderId}) => {
                         <div className="grid gap-4">
                             <div className="grid gap-3">
                                 <Label htmlFor="Title">Tracking Number</Label>
-                                <Input id="Tracking" value={trackingNumber} onChange={(e) => setTracking(e.target.value)} type="text" placeholder="Tracking Number" form="prodReq" required />
+                                <Input id="Tracking" value={trackingNumber} onChange={(e) => setTracking(e.target.value)} type="text" placeholder="Tracking Number" form={formName} required />
                             </div>
                         </div>
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" form="prodReq">Confirm Shipment</Button>
+                            <Button type="submit" form={formName}>Confirm Shipment</Button>
                         </DialogFooter>
                         </DialogContent>
                     </form>

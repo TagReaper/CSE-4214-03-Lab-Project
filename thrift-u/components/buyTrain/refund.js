@@ -18,6 +18,7 @@ import {refund} from "../buyTrain/actions"
 const Refund = ({orderItemId, sellerId}) => {
 
     const [loading, setLoading] = useState(true)
+    const formName = Math.floor(Math.random()*10000);
 
     useEffect(() => {
         async function start() {
@@ -47,7 +48,7 @@ const Refund = ({orderItemId, sellerId}) => {
         return (
             <div>
                 <Dialog>
-                    <form onSubmit={handleRequest} id="prodReq">
+                    <form onSubmit={handleRequest} id={formName}>
                         <DialogTrigger asChild>
                             <Button className={"border-white border-2 m-1 hover:invert"}>Refund Order</Button>
                         </DialogTrigger>
@@ -64,7 +65,7 @@ const Refund = ({orderItemId, sellerId}) => {
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" form="prodReq">Confirm Refund</Button>
+                            <Button type="submit" form={formName}>Confirm Refund</Button>
                         </DialogFooter>
                         </DialogContent>
                     </form>

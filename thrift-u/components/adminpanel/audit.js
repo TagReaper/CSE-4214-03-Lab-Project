@@ -70,6 +70,7 @@ const AdminAudit = ({itemId}) => {
         "Living",
         "Dining"
     ]
+    const formName = Math.floor(Math.random()*10000);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -106,7 +107,7 @@ const AdminAudit = ({itemId}) => {
     return (
         <div>
             <Dialog>
-                <form onSubmit={handleRequest} id="prodReq">
+                <form onSubmit={handleRequest} id={formName}>
                     <DialogTrigger asChild>
                         <Button className='border-2 m-2 border-black bg-blue-400 hover:border-gray-400'>
                             Review
@@ -127,15 +128,15 @@ const AdminAudit = ({itemId}) => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Title">Title</Label>
-                            <Input id="Title" value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required />
+                            <Input id="Title" value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="Pedro Duarte" form={formName} required />
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Description">Description</Label>
-                            <Textarea id="Description" value={desc} onChange={(e) => setDesc(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required />
+                            <Textarea id="Description" value={desc} onChange={(e) => setDesc(e.target.value)} type="text" placeholder="Pedro Duarte" form={formName} required />
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Condition">Condition</Label>
-                            <Select value={condition} onValueChange={(e) => setCondition(e)} form="prodReq" required>
+                            <Select value={condition} onValueChange={(e) => setCondition(e)} form={formName} required>
                                     <SelectTrigger className="w-[375px]">
                                         <SelectValue placeholder="Condition" />
                                     </SelectTrigger>
@@ -150,7 +151,7 @@ const AdminAudit = ({itemId}) => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Tags">Tags</Label>
-                            <MultiSelect values={tags} onValuesChange={(e) => setTags(e)} form="prodReq">
+                            <MultiSelect values={tags} onValuesChange={(e) => setTags(e)} form={formName}>
                                 <MultiSelectTrigger className="w-[375px]">
                                     <MultiSelectValue placeholder="Select Tags" />
                                 </MultiSelectTrigger>
@@ -170,7 +171,7 @@ const AdminAudit = ({itemId}) => {
                         <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" form="prodReq">Approve</Button>
+                        <Button type="submit" form={formName}>Approve</Button>
                     </DialogFooter>
                     </DialogContent>
                 </form>

@@ -70,6 +70,7 @@ const RequestItem = ({sellerId}) => {
         "Living",
         "Dining"
     ]
+    const formName = Math.floor(Math.random()*10000);
 
     const handleRequest = async (event) => {
         event.preventDefault();
@@ -103,7 +104,7 @@ const RequestItem = ({sellerId}) => {
     return (
         <div>
             <Dialog>
-                <form onSubmit={handleRequest} id="prodReq">
+                <form onSubmit={handleRequest} id={formName}>
                     <DialogTrigger asChild>
                         <button className='m-5 center bg-white duration-200 w-xs h-96 rounded-xl border-2 border-transparent overflow-hidden shadow-lg space-y-4 transform 2-full hover:-translate-y-1 hover:border-gray-400'>
                             <Image src={'/Icons/roundPlus.svg'} alt="Product Image" width={200} height={200}/>
@@ -120,27 +121,27 @@ const RequestItem = ({sellerId}) => {
                     <div className="grid gap-4">
                         <div className="grid gap-3">
                             <Label htmlFor="Image">Image</Label>
-                            <Input id="Image" accept="image/*" onChange={(e) => setImage(e.target.files[0])} type="file" form="prodReq"/>
+                            <Input id="Image" accept="image/*" onChange={(e) => setImage(e.target.files[0])} type="file" form={formName}/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Title">Title</Label>
-                            <Input id="Title" value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required />
+                            <Input id="Title" value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder="Pedro Duarte" form={formName} required />
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Description">Description</Label>
-                            <Textarea id="Description" value={desc} onChange={(e) => setDesc(e.target.value)} type="text" placeholder="Pedro Duarte" form="prodReq" required />
+                            <Textarea id="Description" value={desc} onChange={(e) => setDesc(e.target.value)} type="text" placeholder="Pedro Duarte" form={formName} required />
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Price">Price</Label>
-                            <Input id="Price" value={price} onChange={(e) => setPrice(e.target.value)} type="number" placeholder="Pedro Duarte" form="prodReq" required/>
+                            <Input id="Price" value={price} onChange={(e) => setPrice(e.target.value)} type="number" placeholder="Pedro Duarte" form={formName} required/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Quantity">Quantity</Label>
-                            <Input id="Quantity" value={qty} onChange={(e) => setQTY(e.target.value)} type="number" placeholder="1, 2, 3, etc" form="prodReq" required/>
+                            <Input id="Quantity" value={qty} onChange={(e) => setQTY(e.target.value)} type="number" placeholder="1, 2, 3, etc" form={formName} required/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Condition">Condition</Label>
-                            <Select onValueChange={(e) => setCondition(e)} form="prodReq" required>
+                            <Select onValueChange={(e) => setCondition(e)} form={formName} required>
                                     <SelectTrigger className="w-[375px]">
                                         <SelectValue placeholder="Condition" />
                                     </SelectTrigger>
@@ -155,7 +156,7 @@ const RequestItem = ({sellerId}) => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="Tags">Tags</Label>
-                            <MultiSelect onValuesChange={(e) => setTags(e)} form="prodReq">
+                            <MultiSelect onValuesChange={(e) => setTags(e)} form={formName}>
                                 <MultiSelectTrigger className="w-[375px]">
                                     <MultiSelectValue placeholder="Select Tags" />
                                 </MultiSelectTrigger>
@@ -175,7 +176,7 @@ const RequestItem = ({sellerId}) => {
                         <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" form="prodReq">Submit Request</Button>
+                        <Button type="submit" form={formName}>Submit Request</Button>
                     </DialogFooter>
                     </DialogContent>
                 </form>
